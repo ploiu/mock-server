@@ -1,0 +1,45 @@
+{
+  "configVersion": "1.0",
+  "routes": [
+	{
+	  "title": "Hello World",
+	  "url": "/helloWorld",
+	  "method": "GET",
+	  "accept": "*",
+	  "responseHeaders": {
+		"Content-Type": "text/plain"
+	  },
+	  "response": "hello world!"
+	},
+	{
+	  "title": "Hello World With Path Parameters",
+	  "url": "/helloWorld/:name/:age",
+	  "method": "GET",
+	  "accept": "*",
+	  "responseHeaders": {
+		"Content-Type": "text/plain"
+	  },
+	  "response": "hello, {{name}}! You are {{age}} years old!"
+	},
+	{
+	  "title": "Hello World With Query Parameters",
+	  "url": "/helloWorld?:name",
+	  "method": "GET",
+	  "accept": "*",
+	  "responseHeaders": {
+		"Content-Type": "text/plain"
+	  },
+	  "response": "hello, {{name}}!"
+	},
+	{
+	  "title": "Hello World With Optional Path Parameter",
+	  "url": "/helloWorld/:name?",
+	  "method": "GET",
+	  "accept": "*",
+	  "responseHeaders": {
+		"Content-Type": "text/plain"
+	  },
+	  "response": "hello, {{name}}!"
+	}
+  ]
+}
