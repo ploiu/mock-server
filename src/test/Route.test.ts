@@ -324,7 +324,7 @@ Deno.test("execute should template out the response body from url parameters", a
     responseStatus: 200,
   });
   const res = await route.execute(
-    <ServerRequest> { url: "/test/ploiu/23/green?favoriteFood=pasta" },
+    <ServerRequest> { url: "/test/ploiu/23/green?favoriteFood=pasta", method: 'GET' },
   );
   assertEquals(
     res.body,
@@ -343,7 +343,7 @@ Deno.test("execute should set the proper response status code", async () => {
     responseStatus: 418,
   });
   const res = await route.execute(
-    <ServerRequest> { url: "/test/ploiu/23/green?favoriteFood=pasta" },
+    <ServerRequest> { url: "/test/ploiu/23/green?favoriteFood=pasta", method: 'GET' },
   );
   assertEquals(res.status, 418, "Response status codes should match");
 });
@@ -361,7 +361,7 @@ Deno.test("execute should set the proper response headers", async () => {
     responseStatus: 418,
   });
   const res = await route.execute(
-    <ServerRequest> { url: "/test/ploiu/23/green?favoriteFood=pasta" },
+    <ServerRequest> { url: "/test/ploiu/23/green?favoriteFood=pasta", method: 'GET' },
   );
   assertEquals(
     res.headers?.get("Content-Type"),
