@@ -141,6 +141,28 @@ Deno.test("doesUrlMatch matches url with query variables", () => {
     "url should not match without all variables",
   );
 });
+
+Deno.test("doesUrlMatch ensures query variable names are included", () => {
+  const route = Route.fromObject({
+    title: "test",
+    method: "GET",
+    url: "/test?:name&:age",
+    accept: "*",
+    responseHeaders: {},
+    response: "hi",
+  });
+  assertNotEquals(
+    route.doesUrlMatch("/test?abc=ploiu&efg=23"),
+    true,
+    "url should match with both variables",
+  );
+  assertNotEquals(
+    route.doesUrlMatch("/test?name=ploiu"),
+    true,
+    "url should not match query variables not in our pattern",
+  );
+});
+
 Deno.test("doesUrlMatch matches url with optional query variables", () => {
   const route = Route.fromObject({
     title: "test",
@@ -232,6 +254,12 @@ Deno.test("parseVariablesFromUrl should set non-included path variables as null"
     responseHeaders: {},
     response: "hi",
   });
+
+  assertEquals(route.parseVariablesFromUrl("/test/ploiu/23"), {
+    name: "ploiu",
+    age: "23",
+    favoriteFood: null
+  }, "path parameters should be included");
 });
 
 Deno.test("parseVariablesFromUrl should set non-included path variables for variables not directly sequential as null", () => {
@@ -262,12 +290,12 @@ Deno.test("parseVariablesFromUrl should include query parameters", () => {
   });
 
   assertEquals(route.parseVariablesFromUrl("/test?name=ploiu&age=23"), {
-    name: null,
+    name: 'ploiu',
     age: "23",
   }, "query parameters should be included");
 });
 
-Deno.test("parseVariablesFromUrl should set non-included path variables as null", () => {
+Deno.test("parseVariablesFromUrl should set non-included query variables as null", () => {
   const route = Route.fromObject({
     title: "test",
     method: "GET",

@@ -28,10 +28,10 @@ export default class Route {
   }
 
   /**
-	 * checks if the url matches our url rules
-	 * @param {string} url
-	 * @returns {boolean}
-	 */
+   * checks if the url matches our url rules
+   * @param {string} url
+   * @returns {boolean}
+   */
   public doesUrlMatch(url: string = ""): boolean {
     url = url.toLowerCase();
     // simple urls
@@ -39,9 +39,9 @@ export default class Route {
   }
 
   /**
-	 * parses our url and pulls out our parts of the url that should be variables
-	 * @private
-	 */
+   * parses our url and pulls out our parts of the url that should be variables
+   * @private
+   */
   private parseUrlVariables() {
     // matches a variable name after a /, and makes sure to not count a query variable as a flag for the var to be optional
     const pathVarRegex = /(?<=\/:)[a-zA-Z_\-0-9]+(\?(?!=:))?/g;
@@ -64,10 +64,10 @@ export default class Route {
   }
 
   /**
-	 * builds a regular expression used to match our url against potential candidates
-	 * @returns {RegExp}
-	 * @private
-	 */
+   * builds a regular expression used to match our url against potential candidates
+   * @returns {RegExp}
+   * @private
+   */
   private buildUrlRegex(): RegExp {
     // replace all path variable names with a regex
     let compiledUrlString = this.url;
@@ -104,31 +104,28 @@ export default class Route {
   }
 
   /**
-	 * based on our url template, pulls variables out of the passed url and returns a basic JS object with the keys
-	 * as the variable name and the values as the variable value
-	 *
-	 * @param {string} url must have been matched against this route before passing into this method
-	 * @returns {any}
-	 */
+   * based on our url template, pulls variables out of the passed url and returns a basic JS object with the keys
+   * as the variable name and the values as the variable value
+   *
+   * @param {string} url must have been matched against this route before passing into this method
+   * @returns {any}
+   */
   public parseVariablesFromUrl(url: string): any {
     if (this.pathVariables.length === 0 && this.queryVariables.length === 0) {
       return {};
     } else {
-      const result: any = {};
       const pathVars = this.parsePathVars(url);
-      for (let [key, value] of Object.entries(pathVars)) {
-        result[key] = value;
-      }
-      return result;
+      const queryVars = this.parseQueryVars(url);
+      return { ...pathVars, ...queryVars };
     }
   }
 
   /**
-	 * parses path variables from the passed url that has been matched against this route
-	 * @param {string} request
-	 * @returns {any}
-	 * @private
-	 */
+   * parses path variables from the passed url that has been matched against this route
+   * @param {string} request
+   * @returns {any}
+   * @private
+   */
   private parsePathVars(request: string): any {
     const result: any = {};
     // first build a list of where each of our path variables are
@@ -149,12 +146,12 @@ export default class Route {
       const allUrlArgs = splitUrl.filter((it) => it.startsWith(":"));
       const requiredArgs = allUrlArgs.filter((it) => !it.endsWith("?"));
       /*
-			now iterate through allUrlArgs.
-			1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
-			2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
-				a. if there are enough, fill it and splice
-				b. if there are not enough, ignore it
-			 */
+          now iterate through allUrlArgs.
+          1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
+          2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
+            a. if there are enough, fill it and splice
+            b. if there are not enough, ignore it
+           */
       for (let i = 0; i < allUrlArgs.length; i++) {
         const arg = allUrlArgs[i];
         const isRequired = !arg.endsWith("?");
@@ -176,11 +173,53 @@ export default class Route {
   }
 
   /**
-	 * checks if this route has a path variable with the passed fields. Used for testing
-	 * @param {string} name
-	 * @param {boolean} optional
-	 * @returns {boolean}
-	 */
+   * pulls out the query vars of the passed url. The url at this point should have been matched against our pattern
+   * @param {string} request
+   * @returns {any}
+   * @private
+   */
+  private parseQueryVars(request: string): any {
+    // if we don't have any query variables, return an empty object
+    if (this.queryVariables.length === 0) {
+      return {};
+    } else {
+      const result: any = {};
+      // for each mandatory query variable, get its value
+      const mandatoryVars = this.queryVariables.filter((it) => !it.optional)
+        .map((it) => it.name);
+      const optionalVars = this.queryVariables.filter((it) => it.optional).map(
+        (it) => it.name,
+      );
+      for (let mandatoryVar of mandatoryVars) {
+        // get the variable from the query string
+        const varRegex = new RegExp(`(?<=[?&])${mandatoryVar}=[^&]+`);
+        // at this point the request url has been validated against our pattern, so we don't have to check if it exists
+        // @ts-ignore
+        result[mandatoryVar] = request.match(varRegex)[0].split("=")[1];
+      }
+      // now pull out the optional vars
+      for (let optionalVar of optionalVars) {
+        // get the variable from the query string
+        const varRegex = new RegExp(`(?<=[?&])${optionalVar}=[^&]+`);
+        const match = request.match(varRegex);
+        // we may not have a match, so check first
+        if (match?.length === 1) {
+          result[optionalVar] = match[0].split("=")[1];
+        } else {
+          // explicitly set it to null
+          result[optionalVar] = null;
+        }
+      }
+      return result;
+    }
+  }
+
+  /**
+   * checks if this route has a path variable with the passed fields. Used for testing
+   * @param {string} name
+   * @param {boolean} optional
+   * @returns {boolean}
+   */
   public hasPathVariable(name: string, optional: boolean): boolean {
     return this.pathVariables.filter((it) =>
       it.name === name && it.optional === optional
@@ -188,11 +227,11 @@ export default class Route {
   }
 
   /**
-	 * checks if this route has a query variable with the passed fields. Used for testing
-	 * @param {string} name
-	 * @param {boolean} optional
-	 * @returns {boolean}
-	 */
+   * checks if this route has a query variable with the passed fields. Used for testing
+   * @param {string} name
+   * @param {boolean} optional
+   * @returns {boolean}
+   */
   public hasQueryVariable(name: string, optional: boolean): boolean {
     return this.queryVariables.filter((it) =>
       it.name === name && it.optional === optional
@@ -215,12 +254,12 @@ export default class Route {
   }
 
   /**
-	 * creates a `Header` object from the raw input object. Conversion is done
-	 * by simple key/value pairs
-	 * @param input
-	 * @returns {Headers}
-	 * @private
-	 */
+   * creates a `Header` object from the raw input object. Conversion is done
+   * by simple key/value pairs
+   * @param input
+   * @returns {Headers}
+   * @private
+   */
   private static createResponseHeaders(input: any): Headers {
     const headers = new Headers();
     for (let [key, value] of Object.entries(input)) {

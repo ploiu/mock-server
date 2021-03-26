@@ -7,7 +7,7 @@ export default class UrlVariable {
 
   static fromString(str: string): UrlVariable {
     const optional = str.endsWith("?");
-    const name = str.replace(/\?$/, "").toLowerCase();
+    const name = str.replace(/\?$/, "");
     return new UrlVariable(name, optional);
   }
 }
