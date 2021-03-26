@@ -8,11 +8,17 @@ export default class Route {
   private compiledUrlRegex: RegExp;
 
   constructor(
+    // a name to help the user distinguish which route is which
     public title: string,
+    // the url that the route gets bound on, may include path and query variables
     public url: string,
+    // the request method the route gets bound on
     public method: RequestMethod,
+    // the value for the content-type header the request needs to use TODO maybe remove?
     public accept: string,
+    // the headers used in the response for this route
     public responseHeaders: Headers,
+    // the response body
     public response: string,
   ) {
     this.parseUrlVariables();
@@ -100,13 +106,73 @@ export default class Route {
   /**
 	 * based on our url template, pulls variables out of the passed url and returns a basic JS object with the keys
 	 * as the variable name and the values as the variable value
-	 * @param {string} url
+	 *
+	 * @param {string} url must have been matched against this route before passing into this method
 	 * @returns {any}
 	 */
   public parseVariablesFromUrl(url: string): any {
     if (this.pathVariables.length === 0 && this.queryVariables.length === 0) {
       return {};
+    } else {
+      const result: any = {};
+      const pathVars = this.parsePathVars(url);
+      for (let [key, value] of Object.entries(pathVars)) {
+        result[key] = value;
+      }
+      return result;
     }
+  }
+
+  /**
+	 * parses path variables from the passed url that has been matched against this route
+	 * @param {string} request
+	 * @returns {any}
+	 * @private
+	 */
+  private parsePathVars(request: string): any {
+    const result: any = {};
+    // first build a list of where each of our path variables are
+    const splitRequest = request.split("?")[0].split("/");
+    const splitUrl = this.url.split("?:")[0].split("/");
+    // if they are the same length, that means that we passed in all vars
+    if (splitRequest.length === splitUrl.length) {
+      for (let i = 0; i < splitRequest.length; i++) {
+        // if the splitUrl part is a variable, store it in the result
+        if (splitUrl[i].startsWith(":")) {
+          const key: string = splitUrl[i].replaceAll(/[:?]/g, "");
+          result[key] = splitRequest[i];
+        }
+      }
+    } else {
+      // some optional inputs were excluded; first remove any parts of the input that exactly match a part for our route
+      const inputArgs = splitRequest.filter((it) => !splitUrl.includes(it));
+      const allUrlArgs = splitUrl.filter((it) => it.startsWith(":"));
+      const requiredArgs = allUrlArgs.filter((it) => !it.endsWith("?"));
+      /*
+			now iterate through allUrlArgs.
+			1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
+			2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
+				a. if there are enough, fill it and splice
+				b. if there are not enough, ignore it
+			 */
+      for (let i = 0; i < allUrlArgs.length; i++) {
+        const arg = allUrlArgs[i];
+        const isRequired = !arg.endsWith("?");
+        // 1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
+        if (isRequired) {
+          result[arg.replaceAll(/[:]/g, "")] = inputArgs.splice(0, 1)[0];
+          // remove index 0 of requiredArgs to keep track of how many are left
+          requiredArgs.splice(0, 1);
+        } else if (inputArgs.length > requiredArgs.length) {
+          // there are enough input args left to fill this arg and all the required args
+          result[arg.replaceAll(/[:?]/g, "")] = inputArgs.splice(0, 1)[0];
+        } else {
+          // not enough input args left, set the arg to null
+          result[arg.replaceAll(/[:?]/g, "")] = null;
+        }
+      }
+    }
+    return result;
   }
 
   /**

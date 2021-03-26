@@ -207,6 +207,22 @@ Deno.test("parseVariablesFromUrl should return an object with path variables in 
   }, "path parameters should be included");
 });
 
+Deno.test("parseVariablesFromUrl should return an object with path variables in it for variables not directly sequential", () => {
+  const route = Route.fromObject({
+    title: "test",
+    method: "GET",
+    url: "/test/:name/hi/:age",
+    accept: "*",
+    responseHeaders: {},
+    response: "hi",
+  });
+
+  assertEquals(route.parseVariablesFromUrl("/test/ploiu/hi/23"), {
+    name: "ploiu",
+    age: "23",
+  }, "path parameters should be included");
+});
+
 Deno.test("parseVariablesFromUrl should set non-included path variables as null", () => {
   const route = Route.fromObject({
     title: "test",
@@ -216,8 +232,19 @@ Deno.test("parseVariablesFromUrl should set non-included path variables as null"
     responseHeaders: {},
     response: "hi",
   });
+});
 
-  assertEquals(route.parseVariablesFromUrl("/test/23"), {
+Deno.test("parseVariablesFromUrl should set non-included path variables for variables not directly sequential as null", () => {
+  const route = Route.fromObject({
+    title: "test",
+    method: "GET",
+    url: "/test/:name?/hi/:age/:favoriteFood?",
+    accept: "*",
+    responseHeaders: {},
+    response: "hi",
+  });
+
+  assertEquals(route.parseVariablesFromUrl("/test/hi/23"), {
     name: null,
     age: "23",
     favoriteFood: null,
