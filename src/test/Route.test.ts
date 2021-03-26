@@ -71,6 +71,7 @@ Deno.test("doesUrlMatch matches url with path variables", () => {
 		response: "hi",
 	});
 	assert(route.doesUrlMatch("/test/ploiu/23"));
+	assertNotEquals(route.doesUrlMatch("/test/ploiu"), true);
 });
 
 Deno.test("doesUrlMatch matches url with optional path variables", () => {
@@ -84,4 +85,30 @@ Deno.test("doesUrlMatch matches url with optional path variables", () => {
 	});
 	assert(route.doesUrlMatch("/test/ploiu/23"));
 	assert(route.doesUrlMatch("/test/23"));
+	assertNotEquals(route.doesUrlMatch('/test'), true)
 });
+
+Deno.test('doesUrlMatch matches url with query variables', () => {
+	const route = Route.fromObject({
+		title: "test",
+		method: "GET",
+		url: "/test?:name&:age",
+		accept: "*",
+		responseHeaders: {},
+		response: "hi",
+	});
+	assert(route.doesUrlMatch('/test?name=ploiu&age=23'))
+	assertNotEquals(route.doesUrlMatch('/test?name=ploiu'), true)
+})
+Deno.test('doesUrlMatch matches url with optional query variables', () => {
+	const route = Route.fromObject({
+		title: "test",
+		method: "GET",
+		url: "/test?:name?&:age",
+		accept: "*",
+		responseHeaders: {},
+		response: "hi",
+	});
+	assert(route.doesUrlMatch('/test?name=ploiu&age=23'))
+	assert(route.doesUrlMatch('/test?age=23'))
+})

@@ -68,8 +68,10 @@ export default class Route {
 		// create variable regexes to match our url with
 		const nonOptionalPathRegex = /(?<=\/):(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=(\?:|\/))))/g;
 		const optionalPathRegex = /\/:[a-zA-Z_\-0-9]+\?(?!:)/g;
-		const nonOptionalQueryRegex = /(?<=[?&]):[a-zA-Z_\-0-9]+(?!\?)/g;
-		const optionalQueryRegex = /[?&]:[a-zA-Z_\-0-9]+(?=\?)/g;
+		const nonOptionalQueryRegex = /(\\?)?[?&]:(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=&)))/g;
+		const optionalQueryRegex = /(\\?)?[?&]:[a-zA-Z_\-0-9]+(?=\?)\?/g;
+		// first replace any query string question marks since `?` is a special regex char 
+		compiledUrlString = compiledUrlString.replace(/\?:/g, '\\?:')
 		// for non-optional path param
 		compiledUrlString = compiledUrlString.replaceAll(
 			nonOptionalPathRegex,
@@ -83,12 +85,12 @@ export default class Route {
 		// for non-optional query param
 		compiledUrlString = compiledUrlString.replaceAll(
 			nonOptionalQueryRegex,
-			"[a-zA-Z_\\-0-9]+",
+			"[?&][a-zA-Z_\\-0-9]+=[^&]+",
 		);
 		// for optional query param
 		compiledUrlString = compiledUrlString.replaceAll(
 			optionalQueryRegex,
-			"([?&]a-zA-Z_\\-0-9]+)?",
+			"([?&][a-zA-Z_\\-0-9]+=[^&]+)?",
 		);
 		return new RegExp(`^${compiledUrlString}\$`)
 	}
