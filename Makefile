@@ -9,3 +9,9 @@ test:
 
 run:
 	Deno run ${FLAGS} ./src/ts/MockServer.ts
+
+compile:
+	Deno compile ${FLAGS} ./src/ts/MockServer.ts -o=./build/MockServer.exe
+	
+install:
+	Deno install ${FLAGS} ./src/ts/MockServer.ts
