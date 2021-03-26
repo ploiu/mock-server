@@ -34,8 +34,17 @@ export default class Route {
    */
   public doesUrlMatch(url: string = ""): boolean {
     url = url.toLowerCase();
-    // simple urls
-    return url === this.url || this.compiledUrlRegex.test(url);
+    // make sure it passes the general format of this url
+    const basicPatternMatches = url === this.url || this.compiledUrlRegex.test(url)
+    // make sure all mandatory query parameters are present
+    let hasAllMandatoryQueryFlags = true
+    for (let queryVariable of this.queryVariables) {
+      if (!queryVariable.optional) {
+        const queryRegex = new RegExp(`[?&]${queryVariable.name}=[^&]+`, 'i')
+        hasAllMandatoryQueryFlags = hasAllMandatoryQueryFlags && queryRegex.test(url)
+      }
+    }
+    return basicPatternMatches && hasAllMandatoryQueryFlags
   }
 
   /**
@@ -100,7 +109,7 @@ export default class Route {
       optionalQueryRegex,
       "([?&][a-zA-Z_\\-0-9]+=[^&]+)?",
     );
-    return new RegExp(`^${compiledUrlString}\$`);
+    return new RegExp(`^${compiledUrlString}\$`, 'i');
   }
 
   /**
