@@ -12,29 +12,33 @@ const CONFIG_FILE_LOCATION = "./config.json";
  * @returns {Config}
  * @constructor
  */
-export function readConfigFile(): Config {
-  if (!existsSync(CONFIG_FILE_LOCATION)) {
-    setupConfigFile();
+export function readConfigFile(
+  location: string = CONFIG_FILE_LOCATION,
+): Config {
+  if (!existsSync(location)) {
+    setupConfigFile(location);
   }
+  console.log('after setup config file')
   // read the config file
-  const text = Deno.readTextFileSync(CONFIG_FILE_LOCATION);
+  const text = Deno.readTextFileSync(location);
   return <Config> (JSON.parse(text));
 }
 
 /**
  * sets up our config file for the cases where it does not exist. It creates default, empty entries except for where a value is needed
  */
-function setupConfigFile() {
+function setupConfigFile(location: string = CONFIG_FILE_LOCATION) {
   // make sure we have a config file
-  ensureFileSync(CONFIG_FILE_LOCATION);
+  ensureFileSync(location);
   // create default config object
   const config = new Config();
   config.configVersion = "1.0";
   const textContents = JSON.stringify(config, null, 2);
   // write to the file and close it
   const bytesWritten = Deno.writeTextFileSync(
-    CONFIG_FILE_LOCATION,
+    location,
     textContents,
   );
+  console.log('wrote to file')
   // TODO error if nothing was written?
 }
