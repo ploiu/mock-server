@@ -20,7 +20,7 @@ export default class UpdateConfigRoute extends Route {
     super(
       "Custom Update Config Route",
       "/refreshConfig?:location?",
-      <RequestMethod>'POST',
+      <RequestMethod> "POST",
       new Headers(),
       "Refreshed Config",
       200,
@@ -34,15 +34,15 @@ export default class UpdateConfigRoute extends Route {
   async execute(request: ServerRequest): Promise<Response> {
     // log that the route was hit
     const color = super.getColorForMethod(
-      <RequestMethod>request.method.toUpperCase(),
+      <RequestMethod> request.method.toUpperCase(),
     );
     console.log(color(` ${request.method.toUpperCase()} `) + " " + request.url);
-    const args = this.parseVariablesFromUrl(request.url)
-    const configPath = args.location ?? this.configPath
-    console.log(configPath)
+    const args = this.parseVariablesFromUrl(request.url);
+    const configPath = args.location ?? this.configPath;
+    console.log(configPath);
     const newConfig = readConfigFile(configPath);
     this.routeManager.setupRoutes(newConfig);
-    return <Response>{
+    return <Response> {
       body: this.response,
       status: this.responseStatus,
     };

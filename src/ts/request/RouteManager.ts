@@ -24,9 +24,9 @@ export default class RouteManager {
   public match(request: ServerRequest, specialRoutes: Route[]): Route | null {
     let matchingRoute: Route | null = null;
     const url = request.url;
-    const method = request.method
+    const method = request.method;
     // put specialRoutes first as they have priority
-    const routesToMatchOn = [...specialRoutes, ...this.routes]
+    const routesToMatchOn = [...specialRoutes, ...this.routes];
     for (let route of routesToMatchOn) {
       if (route.method === method && route.doesUrlMatch(url)) {
         matchingRoute = route;

@@ -18,7 +18,7 @@ export function readConfigFile(
   if (!existsSync(location)) {
     setupConfigFile(location);
   }
-  console.log('after setup config file')
+  console.log("after setup config file");
   // read the config file
   const text = Deno.readTextFileSync(location);
   return <Config> (JSON.parse(text));
@@ -39,6 +39,6 @@ function setupConfigFile(location: string = CONFIG_FILE_LOCATION) {
     location,
     textContents,
   );
-  console.log('wrote to file')
+  console.log("wrote to file");
   // TODO error if nothing was written?
 }
