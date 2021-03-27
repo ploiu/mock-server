@@ -22,9 +22,9 @@ import {
  * Object that matches against a request and generates a mock response
  */
 export default class Route {
-  public pathVariables: UrlVariable[] = [];
-  public queryVariables: UrlVariable[] = [];
-  private compiledUrlRegex: RegExp;
+  #pathVariables: UrlVariable[] = [];
+  #queryVariables: UrlVariable[] = [];
+  #compiledUrlRegex: RegExp;
 
   constructor(
     // a name to help the user distinguish which route is which
@@ -43,8 +43,8 @@ export default class Route {
     this.parseUrlVariables();
     // remove trailing `/` from the path
     this.url = this.url.replace(/\/$/, "").replace(/\/\?/, "?");
-    this.compiledUrlRegex = this.buildUrlRegex();
-    // make sure all the required fields exist
+    this.#compiledUrlRegex = this.buildUrlRegex();
+    // make sure all the required fields exist TODO
   }
 
   static fromObject(
@@ -117,10 +117,10 @@ export default class Route {
     url = url.toLowerCase();
     // make sure it passes the general format of this url
     const basicPatternMatches = url === this.url ||
-      this.compiledUrlRegex.test(url);
+      this.#compiledUrlRegex.test(url);
     // make sure all mandatory query parameters are present
     let hasAllMandatoryQueryFlags = true;
-    for (let queryVariable of this.queryVariables) {
+    for (let queryVariable of this.#queryVariables) {
       if (!queryVariable.optional) {
         const queryRegex = new RegExp(`[?&]${queryVariable.name}=[^&]+`, "i");
         hasAllMandatoryQueryFlags = hasAllMandatoryQueryFlags &&
@@ -138,7 +138,7 @@ export default class Route {
    * @returns {any}
    */
   public parseVariablesFromUrl(url: string): any {
-    if (this.pathVariables.length === 0 && this.queryVariables.length === 0) {
+    if (this.#pathVariables.length === 0 && this.#queryVariables.length === 0) {
       return {};
     } else {
       const pathVars = this.parsePathVars(url);
@@ -154,7 +154,7 @@ export default class Route {
    * @returns {boolean}
    */
   public hasPathVariable(name: string, optional: boolean): boolean {
-    return this.pathVariables.filter((it) =>
+    return this.#pathVariables.filter((it) =>
       it.name === name && it.optional === optional
     ).length > 0;
   }
@@ -166,7 +166,7 @@ export default class Route {
    * @returns {boolean}
    */
   public hasQueryVariable(name: string, optional: boolean): boolean {
-    return this.queryVariables.filter((it) =>
+    return this.#queryVariables.filter((it) =>
       it.name === name && it.optional === optional
     ).length > 0;
   }
@@ -201,14 +201,14 @@ export default class Route {
     const matchedPathVars = this.url.match(pathVarRegex);
     if (matchedPathVars) {
       for (let pathVar of matchedPathVars) {
-        this.pathVariables.push(UrlVariable.fromString(pathVar));
+        this.#pathVariables.push(UrlVariable.fromString(pathVar));
       }
     }
     // match and pull out our query variables
     const matchedQueryVars = this.url.match(queryVarRegex);
     if (matchedQueryVars) {
       for (let queryVar of matchedQueryVars) {
-        this.queryVariables.push(UrlVariable.fromString(queryVar));
+        this.#queryVariables.push(UrlVariable.fromString(queryVar));
       }
     }
   }
@@ -223,7 +223,7 @@ export default class Route {
     let compiledUrlString = this.url;
     // create variable regexes to match our url with
     const nonOptionalPathRegex =
-      /(?<=\/):(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=(\?:|\/))))/g;
+      /(?<=\/):(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=(\?:|\/|\\))))/g;
     const optionalPathRegex = /\/:[a-zA-Z_\-0-9]+\?(?!:)/g;
     const nonOptionalQueryRegex =
       /(\\?)?[?&]:(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=&)))/g;
@@ -313,14 +313,14 @@ export default class Route {
    */
   private parseQueryVars(request: string): any {
     // if we don't have any query variables, return an empty object
-    if (this.queryVariables.length === 0) {
+    if (this.#queryVariables.length === 0) {
       return {};
     } else {
       const result: any = {};
       // for each mandatory query variable, get its value
-      const mandatoryVars = this.queryVariables.filter((it) => !it.optional)
+      const mandatoryVars = this.#queryVariables.filter((it) => !it.optional)
         .map((it) => it.name);
-      const optionalVars = this.queryVariables.filter((it) => it.optional).map(
+      const optionalVars = this.#queryVariables.filter((it) => it.optional).map(
         (it) => it.name,
       );
       for (let mandatoryVar of mandatoryVars) {

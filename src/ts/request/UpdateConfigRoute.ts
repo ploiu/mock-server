@@ -22,7 +22,7 @@ export default class UpdateConfigRoute extends Route {
       "/refreshConfig?:location?",
       <RequestMethod> "POST",
       new Headers(),
-      "Refreshed Config",
+      "Refreshed Config\n",
       200,
     );
   }

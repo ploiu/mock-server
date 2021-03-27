@@ -4,6 +4,7 @@ import {
   existsSync,
 } from "https://deno.land/std@0.91.0/fs/mod.ts";
 import Config from "./Config.ts";
+import Route from "../request/Route.ts";
 
 const CONFIG_FILE_LOCATION = "./config.json";
 
@@ -18,7 +19,6 @@ export function readConfigFile(
   if (!existsSync(location)) {
     setupConfigFile(location);
   }
-  console.log("after setup config file");
   // read the config file
   const text = Deno.readTextFileSync(location);
   return <Config> (JSON.parse(text));
@@ -33,12 +33,21 @@ function setupConfigFile(location: string = CONFIG_FILE_LOCATION) {
   // create default config object
   const config = new Config();
   config.configVersion = "1.0";
+  // create an example route to show what can be done
+  const route = Route.fromObject({
+    title: "Example Route",
+    url: "/HelloWorld/:name?:age",
+    method: "GET",
+    responseHeaders: {},
+    response: "Hello, {{name}}! You are {{age}} years old",
+    responseStatus: 200,
+  });
+  config.routes.push(route);
   const textContents = JSON.stringify(config, null, 2);
   // write to the file and close it
   const bytesWritten = Deno.writeTextFileSync(
     location,
     textContents,
   );
-  console.log("wrote to file");
   // TODO error if nothing was written?
 }

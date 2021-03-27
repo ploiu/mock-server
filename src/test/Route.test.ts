@@ -202,6 +202,25 @@ Deno.test("doesUrlMatch matches url with mandatory and optional path and query p
   );
 });
 
+Deno.test("doesUrlMatch matches url with mandatory and optional path and query parameters (mandatory path param followed by query param)", () => {
+  const route = Route.fromObject({
+    title: "test",
+    method: "GET",
+    url: "/test/:name/:age?:favoriteColor&:favoriteFood?",
+    responseHeaders: {},
+    response: "hi",
+    responseStatus: 200,
+  });
+  assert(
+    route.doesUrlMatch("/test/ploiu/23?favoriteColor=green&favoriteFood=pasta"),
+    "url should match with all variables",
+  );
+  assert(
+    route.doesUrlMatch("/test/ploiu/23?favoriteColor=green"),
+    "url should match with only mandatory variables",
+  );
+});
+
 Deno.test("parseVariablesFromUrl should return an empty js object if there are no variables to parse", () => {
   const route = Route.fromObject({
     title: "test",
