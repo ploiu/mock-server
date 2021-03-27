@@ -43,4 +43,5 @@ When run, a `config.json` file will be created with an example route if a `confi
    "responseStatus": 200
 }
 ```
-    
+
+As you can tell from above, path and query variable names start with a `:` character, and to make it optional simply end its name with `?`. To reference these variables in the response body, wrap their name in `{{Curly Braces}}`. To use a default variable value in case of an optional variable not passed in, follow it up with a colon and the default value like this: `{{optionalVarName:defaultValue}}`
