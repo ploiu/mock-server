@@ -11,7 +11,7 @@ run:
 	deno run ${FLAGS} ./src/ts/MockServer.ts
 
 compile:
-	deno compile ${FLAGS} --lite ./src/ts/MockServer.ts -o=./build/MockServer.exe
+	deno compile ${FLAGS} --lite ./src/ts/MockServer.ts
 	
 install:
 	deno install ${FLAGS} ./src/ts/MockServer.ts
