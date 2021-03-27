@@ -354,6 +354,53 @@ Deno.test("execute should template out the response body from url parameters", a
   );
 });
 
+Deno.test("execute should use default variables if an optional variable is not included", async () => {
+  const route = Route.fromObject({
+    title: "test",
+    url: "/test/:name/:age/:favoriteColor?:favoriteFood",
+    responseHeaders: {},
+    response:
+      `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor:green}} {{favoriteFood}}. My favorite color is {{favoriteColor:blue}}`,
+    method: "GET",
+    responseStatus: 200,
+  });
+
+  const res = await route.execute(
+    <ServerRequest> {
+      url: "/test/ploiu/23?favoriteFood=pasta",
+      method: "GET",
+    },
+  );
+  assertEquals(
+    res.body,
+    "Hello, ploiu! You are 23 years old and you probably like green pasta. My favorite color is blue",
+    "default values should be used if the variable is not included",
+  );
+});
+Deno.test("execute should fill in default variable fields if the variable is included", async () => {
+  const route = Route.fromObject({
+    title: "test",
+    url: "/test/:name/:age?:favoriteColor?&:favoriteFood",
+    responseHeaders: {},
+    response:
+      `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor:green}} {{favoriteFood}}. My favorite color is {{favoriteColor:blue}}`,
+    method: "GET",
+    responseStatus: 200,
+  });
+
+  const res = await route.execute(
+    <ServerRequest> {
+      url: "/test/ploiu/23?favoriteFood=pasta&favoriteColor=orange",
+      method: "GET",
+    },
+  );
+  assertEquals(
+    res.body,
+    "Hello, ploiu! You are 23 years old and you probably like orange pasta. My favorite color is orange",
+    "default value templates should be filled if the variable is included",
+  );
+});
+
 Deno.test("execute should set the proper response status code", async () => {
   const route = Route.fromObject({
     title: "test",
