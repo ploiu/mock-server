@@ -377,6 +377,7 @@ Deno.test("execute should use default variables if an optional variable is not i
     "default values should be used if the variable is not included",
   );
 });
+
 Deno.test("execute should fill in default variable fields if the variable is included", async () => {
   const route = Route.fromObject({
     title: "test",
@@ -443,4 +444,24 @@ Deno.test("execute should set the proper response headers", async () => {
     "text/plain",
     "Response headers should match",
   );
+});
+
+Deno.test("execute should properly handle `null` for response body", async () => {
+  const route = Route.fromObject({
+    title: "test",
+    url: "/test/",
+    responseHeaders: {
+      "Content-Type": "text/plain",
+    },
+    response: null,
+    method: "GET",
+    responseStatus: 418,
+  });
+  const res = await route.execute(
+      <ServerRequest> {
+        url: "/test/",
+        method: "GET",
+      },
+  );
+  assertEquals(res.body, null, "response body should be null");
 });

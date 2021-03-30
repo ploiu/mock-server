@@ -178,21 +178,23 @@ export default class Route {
    */
   private populateBodyTemplate(url: string): string {
     let bodyCopy = this.response;
-    // retrieve the url variables from the url
-    const urlVars = this.parseVariablesFromUrl(url);
-    // now replace each instance of our var placeholders
-    for (let [varName, varValue] of Object.entries(urlVars)) {
-      const replaceRegex = new RegExp(`{{${varName}(:[^}]+)?}}`, "ig");
-      if (varValue) {
-        bodyCopy = bodyCopy.replaceAll(replaceRegex, <string> varValue);
+    if(bodyCopy !== null) {
+      // retrieve the url variables from the url
+      const urlVars = this.parseVariablesFromUrl(url);
+      // now replace each instance of our var placeholders
+      for (let [varName, varValue] of Object.entries(urlVars)) {
+        const replaceRegex = new RegExp(`{{${varName}(:[^}]+)?}}`, "ig");
+        if (varValue) {
+          bodyCopy = bodyCopy.replaceAll(replaceRegex, <string>varValue);
+        }
       }
-    }
-    // now replace all of our remaining placeholders
-    const remainingVars = bodyCopy.match(/{{[a-zA-Z\-_0-9]+:.*?}}/g);
-    if (remainingVars) {
-      for (let remainingVar of remainingVars) {
-        const defaultVal = remainingVar.match(/(?<=:)[^}]+(?=}})/) ?? [];
-        bodyCopy = bodyCopy.replace(remainingVar, defaultVal[0]);
+      // now replace all of our remaining placeholders
+      const remainingVars = bodyCopy.match(/{{[a-zA-Z\-_0-9]+:.*?}}/g);
+      if (remainingVars) {
+        for (let remainingVar of remainingVars) {
+          const defaultVal = remainingVar.match(/(?<=:)[^}]+(?=}})/) ?? [];
+          bodyCopy = bodyCopy.replace(remainingVar, defaultVal[0]);
+        }
       }
     }
     return bodyCopy;
