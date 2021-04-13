@@ -36,7 +36,7 @@ export default class Route {
     // the headers used in the response for this route
     public responseHeaders: Headers,
     // the response body
-    public response: string,
+    public response: string | null,
     // the http status code
     public responseStatus: number,
   ) {
@@ -57,7 +57,7 @@ export default class Route {
       url,
       method,
       headers,
-      response,
+        (typeof response === 'string') ? response : !!response ?  JSON.stringify(response): null,
       responseStatus,
     );
   }
@@ -197,7 +197,7 @@ export default class Route {
         }
       }
     }
-    return bodyCopy;
+    return bodyCopy!;
   }
 
   /**
