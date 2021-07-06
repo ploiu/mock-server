@@ -245,22 +245,22 @@ export default class Route {
     // for non-optional path param
     compiledUrlString = compiledUrlString.replaceAll(
       nonOptionalPathRegex,
-      "[a-zA-Z_\\-0-9]+",
+      "[a-zA-Z_\\-0-9!@#$%^*():;.]+",
     );
     // for optional path param
     compiledUrlString = compiledUrlString.replaceAll(
       optionalPathRegex,
-      "(/[a-zA-Z_\\-0-9]+)?",
+      "(/[a-zA-Z_\\-0-9!@#$%^*():;.]+)?",
     );
     // for non-optional query param
     compiledUrlString = compiledUrlString.replaceAll(
       nonOptionalQueryRegex,
-      "[?&][a-zA-Z_\\-0-9]+=[^&]+",
+      "[?&][a-zA-Z_\\-0-9!@#$%^*():;.]+=[^&]+",
     );
     // for optional query param
     compiledUrlString = compiledUrlString.replaceAll(
       optionalQueryRegex,
-      "([?&][a-zA-Z_\\-0-9]+=[^&]+)?",
+      "([?&][a-zA-Z_\\-0-9!@#$%^*():;.]+=[^&]+)?",
     );
     return new RegExp(`^${compiledUrlString}\$`, "i");
   }

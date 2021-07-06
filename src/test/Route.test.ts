@@ -85,6 +85,18 @@ Deno.test("doesUrlMatch matches simple url", () => {
     );
 });
 
+Deno.test("doesUrlMatch matches urls with non-alphanumeric characters", () => {
+    const route = Route.fromObject({
+        title: "test",
+        method: "GET",
+        url: "/test/:email/:code",
+        responseHeaders: {},
+        response: "hi",
+        responseStatus: 200,
+    });
+    assert(route.doesUrlMatch("/test/test@example.com/123456"), "url should match /test/test@example.com/123456");
+});
+
 Deno.test("doesUrlMatch matches simple url with multiple path sections", () => {
     const route = Route.fromObject({
         title: "test",
