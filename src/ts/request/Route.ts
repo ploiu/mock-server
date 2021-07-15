@@ -51,12 +51,11 @@ export default class Route {
     // @ts-ignore
     { title, url, method, responseHeaders, response, responseStatus },
   ): Route {
-    const headers = this.createResponseHeaders(responseHeaders);
     return new Route(
       title,
       url,
       method,
-      headers,
+      responseHeaders,
       (typeof response === "string")
         ? response
         : !!response
@@ -69,14 +68,13 @@ export default class Route {
   /**
    * creates a `Header` object from the raw input object. Conversion is done
    * by simple key/value pairs
-   * @param input
    * @returns {Headers}
    * @private
    */
-  private static createResponseHeaders(input: any): Headers {
+  private createResponseHeaders(): Headers {
     const headers = new Headers();
-    for (let [key, value] of Object.entries(input)) {
-      headers.set(key, String(value));
+    for (let [key, value] of Object.entries(this.responseHeaders)) {
+      headers.append(key, String(value));
     }
     return headers;
   }
@@ -99,7 +97,7 @@ export default class Route {
       const responseBody = this.populateBodyTemplate(url);
       return {
         status: this.responseStatus,
-        headers: this.responseHeaders,
+        headers: this.createResponseHeaders(),
         body: responseBody,
       };
     } catch (e) {
