@@ -15,3 +15,6 @@ compile:
 	
 install:
 	deno install ${FLAGS} ./src/ts/MockServer.ts
+
+generate:
+	deno run --allow-read --allow-write ./src/ts/GenerateHtml.ts

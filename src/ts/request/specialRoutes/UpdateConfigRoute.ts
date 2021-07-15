@@ -2,10 +2,10 @@ import {
   Response,
   ServerRequest,
 } from "https://deno.land/std@0.91.0/http/mod.ts";
-import Route from "./Route.ts";
-import RouteManager from "./RouteManager.ts";
-import { RequestMethod } from "./RequestMethod.ts";
-import { readConfigFile } from "../config/ConfigManager.ts";
+import Route from "../Route.ts";
+import RouteManager from "../RouteManager.ts";
+import { RequestMethod } from "../RequestMethod.ts";
+import { readConfigFile } from "../../config/ConfigManager.ts";
 
 /**
  * A special route that refreshes the config file for the mock server
