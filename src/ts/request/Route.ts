@@ -57,7 +57,11 @@ export default class Route {
       url,
       method,
       headers,
-        (typeof response === 'string') ? response : !!response ?  JSON.stringify(response): null,
+      (typeof response === "string")
+        ? response
+        : !!response
+        ? JSON.stringify(response)
+        : null,
       responseStatus,
     );
   }
@@ -178,14 +182,14 @@ export default class Route {
    */
   private populateBodyTemplate(url: string): string {
     let bodyCopy = this.response;
-    if(bodyCopy !== null) {
+    if (bodyCopy !== null) {
       // retrieve the url variables from the url
       const urlVars = this.parseVariablesFromUrl(url);
       // now replace each instance of our var placeholders
       for (let [varName, varValue] of Object.entries(urlVars)) {
         const replaceRegex = new RegExp(`{{${varName}(:[^}]+)?}}`, "ig");
         if (varValue) {
-          bodyCopy = bodyCopy.replaceAll(replaceRegex, <string>varValue);
+          bodyCopy = bodyCopy.replaceAll(replaceRegex, <string> varValue);
         }
       }
       // now replace all of our remaining placeholders
