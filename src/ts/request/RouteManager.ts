@@ -6,7 +6,7 @@ import { ServerRequest } from "https://deno.land/std@0.91.0/http/mod.ts";
  * Central location for matching requests to routes and executing the responses for those routes
  */
 export default class RouteManager {
-  private routes: Route[] = [];
+  public routes: Route[] = [];
 
   /**
    * Sets up our routes based on the values in the config object

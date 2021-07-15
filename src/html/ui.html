@@ -10,6 +10,8 @@
             --success: #A5C882;
             --error: #CD533B;
             --body-background: #333;
+            --text: #dfd8e3;
+            --darker-background: #111;
         }
 
         body, html {
@@ -17,12 +19,78 @@
             height: 100%;
             background-color: var(--body-background);
             overflow: hidden;
+            color: var(--text);
+            font-family: "Fira Code", Consolas, monospace;
         }
+
+        .container {
+            padding: 0 2em;
+        }
+
+        #route-panel {
+            float: left;
+            width: 20%;
+            resize: horizontal;
+            border-right: 1px solid var(--secondary);
+            padding-right: 2em;
+        }
+        .route-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .route-list > li.clickable {
+            padding: .5em;
+            border-radius: 6px;
+            background-color: var(--darker-background);
+            margin: 0.5em 0;
+        }
+
+        .route-list > li.clickable:hover {
+            background-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .route-list > li.clickable.selected {
+            background-color: var(--success);
+            color: var(--body-background);
+        }
+
     </style>
 </head>
 <body>
-<div id="main">
-
+<div id="main" class="container">
+    <h1>Ploiu Mock Server</h1>
+    <!--main area, this contains the route list and the editor panel for that route-->
+    <div>
+        <div id="route-panel">
+            <ul class="route-list">
+                <li class="clickable" v-for="(route, index) in routes" :key="index" :class="{selected: selectedRoute === route}" @click="selectedRoute = route">
+                    {{route.title}}
+                </li>
+            </ul>
+        </div>
+        <div id="route-editor"></div>
+    </div>
 </div>
+<script src="https://unpkg.com/vue@3.1.4"></script>
+<script>
+    const ui = {
+        data() {
+            return {
+                /** @type {Route[]}*/
+                routes: [],
+                selectedRoute: null
+            }
+        },
+        async mounted() {
+            const routes = await (await fetch('/mock-server-routes')).json()
+            if(routes) {
+                this.routes = routes
+            }
+        }
+    }
+    Vue.createApp(ui).mount('#main')
+</script>
 </body>
 </html>

@@ -12,6 +12,7 @@ import RouteManager from "./request/RouteManager.ts";
 import Route from "./request/Route.ts";
 import UpdateConfigRoute from "./request/specialRoutes/UpdateConfigRoute.ts";
 import UIRoute from "./request/specialRoutes/UIRoute.ts";
+import FetchRoutesRoute from "./request/specialRoutes/FetchRoutesRoute.ts";
 
 const helpText = `
 	USAGE: MockServer [flags]
@@ -96,7 +97,7 @@ export async function startMockServer(
 function createUIFile() {
   ////// DO NOT ALTER BELOW THIS LINE - IT IS THE STRING CONTENTS OF ../html/ui.html AND SHOULD BE TREATED AS GENERATED CODE
   const uiHtml: string =
-    '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <title>Ploiu Mock Server</title>\n    <style>\n        :root {\n            --primary: #7C35AA;\n            --secondary: #8D99AE;\n            --success: #A5C882;\n            --error: #CD533B;\n            --body-background: #333;\n        }\n\n        body, html {\n            width: 100%;\n            height: 100%;\n            background-color: var(--body-background);\n            overflow: hidden;\n        }\n    </style>\n</head>\n<body>\n<div id="main">\n\n</div>\n</body>\n</html>\n';
+    '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <title>Ploiu Mock Server</title>\n    <style>\n        :root {\n            --primary: #7C35AA;\n            --secondary: #8D99AE;\n            --success: #A5C882;\n            --error: #CD533B;\n            --body-background: #333;\n            --text: #dfd8e3;\n            --darker-background: #111;\n        }\n\n        body, html {\n            width: 100%;\n            height: 100%;\n            background-color: var(--body-background);\n            overflow: hidden;\n            color: var(--text);\n            font-family: "Fira Code", Consolas, monospace;\n        }\n\n        .container {\n            padding: 0 2em;\n        }\n\n        #route-panel {\n            float: left;\n            width: 20%;\n            resize: horizontal;\n            border-right: 1px solid var(--secondary);\n            padding-right: 2em;\n        }\n        .route-list {\n            list-style-type: none;\n            padding-left: 0;\n        }\n\n        .route-list > li.clickable {\n            padding: .5em;\n            border-radius: 6px;\n            background-color: var(--darker-background);\n            margin: 0.5em 0;\n        }\n\n        .route-list > li.clickable:hover {\n            background-color: var(--primary);\n            cursor: pointer;\n        }\n\n        .route-list > li.clickable.selected {\n            background-color: var(--success);\n            color: var(--body-background);\n        }\n\n    </style>\n</head>\n<body>\n<div id="main" class="container">\n    <h1>Ploiu Mock Server</h1>\n    <!--main area, this contains the route list and the editor panel for that route-->\n    <div>\n        <div id="route-panel">\n            <ul class="route-list">\n                <li class="clickable" v-for="(route, index) in routes" :key="index" :class="{selected: selectedRoute === route}" @click="selectedRoute = route">\n                    {{route.title}}\n                </li>\n            </ul>\n        </div>\n        <div id="route-editor"></div>\n    </div>\n</div>\n<script src="https://unpkg.com/vue@3.1.4"></script>\n<script>\n    const ui = {\n        data() {\n            return {\n                /** @type {Route[]}*/\n                routes: [],\n                selectedRoute: null\n            }\n        },\n        async mounted() {\n            const routes = await (await fetch(\'/mock-server-routes\')).json()\n            if(routes) {\n                this.routes = routes\n            }\n        }\n    }\n    Vue.createApp(ui).mount(\'#main\')\n</script>\n</body>\n</html>\n';
   ////// END GENERATED CODE
   try {
     Deno.removeSync("./ui.html");
@@ -112,5 +113,6 @@ function setupSpecialRoutes(
   return [
     new UpdateConfigRoute(configLocation, routeManager),
     new UIRoute(routeManager),
+    new FetchRoutesRoute(routeManager),
   ];
 }
