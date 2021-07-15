@@ -8,13 +8,16 @@ test:
 	deno test
 
 run:
-	deno run ${FLAGS} ./src/ts/MockServer.ts
+	deno run --allow-read --allow-write ./src/ts/GenerateHtml.ts
+	deno run ${FLAGS} ./src/ts/MockServer.ts --load-ui
 
 compile:
+	deno run --allow-read --allow-write ./src/ts/GenerateHtml.ts
 	deno compile ${FLAGS} --lite ./src/ts/MockServer.ts
 	
 install:
-	deno install ${FLAGS} ./src/ts/MockServer.ts
+	deno run --allow-read --allow-write ./src/ts/GenerateHtml.ts
+	deno install ${FLAGS} --force ./src/ts/MockServer.ts
 
-generate:
+generate-ui:
 	deno run --allow-read --allow-write ./src/ts/GenerateHtml.ts

@@ -9,7 +9,7 @@ if (import.meta.main) {
   );
   const tsFile = Deno.readTextFileSync("./src/ts/MockServer.ts");
   const replacedContents = tsFile.replace(
-    /(?<=const uiHtml: string = ).*?(?=;)/,
+    /(?<=const uiHtml: string =[\r\n ]*).*?(?=;(\r\n)?$)/mgi,
     `'${formattedHtml}'`,
   );
   Deno.writeTextFileSync("./src/ts/MockServer.ts", replacedContents);

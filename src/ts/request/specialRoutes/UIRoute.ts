@@ -15,7 +15,7 @@ export default class UIRoute extends Route {
       "UI",
       "/mock-server-ui",
       <RequestMethod> "GET",
-      {},
+      new Headers(),
       null,
       200,
     );
@@ -25,7 +25,12 @@ export default class UIRoute extends Route {
     return super.doesUrlMatch(url);
   }
 
-  async execute(request: ServerRequest): Promise<void> {
-    return super.execute(request);
+  async execute(request: ServerRequest): Promise<Response> {
+    // log that the route was hit
+    const color = super.getColorForMethod(
+      <RequestMethod> request.method.toUpperCase(),
+    );
+    console.log(color(` ${request.method.toUpperCase()} `) + " " + request.url);
+    return await serveFile(request, "./ui.html");
   }
 }
