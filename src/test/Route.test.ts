@@ -2,7 +2,7 @@ import {
   assert,
   assertEquals,
   assertNotEquals,
-} from "https://deno.land/std@0.91.0/testing/asserts.ts";
+} from "https://deno.land/std@0.100.0/testing/asserts.ts";
 import Route from "../ts/request/Route.ts";
 import { ServerRequest } from "https://deno.land/std@0.100.0/http/mod.ts";
 

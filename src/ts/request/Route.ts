@@ -16,7 +16,7 @@ import {
   bgYellow,
   black,
   red,
-} from "https://deno.land/std@0.91.0/fmt/colors.ts";
+} from "https://deno.land/std@0.100.0/fmt/colors.ts";
 
 /**
  * Object that matches against a request and generates a mock response

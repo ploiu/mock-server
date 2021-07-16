@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.100.0/http/mod.ts";
-import { parse } from "https://deno.land/std@0.91.0/flags/mod.ts";
+import { parse } from "https://deno.land/std@0.100.0/flags/mod.ts";
 import Config from "./config/Config.ts";
 import { readConfigFile } from "./config/ConfigManager.ts";
 import {
@@ -7,7 +7,7 @@ import {
   green,
   magenta,
   yellow,
-} from "https://deno.land/std@0.91.0/fmt/colors.ts";
+} from "https://deno.land/std@0.100.0/fmt/colors.ts";
 import RouteManager from "./request/RouteManager.ts";
 import Route from "./request/Route.ts";
 import UpdateConfigRoute from "./request/specialRoutes/UpdateConfigRoute.ts";
@@ -36,7 +36,7 @@ if (import.meta.main) {
   const port: number = parsedArgs.port ?? parsedArgs.p ?? 8000;
   const configLocation: string = parsedArgs.config ?? parsedArgs.c ??
     "./config.json";
-  const loadUI: boolean = parsedArgs["load-ui"] ?? parsedArgs.l ?? true;
+  const loadUI: boolean = parsedArgs["load-ui"] ?? parsedArgs.l ?? false;
   await startMockServer(port, configLocation, loadUI);
 }
 
