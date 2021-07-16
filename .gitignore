@@ -1,4 +1,6 @@
 .idea
 config.json
-ui.html
 *.exe
+/ui.css
+/ui.html
+/src/ui/ui.css.map

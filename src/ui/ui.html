@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ploiu Mock Server</title>
+    <link rel="stylesheet" href="ui.css">
+</head>
+<body>
+<div id="main" class="container">
+    <h1>Ploiu Mock Server</h1>
+    <!--main area, this contains the route list and the editor panel for that route-->
+    <div id="edit-route-view" v-if="currentView === 'editRoute'">
+        <div id="route-panel">
+            <div class="grid one-x-two">
+                <h3>Routes</h3>
+                <button class="primary outline">Save</button>
+            </div>
+            <ul class="route-list">
+                <li class="clickable" v-for="(route, index) in routes" :key="index"
+                    :class="{selected: selectedRoute === route}" @click="selectedRoute = route">
+                    {{route.title}}
+                </li>
+            </ul>
+        </div>
+        <div id="route-editor" v-if="selectedRoute.title ?? false">
+            <!--row with route name-->
+            <div id="route-name">
+                <h5>Route Name</h5>
+                <input v-model="selectedRoute.title" class="full-width">
+            </div>
+            <!--row with request method and url-->
+            <div id="method-and-url">
+                <h3>Current Route</h3>
+                <div class="input-group" id="method-url-bar">
+                    <select id="requestMethod" v-model="selectedRoute.method">
+                        <option :value="method" v-for="method in requestMethods">{{method}}</option>
+                    </select>
+                    <input type="text" id="requestUrl" v-model="selectedRoute.url" placeholder="url">
+                </div>
+            </div>
+            <!--row with response headers-->
+            <div id="response-headers">
+                <h5>Response Headers</h5>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Value</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="(header, index) in selectedRoute.responseHeaders" :key="index">
+                        <td>
+                            <input type="text" v-model="header.name">
+                        </td>
+                        <td>
+                            <input type="text" v-model="header.value">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!--row with response body-->
+            <div id="response-body">
+                <h5>Response Body</h5>
+                <textarea v-model="selectedRoute.response" class="full-width"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://unpkg.com/vue@3.1.4"></script>
+<script>
+  const ui = {
+    data() {
+      return {
+        /** @type {Route[]}; the routes the user has set up*/
+        routes: [],
+        /** @type {Route}; the current route the user is editing*/
+        selectedRoute: {},
+        requestMethods: [
+          'GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH'
+        ],
+        // the visible view for the UI
+        currentView: 'editRoute'
+      }
+    },
+    methods: {
+      /** splits a header map into a list of single headers so that they can be edited on the UI*/
+      groupHeaders(headers = {}) {
+        const grouped = []
+        for (let [key, value] of Object.entries(headers)) {
+          grouped.push({
+            name: key,
+            value: value
+          })
+        }
+        // assign a new id for each grouped header
+        for (let i = 0; i < grouped.length; i++) {
+          grouped[i].id = i
+        }
+        return grouped
+      },
+      /** condenses a list of headers down into a single object to send back to the server */
+      condenseHeaders(headers = []) {
+        const condensed = {}
+        for (let grouped of headers) {
+          condensed[grouped.name] = grouped.value
+        }
+        return condensed
+      }
+    },
+    async mounted() {
+      const routes = await (await fetch('/mock-server-routes')).json()
+      if (routes) {
+        for (let route of routes) {
+          route.responseHeaders = this.groupHeaders(route.responseHeaders)
+        }
+        this.routes = routes
+      }
+    }
+  }
+  Vue.createApp(ui).mount('#main')
+</script>
+</body>
+</html>

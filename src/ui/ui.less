@@ -1,0 +1,210 @@
+@primary: #7C35AA;
+@secondary: #8D99AE;
+@success: #A5C882;
+@error: #CD533B;
+@body-background: #333;
+@text: #dfd8e3;
+@darker-background: #111;
+@border-radius: 6px;
+
+@colors: primary, secondary, success, error;
+
+// TODO possibly remove this since we're moving to LESS
+:root {
+  --primary: @primary;
+  --secondary: @secondary;
+  --success: @success;
+  --error: @error;
+  --body-background: @body-background;
+  --text: @text;
+  --darker-background: @darker-background;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  background-color: var(--body-background);
+  overflow: hidden;
+  color: var(--text);
+  font-family: "Fira Code", Consolas, monospace;
+}
+
+.container {
+  padding: 0 2em;
+}
+
+#route-panel {
+  resize: horizontal;
+  border-right: 1px solid var(--secondary);
+  padding-right: 2em;
+  margin-right: 2em;
+  grid-column-start: 1;
+  grid-column-end: 2;
+
+  .route-list {
+    list-style-type: none;
+    padding-left: 0;
+
+    > li.clickable {
+      padding: .5em;
+      border-radius: @border-radius;
+      background-color: var(--darker-background);
+      margin: 0.5em 0;
+
+      &:hover {
+        background-color: var(--secondary);
+        cursor: pointer;
+      }
+
+      &.selected {
+        background-color: var(--primary);
+      }
+    }
+  }
+}
+
+#edit-route-view {
+  display: grid;
+  grid-auto-columns: 20% 80%;
+}
+
+#route-editor {
+  grid-column-start: 2;
+  grid-column-end: 3;
+  // even though it's in a grid, it is a container of other grid items
+  display: grid;
+  grid-auto-columns: auto auto auto;
+  grid-auto-rows: auto auto auto auto;
+
+  #method-and-url {
+    #route-name {
+      grid-row-start: 1;
+      grid-row-end: 2;
+      grid-column-start: 1;
+      grid-column-end: 4;
+    }
+
+    #method-url-bar {
+      grid-row-start: 2;
+      grid-row-end: 3;
+      display: grid;
+      grid-auto-columns: 10% auto;
+
+      > select {
+        grid-column-start: 1;
+        grid-column-end: 2;
+      }
+
+      > input {
+        grid-column-start: 2;
+        grid-column-end: 3;
+      }
+    }
+
+    #response-headers {
+      grid-row-start: 3;
+      grid-row-end: 4;
+      grid-column-start: 1;
+      grid-column-end: 4;
+    }
+
+    #response-body {
+      grid-row-start: 4;
+      grid-row-end: 5;
+      grid-column-start: 1;
+      grid-column-end: 4;
+    }
+  }
+}
+
+select, input, textarea {
+  border-radius: @border-radius;
+  padding: 1em;
+  background-color: var(--darker-background);
+  color: var(--text);
+  border-color: var(--secondary);
+  border-width: 1px;
+  border-style: solid;
+
+  &:focus {
+    border-color: var(--primary);
+    outline: none;
+  }
+
+  &.full-width {
+    width: 98%;
+  }
+}
+
+.input-group {
+  > select, input {
+    &:first-child {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: none;
+    }
+
+    &:not(:first-child) {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    &:last-child {
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+    }
+  }
+}
+
+table {
+  width: 100%;
+
+  td > input {
+    width: 95%;
+  }
+}
+
+button {
+  padding: .5em 1.25em;
+  border-style: solid;
+  cursor: pointer;
+  border-radius: @border-radius;
+  each(@colors, {
+    &.@{value} {
+      background-color: @@value;
+      border-color: darken(@@value, 10%);
+
+      &:hover {
+        background-color: darken(@@value, 5%);
+      }
+
+      &:active {
+        background-color: darken(@@value, 10%);
+      }
+      
+      &.outline {
+        background-color: transparent;
+        color: @@value;
+        border-color: @@value;
+        
+        &:hover {
+          background-color: @@value;
+          color: #fff - @@value;
+        }
+        
+        &:active {
+          background-color: darken(@@value, 10%);
+        }
+      }
+    }
+  })
+}
+
+.grid {
+  display: grid;
+
+  &.one-x-two {
+    grid-template-rows: auto;
+    grid-template-columns: auto auto;
+  }
+}

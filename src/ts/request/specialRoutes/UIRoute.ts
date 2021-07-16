@@ -14,7 +14,7 @@ export default class UIRoute extends Route {
     super(
       "UI",
       "/mock-server-ui",
-      <RequestMethod> "GET",
+      <RequestMethod>"GET",
       new Headers(),
       null,
       200,
@@ -22,15 +22,28 @@ export default class UIRoute extends Route {
   }
 
   doesUrlMatch(url: string = ""): boolean {
-    return super.doesUrlMatch(url);
+    return url.toLowerCase().includes('/mock-server-ui') || url.toLowerCase().includes('ui.css')
   }
 
+  /**
+   * handles serving the files to the browser
+   * @param request
+   */
   async execute(request: ServerRequest): Promise<Response> {
     // log that the route was hit
     const color = super.getColorForMethod(
-      <RequestMethod> request.method.toUpperCase(),
+      <RequestMethod>request.method.toUpperCase(),
     );
     console.log(color(` ${request.method.toUpperCase()} `) + " " + request.url);
-    return await serveFile(request, "./ui.html");
+    if (request.url.toLowerCase().includes('/mock-server-ui')) {
+      return await serveFile(request, "./ui.html");
+    } else if (request.url.toLowerCase().includes('ui.css')) {
+      return await serveFile(request, "./ui.css");
+    } else {
+      return <Response>{
+        body: "",
+        status: 404
+      }
+    }
   }
 }
