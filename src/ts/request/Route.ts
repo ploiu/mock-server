@@ -3,7 +3,7 @@ import UrlVariable from "./UrlVariable.ts";
 import {
   Response,
   ServerRequest,
-} from "https://deno.land/std@0.91.0/http/mod.ts";
+} from "https://deno.land/std@0.100.0/http/mod.ts";
 import {
   bgBlue,
   bgBrightBlue,

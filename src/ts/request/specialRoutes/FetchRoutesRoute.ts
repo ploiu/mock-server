@@ -4,7 +4,7 @@ import { RequestMethod } from "../RequestMethod.ts";
 import {
   Response,
   ServerRequest,
-} from "https://deno.land/std@0.91.0/http/mod.ts";
+} from "https://deno.land/std@0.100.0/http/mod.ts";
 
 export default class FetchRoutesRoute extends Route {
   /** Routes not provided by the user */
@@ -12,7 +12,7 @@ export default class FetchRoutesRoute extends Route {
     "/mock-server-routes",
     "/mock-server-ui",
     "/refreshConfig",
-    "/mock-ui-save-routes"
+    "/mock-ui-save-routes",
   ];
 
   constructor(private routeManager: RouteManager) {

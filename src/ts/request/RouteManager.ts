@@ -1,6 +1,6 @@
 import Route from "./Route.ts";
 import Config from "../config/Config.ts";
-import { ServerRequest } from "https://deno.land/std@0.91.0/http/mod.ts";
+import { ServerRequest } from "https://deno.land/std@0.100.0/http/mod.ts";
 
 /**
  * Central location for matching requests to routes and executing the responses for those routes
