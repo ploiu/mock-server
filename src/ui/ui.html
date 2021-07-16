@@ -13,7 +13,7 @@
         <div id="route-panel">
             <div class="grid one-x-two">
                 <h3>Routes</h3>
-                <button class="primary outline">Save</button>
+                <button class="primary outline" @click="save()">Save</button>
             </div>
             <ul class="route-list">
                 <li class="clickable" v-for="(route, index) in routes" :key="index"
@@ -22,7 +22,7 @@
                 </li>
             </ul>
         </div>
-        <div id="route-editor" v-if="selectedRoute.title ?? false">
+        <div id="route-editor" v-if="selectedRoute !== null">
             <!--row with route name-->
             <div id="route-name">
                 <h5>Route Name</h5>
@@ -76,7 +76,7 @@
         /** @type {Route[]}; the routes the user has set up*/
         routes: [],
         /** @type {Route}; the current route the user is editing*/
-        selectedRoute: {},
+        selectedRoute: null,
         requestMethods: [
           'GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH'
         ],
@@ -107,6 +107,27 @@
           condensed[grouped.name] = grouped.value
         }
         return condensed
+      },
+
+      /**
+       * saves our routes to our config file and refreshes the routes
+       */
+      async save() {
+        // clone the routes TODO find a better way
+        const routes = JSON.parse(JSON.stringify(this.routes));
+        // condense the headers of each route
+        for(let route of routes) {
+          route.responseHeaders = this.condenseHeaders(route.responseHeaders);
+        }
+        const saveResult = await (await fetch('/mock-ui-save-routes', {
+          method: 'POST',
+          body: JSON.stringify(routes)
+        })).json()
+        if(saveResult.success) {
+          alert('Successfully saved routes')
+        } else {
+          alert('Failed to save routes')
+        }
       }
     },
     async mounted() {

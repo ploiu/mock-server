@@ -6,6 +6,7 @@
   --body-background: #333;
   --text: #dfd8e3;
   --darker-background: #111;
+  --border-radius: 6px;
 }
 body,
 html {

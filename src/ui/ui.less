@@ -18,6 +18,7 @@
   --body-background: @body-background;
   --text: @text;
   --darker-background: @darker-background;
+  --border-radius: @border-radius;
 }
 
 body, html {
@@ -169,6 +170,7 @@ button {
   border-style: solid;
   cursor: pointer;
   border-radius: @border-radius;
+  // generate color profiles for each of our colors
   each(@colors, {
     &.@{value} {
       background-color: @@value;
@@ -181,17 +183,17 @@ button {
       &:active {
         background-color: darken(@@value, 10%);
       }
-      
+
       &.outline {
         background-color: transparent;
         color: @@value;
         border-color: @@value;
-        
+
         &:hover {
           background-color: @@value;
           color: #fff - @@value;
         }
-        
+
         &:active {
           background-color: darken(@@value, 10%);
         }

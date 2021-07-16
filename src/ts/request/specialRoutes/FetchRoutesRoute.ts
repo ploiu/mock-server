@@ -12,6 +12,7 @@ export default class FetchRoutesRoute extends Route {
     "/mock-server-routes",
     "/mock-server-ui",
     "/refreshConfig",
+    "/mock-ui-save-routes"
   ];
 
   constructor(private routeManager: RouteManager) {
