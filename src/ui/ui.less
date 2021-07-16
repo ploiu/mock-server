@@ -46,11 +46,13 @@ body, html {
     list-style-type: none;
     padding-left: 0;
 
-    > li.clickable {
+    li.clickable {
       padding: .5em;
       border-radius: @border-radius;
       background-color: var(--darker-background);
       margin: 0.5em 0;
+      white-space: break-spaces;
+      word-break: break-word;
 
       &:hover {
         background-color: var(--secondary);
@@ -205,8 +207,22 @@ button {
 .grid {
   display: grid;
 
+  &.align-center {
+    align-items: center;
+  }
+
   &.one-x-two {
     grid-template-rows: auto;
     grid-template-columns: auto auto;
+  }
+
+  .col-1 {
+    grid-column-start: 1;
+    grid-column-end: 2;
+  }
+
+  .col-2 {
+    grid-column-start: 2;
+    grid-column-end: 3;
   }
 }

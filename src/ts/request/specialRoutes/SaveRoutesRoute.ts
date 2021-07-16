@@ -42,6 +42,7 @@ export default class SaveRoutesRoute extends Route {
         config.routes.push(Route.fromObject(route));
       }
       writeConfigFile(this.configLocation, config);
+      this.routeManager.setupRoutes(config);
       return <Response>{
         body: '{"success": true}',
         status: 200

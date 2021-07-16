@@ -32,17 +32,19 @@ html {
   list-style-type: none;
   padding-left: 0;
 }
-#route-panel .route-list > li.clickable {
+#route-panel .route-list li.clickable {
   padding: 0.5em;
   border-radius: 6px;
   background-color: var(--darker-background);
   margin: 0.5em 0;
+  white-space: break-spaces;
+  word-break: break-word;
 }
-#route-panel .route-list > li.clickable:hover {
+#route-panel .route-list li.clickable:hover {
   background-color: var(--secondary);
   cursor: pointer;
 }
-#route-panel .route-list > li.clickable.selected {
+#route-panel .route-list li.clickable.selected {
   background-color: var(--primary);
 }
 #edit-route-view {
@@ -229,8 +231,19 @@ button.error.outline:active {
 .grid {
   display: grid;
 }
+.grid.align-center {
+  align-items: center;
+}
 .grid.one-x-two {
   grid-template-rows: auto;
   grid-template-columns: auto auto;
+}
+.grid .col-1 {
+  grid-column-start: 1;
+  grid-column-end: 2;
+}
+.grid .col-2 {
+  grid-column-start: 2;
+  grid-column-end: 3;
 }
 /*# sourceMappingURL=ui.css.map */

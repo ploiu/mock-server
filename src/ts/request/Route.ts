@@ -61,7 +61,7 @@ export default class Route {
         : !!response
         ? JSON.stringify(response)
         : null,
-      responseStatus,
+      Number(responseStatus),
     );
   }
 

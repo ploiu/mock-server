@@ -16,21 +16,31 @@
                 <button class="primary outline" @click="save()">Save</button>
             </div>
             <ul class="route-list">
-                <li class="clickable" v-for="(route, index) in routes" :key="index"
-                    :class="{selected: selectedRoute === route}" @click="selectedRoute = route">
-                    {{route.title}}
-                </li>
+                <div v-for="(route, index) in routes" :key="index" class="grid one-x-two align-center">
+                    <li class="clickable"
+                        :class="{selected: selectedRoute === route, 'col-1': true}" @click="selectedRoute = route">
+                        {{route.title}}
+                    </li>
+                    <button class="error col-2" @click="removeRoute(route)">Delete</button>
+                </div>
             </ul>
+            <!--button to add new route-->
+            <button class="secondary outline" @click="addNew()">Add New</button>
         </div>
+        <!--panel to edit routes-->
         <div id="route-editor" v-if="selectedRoute !== null">
+            <h3>Current Route</h3>
             <!--row with route name-->
             <div id="route-name">
-                <h5>Route Name</h5>
-                <input v-model="selectedRoute.title" class="full-width">
+                <h5>Route Name & Status</h5>
+                <div class="input-group grid one-x-two">
+                    <input v-model="selectedRoute.title" class="col-1">
+                    <input type="number" v-model="selectedRoute.responseStatus" placeholder="status code" class="col-2">
+                </div>
             </div>
             <!--row with request method and url-->
             <div id="method-and-url">
-                <h3>Current Route</h3>
+                <h5>Method & URL</h5>
                 <div class="input-group" id="method-url-bar">
                     <select id="requestMethod" v-model="selectedRoute.method">
                         <option :value="method" v-for="method in requestMethods">{{method}}</option>
@@ -108,7 +118,18 @@
         }
         return condensed
       },
-
+      /** creates a new route object, adds it to our route list, and sets it as the selected route */
+      addNew() {
+        const route = {};
+        this.routes.push(route);
+        this.selectedRoute = route;
+      },
+      removeRoute(route) {
+        this.routes = this.routes.filter(it => it !== route);
+        if (this.selectedRoute === route) {
+          this.selectedRoute = null;
+        }
+      },
       /**
        * saves our routes to our config file and refreshes the routes
        */
@@ -116,19 +137,19 @@
         // clone the routes TODO find a better way
         const routes = JSON.parse(JSON.stringify(this.routes));
         // condense the headers of each route
-        for(let route of routes) {
+        for (let route of routes) {
           route.responseHeaders = this.condenseHeaders(route.responseHeaders);
         }
         const saveResult = await (await fetch('/mock-ui-save-routes', {
           method: 'POST',
           body: JSON.stringify(routes)
         })).json()
-        if(saveResult.success) {
+        if (saveResult.success) {
           alert('Successfully saved routes')
         } else {
           alert('Failed to save routes')
         }
-      }
+      },
     },
     async mounted() {
       const routes = await (await fetch('/mock-server-routes')).json()
