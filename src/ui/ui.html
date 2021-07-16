@@ -15,7 +15,7 @@
                 <h3>Routes</h3>
                 <button class="primary outline" @click="save()">Save</button>
             </div>
-            <ul class="route-list">
+            <ul id="route-panel-list" class="route-list">
                 <div v-for="(route, index) in routes" :key="index" class="grid one-x-two align-center">
                     <li class="clickable"
                         :class="{selected: selectedRoute === route, 'col-1': true}" @click="selectedRoute = route">
