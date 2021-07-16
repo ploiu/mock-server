@@ -246,4 +246,38 @@ button.error.outline:active {
   grid-column-start: 2;
   grid-column-end: 3;
 }
+.info-message {
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  right: 25%;
+  text-align: center;
+  padding: 1em;
+  transition: bottom 0.25s linear;
+  border-radius: 6px;
+}
+.info-message.visible {
+  bottom: 15%;
+  transition: bottom 0.25s ease-out;
+}
+.info-message.primary {
+  background-color: #7C35AA;
+  color: #271135;
+  border: 1px solid #271135;
+}
+.info-message.secondary {
+  background-color: #8D99AE;
+  color: #434d5f;
+  border: 1px solid #434d5f;
+}
+.info-message.success {
+  background-color: #A5C882;
+  color: #597b36;
+  border: 1px solid #597b36;
+}
+.info-message.error {
+  background-color: #CD533B;
+  color: #582117;
+  border: 1px solid #582117;
+}
 /*# sourceMappingURL=ui.css.map */

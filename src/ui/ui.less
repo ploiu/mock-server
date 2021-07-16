@@ -226,3 +226,29 @@ button {
     grid-column-end: 3;
   }
 }
+
+.info-message {
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  right: 25%;
+  text-align: center;
+  padding: 1em;
+
+  transition: bottom .25s linear;
+
+  &.visible {
+    bottom: 15%;
+    transition: bottom .25s ease-out;
+  }
+
+  each(@colors, {
+    border-radius: @border-radius;
+
+    &.@{value} {
+      background-color: @@value;
+      color: darken(@@value, 30%);
+      border: 1px solid $color;
+    }
+  })
+}
