@@ -13,7 +13,7 @@
         <div id="route-panel">
             <div class="grid one-x-two">
                 <h3>Routes</h3>
-                <button class="primary outline" @click="save()">Save</button>
+                <button class="primary outline" @click="save()" id="save-button">Save</button>
             </div>
             <ul id="route-panel-list" class="route-list">
                 <div v-for="(route, index) in routes" :key="index" class="grid one-x-two align-center">
@@ -25,7 +25,7 @@
                 </div>
             </ul>
             <!--button to add new route-->
-            <button class="secondary outline" @click="addNew()">Add New</button>
+            <button class="secondary outline" @click="addNew()" id="add-new-button">Add New</button>
         </div>
         <!--panel to edit routes-->
         <div id="route-editor" v-if="selectedRoute !== null">
@@ -35,7 +35,8 @@
                 <h5>Route Name & Status</h5>
                 <div class="input-group grid one-x-two">
                     <input v-model="selectedRoute.title" class="col-1" id="route-name-input">
-                    <input type="number" v-model="selectedRoute.responseStatus" placeholder="status code" class="col-2" id="route-status-code-input">
+                    <input type="number" v-model="selectedRoute.responseStatus" placeholder="status code" class="col-2"
+                           id="route-status-code-input">
                 </div>
             </div>
             <!--row with request method and url-->
@@ -61,26 +62,26 @@
                     <tbody>
                     <tr v-for="(header, index) in selectedRoute.responseHeaders" :key="index">
                         <td>
-                            <input type="text" v-model="header.name">
+                            <input type="text" v-model="header.name" class="header-title">
                         </td>
                         <td>
-                            <input type="text" v-model="header.value">
+                            <input type="text" v-model="header.value" class="header-value">
                         </td>
                         <td>
-                            <button class="error" @click="removeHeader(header)">Delete</button>
+                            <button class="error header-remove-button" @click="removeHeader(header)">Delete</button>
                         </td>
                     </tr>
                     </tbody>
                 </table>
-                <button class="secondary" @click="addHeader()">Add Header</button>
+                <button class="secondary" @click="addHeader()" id="add-header-button">Add Header</button>
             </div>
             <!--row with response body-->
             <div id="response-body">
                 <h5>Response Body</h5>
-                <textarea v-model="selectedRoute.response" class="full-width"></textarea>
+                <textarea v-model="selectedRoute.response" class="full-width" id="response-body-input"></textarea>
             </div>
         </div>
-        <div class="info-message" :class="messageType, {visible: message !== null}">{{message}}</div>
+        <div id="messageBar" class="info-message" :class="messageType, {visible: message !== null}">{{message}}</div>
     </div>
 </div>
 <script src="https://unpkg.com/vue@3.1.4"></script>
@@ -147,7 +148,7 @@
                 this.selectedRoute.responseHeaders.push(header);
             },
             removeHeader(header) {
-              this.selectedRoute.responseHeaders = this.selectedRoute.responseHeaders.filter(it => it !== header);
+                this.selectedRoute.responseHeaders = this.selectedRoute.responseHeaders.filter(it => it !== header);
             },
             /**
              * saves our routes to our config file and refreshes the routes

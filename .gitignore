@@ -4,3 +4,4 @@ config.json
 /ui.css
 /ui.html
 /src/ui/ui.css.map
+/config-test.json
