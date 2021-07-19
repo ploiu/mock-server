@@ -34,18 +34,18 @@
             <div id="route-name">
                 <h5>Route Name & Status</h5>
                 <div class="input-group grid one-x-two">
-                    <input v-model="selectedRoute.title" class="col-1">
-                    <input type="number" v-model="selectedRoute.responseStatus" placeholder="status code" class="col-2">
+                    <input v-model="selectedRoute.title" class="col-1" id="route-name-input">
+                    <input type="number" v-model="selectedRoute.responseStatus" placeholder="status code" class="col-2" id="route-status-code-input">
                 </div>
             </div>
             <!--row with request method and url-->
             <div id="method-and-url">
                 <h5>Method & URL</h5>
                 <div class="input-group" id="method-url-bar">
-                    <select id="requestMethod" v-model="selectedRoute.method">
+                    <select id="route-request-method-input" v-model="selectedRoute.method">
                         <option :value="method" v-for="method in requestMethods">{{method}}</option>
                     </select>
-                    <input type="text" id="requestUrl" v-model="selectedRoute.url" placeholder="url">
+                    <input type="text" id="route-request-url" v-model="selectedRoute.url" placeholder="url">
                 </div>
             </div>
             <!--row with response headers-->
