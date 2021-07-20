@@ -24,5 +24,5 @@ generate-ui:
 
 run-server-for-browser-tests:
 	del config-test.json
-	deno run --allow-read --allow-write ./src/ts/GenerateHtml.ts
+	deno run --allow-read --allow-write ./src/ts/GenerateHtml.ts --test
 	deno run ${FLAGS} ./src/ts/MockServer.ts --load-ui --config ./config-test.json

@@ -23,13 +23,14 @@ export default class UIRoute extends Route {
 
   doesUrlMatch(url: string = ""): boolean {
     return url.toLowerCase().includes("/mock-server-ui") ||
-      url.toLowerCase().includes("ui.css");
+      url.toLowerCase().includes("ui.css") ||
+      url.toLowerCase().includes("ui.js");
   }
 
   /**
-   * handles serving the files to the browser
-   * @param request
-   */
+     * handles serving the files to the browser
+     * @param request
+     */
   async execute(request: ServerRequest): Promise<Response> {
     // log that the route was hit
     const color = super.getColorForMethod(
@@ -37,9 +38,11 @@ export default class UIRoute extends Route {
     );
     console.log(color(` ${request.method.toUpperCase()} `) + " " + request.url);
     if (request.url.toLowerCase().includes("/mock-server-ui")) {
-      return await serveFile(request, "./ui.html");
+      return await serveFile(request, "./generated/ui.html");
     } else if (request.url.toLowerCase().includes("ui.css")) {
-      return await serveFile(request, "./ui.css");
+      return await serveFile(request, "./generated/ui.css");
+    } else if (request.url.toLowerCase().includes("ui.js")) {
+      return await serveFile(request, "./generated/ui.js");
     } else {
       return <Response> {
         body: "",

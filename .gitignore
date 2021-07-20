@@ -1,7 +1,7 @@
 .idea
 config.json
 *.exe
-/ui.css
-/ui.html
+/generated
 /src/ui/ui.css.map
 /config-test.json
+

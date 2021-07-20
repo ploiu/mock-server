@@ -252,3 +252,11 @@ button {
     }
   })
 }
+
+* {
+  each(@colors, {
+    .text-@{value} {
+      color: @@value;
+    }
+  })
+}

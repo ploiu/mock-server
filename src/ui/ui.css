@@ -280,4 +280,16 @@ button.error.outline:active {
   color: #582117;
   border: 1px solid #582117;
 }
+* .text-primary {
+  color: #7C35AA;
+}
+* .text-secondary {
+  color: #8D99AE;
+}
+* .text-success {
+  color: #A5C882;
+}
+* .text-error {
+  color: #CD533B;
+}
 /*# sourceMappingURL=ui.css.map */
