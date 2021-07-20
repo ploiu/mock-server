@@ -1,7 +1,3 @@
-/**
- * Browser side tests. These can be run with `make run-server-for-browser-tests`
- */
-
 // collection of helpful test methods
 const Ploiu = {
   /** list of failed test names */
@@ -74,6 +70,7 @@ const Ploiu = {
       await test();
       this.ok();
     } catch (e) {
+      this.failedTests.push(title);
       if (typeof e === "string") {
         this.fail(e, false);
       }
@@ -82,12 +79,12 @@ const Ploiu = {
   ////// util methods
 
   /**
-         * Types the passed text into the passed element
-         * @param {string} text the text to type
-         * @param {HTMLElement} inputElement the input element to fill with the text
-         * @param {Number} keyIntervalMS the interval in milliseconds between each keystroke
-         * @return {Promise<void>}
-         */
+     * Types the passed text into the passed element
+     * @param {string} text the text to type
+     * @param {HTMLElement} inputElement the input element to fill with the text
+     * @param {Number} keyIntervalMS the interval in milliseconds between each keystroke
+     * @return {Promise<void>}
+     */
   async type(text, inputElement, keyIntervalMS = 10) {
     return new Promise((resolve) => {
       const splitText = text.split("");
@@ -112,108 +109,114 @@ const Ploiu = {
     });
   },
   /**
-         * selects an option in the passed `selectElement`
-         * @param {number} index
-         * @param {HTMLSelectElement} selectElement
-         */
+     * selects an option in the passed `selectElement`
+     * @param {number} index
+     * @param {HTMLSelectElement} selectElement
+     */
   select(index, selectElement) {
     selectElement.selectedIndex = index;
     selectElement.dispatchEvent(new Event("change", {}));
   },
   /**
-         * clicks the passed element and waits the passed duration before resolving
-         * @param element
-         * @param waitDurationMS
-         * @return {Promise<void>}
-         */
+     * clicks the passed element and waits the passed duration before resolving
+     * @param element
+     * @param waitDurationMS
+     * @return {Promise<void>}
+     */
   async clickAndWait(element, waitDurationMS = 250) {
     return new Promise((resolve) => {
       element.click();
       window.setTimeout(resolve, waitDurationMS);
     });
   },
+  /** used to run a function that requires some sort of delay before it. Use this instead of `window.setTimeout`*/
+  async delay(fn, delayTime = 250) {
+    return new Promise((resolve, reject) => {
+      window.setTimeout(() => {
+        try {
+          fn();
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      }, delayTime);
+    });
+  },
 };
 
 console.log("starting tests...");
 await Ploiu.testAsync("should show only 1 route on page load", async () => {
-  return new Promise((resolve) => {
-    // wait a moment for vue to startup
-    window.setTimeout(() => {
-      const routes = [...document.querySelectorAll("#route-panel-list li")];
-      Ploiu.assertEquals(1, routes.length, "only should be 1 route");
-      Ploiu.assertEquals(
-        "Example Route",
-        routes[0].innerText,
-        "Route should display route name",
-      );
-      resolve();
-    }, 2_000);
-  });
+  // wait a moment for vue to startup
+  return Ploiu.delay(() => {
+    const routes = [...document.querySelectorAll("#route-panel-list li")];
+    Ploiu.assertEquals(1, routes.length, "only should be 1 route");
+    Ploiu.assertEquals(
+      "Example Route",
+      routes[0].innerText,
+      "Route should display route name",
+    );
+  }, 2_000);
 });
 
 await Ploiu.testAsync(
   "should show edit route panel on route click",
   async () => {
-    return new Promise((resolve) => {
-      const beforeClick = document.querySelector("#route-editor");
-      Ploiu.assertNull(
-        beforeClick,
-        "route editor should not be visible before a route is selected",
+    const beforeClick = document.querySelector("#route-editor");
+    Ploiu.assertNull(
+      beforeClick,
+      "route editor should not be visible before a route is selected",
+    );
+    document.querySelector("#route-panel-list li").click();
+    // displaying the route editor is fast but not instantaneous, so wait a bit before testing this part
+    return Ploiu.delay(() => {
+      const afterClick = document.querySelector("#route-editor");
+      Ploiu.assertNotNull(
+        afterClick,
+        "route editor should be visible after a route is selected",
       );
-      document.querySelector("#route-panel-list li").click();
-      // displaying the route editor is fast but not instantaneous, so wait a bit before testing this part
-      window.setTimeout(() => {
-        const afterClick = document.querySelector("#route-editor");
-        Ploiu.assertNotNull(
-          afterClick,
-          "route editor should be visible after a route is selected",
-        );
-        // test each of the form components
-        const routeName = document.querySelector("#route-name-input").value;
-        const routeResponseCode = +document.querySelector(
-          "#route-status-code-input",
-        ).value;
-        const requestMethod =
-          document.querySelector("#route-request-method-input").value;
-        const requestUrl = document.querySelector("#route-request-url").value;
-        const headers = [
-          ...document.querySelectorAll("#response-headers tbody tr"),
-        ];
-        const responseBody =
-          document.querySelector("#response-body-input").value;
+      // test each of the form components
+      const routeName = document.querySelector("#route-name-input").value;
+      const routeResponseCode = +document.querySelector(
+        "#route-status-code-input",
+      ).value;
+      const requestMethod =
+        document.querySelector("#route-request-method-input").value;
+      const requestUrl = document.querySelector("#route-request-url").value;
+      const headers = [
+        ...document.querySelectorAll("#response-headers tbody tr"),
+      ];
+      const responseBody = document.querySelector("#response-body-input").value;
 
-        Ploiu.assertEquals(
-          "Example Route",
-          routeName,
-          "route name input does not match selected route name",
-        );
-        Ploiu.assertEquals(
-          200,
-          routeResponseCode,
-          "route response code input does not match selected route response code",
-        );
-        Ploiu.assertEquals(
-          "GET",
-          requestMethod,
-          "route status code input does not match selected route status code",
-        );
-        Ploiu.assertEquals(
-          "/HelloWorld/:name?:age",
-          requestUrl,
-          "route url input does not match selected route url",
-        );
-        Ploiu.assertEquals(
-          0,
-          headers.length,
-          "route has 0 headers, so UI should only display 0",
-        );
-        Ploiu.assertEquals(
-          "Hello, {{name}}! You are {{age}} years old",
-          responseBody,
-          "response body should be route's response body",
-        );
-        resolve();
-      }, 250);
+      Ploiu.assertEquals(
+        "Example Route",
+        routeName,
+        "route name input does not match selected route name",
+      );
+      Ploiu.assertEquals(
+        200,
+        routeResponseCode,
+        "route response code input does not match selected route response code",
+      );
+      Ploiu.assertEquals(
+        "GET",
+        requestMethod,
+        "route status code input does not match selected route status code",
+      );
+      Ploiu.assertEquals(
+        "/HelloWorld/:name?:age",
+        requestUrl,
+        "route url input does not match selected route url",
+      );
+      Ploiu.assertEquals(
+        0,
+        headers.length,
+        "route has 0 headers, so UI should only display 0",
+      );
+      Ploiu.assertEquals(
+        "Hello, {{name}}! You are {{age}} years old",
+        responseBody,
+        "response body should be route's response body",
+      );
     });
   },
 );
@@ -222,41 +225,37 @@ await Ploiu.testAsync(
   "should show empty edit route panel when creating a new route",
   async () => {
     document.querySelector("#add-new-button").click();
-    return new Promise((resolve) => {
-      window.setTimeout(() => {
-        // test each of the form components
-        const routeName = document.querySelector("#route-name-input").value;
-        const routeResponseCode =
-          document.querySelector("#route-status-code-input").value;
-        const requestMethod =
-          document.querySelector("#route-request-method-input").value;
-        const requestUrl = document.querySelector("#route-request-url").value;
-        const headers = [
-          ...document.querySelectorAll("#response-headers tbody tr"),
-        ];
-        const responseBody =
-          document.querySelector("#response-body-input").value;
+    return Ploiu.delay(() => {
+      // test each of the form components
+      const routeName = document.querySelector("#route-name-input").value;
+      const routeResponseCode =
+        document.querySelector("#route-status-code-input").value;
+      const requestMethod =
+        document.querySelector("#route-request-method-input").value;
+      const requestUrl = document.querySelector("#route-request-url").value;
+      const headers = [
+        ...document.querySelectorAll("#response-headers tbody tr"),
+      ];
+      const responseBody = document.querySelector("#response-body-input").value;
 
-        Ploiu.assertEquals("", routeName, "route name input should be empty");
-        Ploiu.assertEquals(
-          "",
-          routeResponseCode,
-          "route response code input should be empty",
-        );
-        Ploiu.assertEquals(
-          "",
-          requestMethod,
-          "route status code input should be empty",
-        );
-        Ploiu.assertEquals("", requestUrl, "route url input should be empty");
-        Ploiu.assertEquals(
-          0,
-          headers.length,
-          "so UI should only display 0 headers",
-        );
-        Ploiu.assertEquals("", responseBody, "response body should be empty");
-        resolve();
-      }, 250);
+      Ploiu.assertEquals("", routeName, "route name input should be empty");
+      Ploiu.assertEquals(
+        "",
+        routeResponseCode,
+        "route response code input should be empty",
+      );
+      Ploiu.assertEquals(
+        "",
+        requestMethod,
+        "route status code input should be empty",
+      );
+      Ploiu.assertEquals("", requestUrl, "route url input should be empty");
+      Ploiu.assertEquals(
+        0,
+        headers.length,
+        "so UI should only display 0 headers",
+      );
+      Ploiu.assertEquals("", responseBody, "response body should be empty");
     });
   },
 );
@@ -282,32 +281,29 @@ await Ploiu.testAsync("should allow fields to be input into", async () => {
   Ploiu.select(0, requestMethodInput);
   headersButton.click();
   // wait a bit for the UI to update
-  return new Promise((resolve) => {
-    window.setTimeout(() => {
-      // verify that the headers inputs exist, and only one of each exist since we clicked the button once
-      const headerTitleInputs = [
-        ...document.querySelectorAll("input.header-title"),
-      ];
-      const headerValueInputs = [
-        ...document.querySelectorAll("input.header-value"),
-      ];
-      Ploiu.assertEquals(
-        1,
-        headerTitleInputs.length,
-        "There should only be 1 header input",
-      );
-      Ploiu.assertEquals(
-        1,
-        headerValueInputs.length,
-        "There should only be 1 header value input",
-      );
-      // make sure the delete button exists
-      const deleteHeaderButton = document.querySelector(
-        ".header-remove-button",
-      );
-      Ploiu.assertNotNull(deleteHeaderButton);
-      resolve();
-    }, 250);
+  return Ploiu.delay(() => {
+    // verify that the headers inputs exist, and only one of each exist since we clicked the button once
+    const headerTitleInputs = [
+      ...document.querySelectorAll("input.header-title"),
+    ];
+    const headerValueInputs = [
+      ...document.querySelectorAll("input.header-value"),
+    ];
+    Ploiu.assertEquals(
+      1,
+      headerTitleInputs.length,
+      "There should only be 1 header input",
+    );
+    Ploiu.assertEquals(
+      1,
+      headerValueInputs.length,
+      "There should only be 1 header value input",
+    );
+    // make sure the delete button exists
+    const deleteHeaderButton = document.querySelector(
+      ".header-remove-button",
+    );
+    Ploiu.assertNotNull(deleteHeaderButton);
   });
 });
 
@@ -348,9 +344,10 @@ await Ploiu.testAsync("should successfully save route changes", async () => {
 const dialog = document.createElement("dialog");
 document.body.appendChild(dialog);
 dialog.style.backgroundColor = "black";
+dialog.style.color = "white";
 if (Ploiu.failedTests.length > 0) {
   dialog.innerHTML = `
-    <h1 class="text-error">There are test failures</h1>:
+    <h1 class="text-error">There are test failures:</h1>
     <ul>
     ${
     (() => {

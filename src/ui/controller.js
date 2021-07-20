@@ -59,9 +59,7 @@ const ui = {
         this.selectedRoute = null;
       }
     },
-    /**
-         * adds a new header to the currently selected route
-         */
+    /** adds a new header to the currently selected route */
     addHeader() {
       this.selectedRoute.responseHeaders = this.selectedRoute.responseHeaders ??
         [];
@@ -76,9 +74,7 @@ const ui = {
       this.selectedRoute.responseHeaders = this.selectedRoute.responseHeaders
         .filter((it) => it !== header);
     },
-    /**
-         * saves our routes to our config file and refreshes the routes
-         */
+    /** saves our routes to our config file and refreshes the routes */
     async save() {
       // clone the routes TODO find a better way
       const routes = JSON.parse(JSON.stringify(this.routes));

@@ -29,7 +29,7 @@ If you don't want to compile it as an executable, you can "install" it by runnin
 ## Testing
 Since deno comes builtin with a testing engine, you can simply run `deno test`, though `make test` will work as well
 
-For UI Testing, this project uses the [deno fork of puppeteer](https://deno.land/x/puppeteer@9.0.1). To run the browser UI tests, run `make run-server-for-browser-tests`, and then run `make browser-test` in a different shell.
+For UI Testing, this project uses a custom lightweight testing util that I may break out into its own thing for future projects. To run the browser UI tests, run `make run-server-for-browser-tests`, and then open the provided resulting url in your browser. The tests should automatically start up after a few seconds to allow for everything to load in.
 
 ## Mocks
 When run, a `config.json` file will be created with an example route if a `config.json` file does not exist in _your current directory_ (you can also specify a config file with the --config flag). The config file should list all your mock routes. An example route would look like this:
