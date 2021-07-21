@@ -1,4 +1,8 @@
-import { serve } from "https://deno.land/std@0.100.0/http/mod.ts";
+import {
+  Response,
+  serve,
+  Server,
+} from "https://deno.land/std@0.100.0/http/mod.ts";
 import { parse } from "https://deno.land/std@0.100.0/flags/mod.ts";
 import { emptyDirSync } from "https://deno.land/std@0.100.0/fs/mod.ts";
 import Config from "./config/Config.ts";
@@ -74,11 +78,35 @@ export async function startMockServer(
       }`,
     );
   }
+  await startServing(server, specialRoutes, routeManager);
+}
+
+/**
+ * Listens for requests on the server and responds to them in kind until the server is closed
+ * @param server
+ * @param specialRoutes
+ * @param routeManager
+ */
+async function startServing(
+  server: Server,
+  specialRoutes: Route[],
+  routeManager: RouteManager,
+) {
   // match each request and execute them
   for await (let request of server) {
     const route = routeManager.match(request, specialRoutes);
     if (route) {
-      request.respond(await route.execute(request));
+      // don't use await because it will block the rest of the thread if any route takes a long time
+      route.execute(request).then((data: Response) => request.respond(data))
+        .catch((exception: Error | string) => {
+          const message = (typeof exception !== "string")
+            ? exception.message
+            : exception;
+          if (!message.toLowerCase().includes("forcibly closed")) {
+            // re-throw the exception because it's probably serious
+            throw exception;
+          }
+        });
     } else {
       console.log(
         yellow(
