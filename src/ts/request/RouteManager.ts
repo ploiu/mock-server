@@ -28,7 +28,10 @@ export default class RouteManager {
     // put specialRoutes first as they have priority
     const routesToMatchOn = [...specialRoutes, ...this.routes];
     for (let route of routesToMatchOn) {
-      if (route.method === method && route.doesUrlMatch(url)) {
+      if (
+        (route.method === method || method === "HEAD") &&
+        route.doesUrlMatch(url)
+      ) {
         matchingRoute = route;
         break;
       }

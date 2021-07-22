@@ -28,13 +28,11 @@ export default class SaveRoutesRoute extends Route {
   async execute(request: ServerRequest): Promise<Response> {
     try {
       // our json is passed in as bytes, so we need to read them into a buffer and parse the buffer into a JSON string
-      const buffer = await Deno.readAll(request.body);
+      const buffer = await Deno.readAll(request.body); // FIXME
       let requestJson = "";
       for (let charCode of buffer) {
         requestJson += String.fromCharCode(charCode);
       }
-      // now that we have the json, we can format it and write it to our config file
-      console.info("Saving Routes...");
       const config = readConfigFile(this.configLocation);
       // clear all config routes in order to re-write them
       config.routes = [];

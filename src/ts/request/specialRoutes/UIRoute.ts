@@ -6,6 +6,7 @@ import {
   ServerRequest,
 } from "https://deno.land/std@0.100.0/http/mod.ts";
 import { serveFile } from "https://deno.land/std@0.100.0/http/file_server.ts";
+import { LogManager } from "../../LogManager.ts";
 
 export default class UIRoute extends Route {
   constructor(
@@ -32,11 +33,7 @@ export default class UIRoute extends Route {
      * @param request
      */
   async execute(request: ServerRequest): Promise<Response> {
-    // log that the route was hit
-    const color = super.getColorForMethod(
-      <RequestMethod> request.method.toUpperCase(),
-    );
-    console.log(color(` ${request.method.toUpperCase()} `) + " " + request.url);
+    LogManager.newEntry(request.url, request.method.toUpperCase());
     if (request.url.toLowerCase().includes("/mock-server-ui")) {
       return await serveFile(request, "./generated/ui.html");
     } else if (request.url.toLowerCase().includes("ui.css")) {

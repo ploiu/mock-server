@@ -6,6 +6,7 @@ import Route from "../Route.ts";
 import RouteManager from "../RouteManager.ts";
 import { RequestMethod } from "../RequestMethod.ts";
 import { readConfigFile } from "../../config/ConfigManager.ts";
+import { LogManager } from "../../LogManager.ts";
 
 /**
  * A special route that refreshes the config file for the mock server
@@ -32,11 +33,7 @@ export default class UpdateConfigRoute extends Route {
   }
 
   async execute(request: ServerRequest): Promise<Response> {
-    // log that the route was hit
-    const color = super.getColorForMethod(
-      <RequestMethod> request.method.toUpperCase(),
-    );
-    console.log(color(` ${request.method.toUpperCase()} `) + " " + request.url);
+    LogManager.newEntry(request.url, request.method.toUpperCase());
     const args = this.parseVariablesFromUrl(request.url);
     const configPath = args.location ?? this.configPath;
     console.log(configPath);
