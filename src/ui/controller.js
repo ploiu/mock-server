@@ -123,16 +123,23 @@ const ui = {
       this.currentView = viewName;
     },
     /**
-         *
+         * adds a single log to our log list
          * @param {{url: string, method: string, body: any | null, timestamp: Number | string}} log
          */
     addLog(log) {
       log.timestamp = this.dateFormat.format(log.timestamp);
       this.logs.push(log);
     },
+    /** removes all logs from our list */
+    clearLogs() {
+      this.logs.splice(0, this.logs.length);
+    },
+    /**
+         * Scrolls our log panel to the bottom of its contents
+         */
     scrollLogPanel() {
       const logPanel = document.querySelector("#logArea");
-      logPanel.scrollTo(0, logPanel.scrollHeight);
+      logPanel?.scrollTo(0, logPanel.scrollHeight);
     },
   },
   async mounted() {
@@ -147,13 +154,14 @@ const ui = {
     const source = new EventSource("/logs");
     source.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      console.log(data);
-      for (const log of data) {
-        this.addLog(log);
+      if (data.length > 0) {
+        for (const log of data) {
+          this.addLog(log);
+        }
+        this.$nextTick(() => {
+          this.scrollLogPanel();
+        });
       }
-      this.$nextTick(() => {
-        this.scrollLogPanel();
-      });
     };
   },
 };

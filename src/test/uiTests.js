@@ -340,6 +340,106 @@ await Ploiu.testAsync("should successfully save route changes", async () => {
   Ploiu.assertNotNull(successBar);
 });
 
+await Ploiu.testAsync("should show switch view buttons", async () => {
+  const editRouteButton = document.querySelector("#edit-route-view-button");
+  const viewLogsButton = document.querySelector("#view-logs-view-button");
+  Ploiu.assertNotNull(editRouteButton, "Edit Route Button Should Exist");
+  // make sure that the edit route button is selected
+  Ploiu.assertFalse(
+    editRouteButton.classList.contains("outline"),
+    "Edit Route button should be selected",
+  );
+  Ploiu.assertNotNull(viewLogsButton, "View Logs Button Should Exist");
+});
+
+await Ploiu.testAsync(
+  "should switch to log view when clicking view logs button",
+  async () => {
+    const viewLogsButton = document.querySelector("#view-logs-view-button");
+    await Ploiu.clickAndWait(viewLogsButton);
+    // make sure the view logs button is selected
+    Ploiu.assertFalse(
+      viewLogsButton.classList.contains("outline"),
+      "View Logs button should be selected",
+    );
+    const logListPanel = document.querySelector("#logArea");
+    Ploiu.assertNotNull(logListPanel, "Log List should be visible");
+  },
+);
+
+await Ploiu.testAsync("should show log for a valid request", async () => {
+  // make a fetch request to the backend server for our only route
+  await fetch("/HelloWorld/ploiu?age=23");
+  // the backend waits about half a second before sending events, but to be safe let's wait a bit longer
+  return Ploiu.delay(() => {
+    const logEntries = [...document.querySelectorAll(".log")];
+    Ploiu.assertEquals(
+      1,
+      logEntries.length,
+      "There should be exactly 1 log entry since 1 request was made",
+    );
+    const entry = logEntries[0];
+    const methodText = entry.querySelector(".method").innerText;
+    const url = entry.querySelector(".url").innerText;
+    Ploiu.assertEquals(
+      "GET",
+      methodText,
+      "log method should match request method",
+    );
+    Ploiu.assertEquals(
+      "/HelloWorld/ploiu?age=23",
+      url,
+      "Url should match request url",
+    );
+  }, 1_000);
+});
+
+await Ploiu.testAsync(
+  "should show error log for an invalid request",
+  async () => {
+    await fetch("/test");
+    return Ploiu.delay(() => {
+      const lastLogEntry = document.querySelector(".log:last-child");
+      Ploiu.assertNotNull(lastLogEntry, "there should be a new log entry");
+      const methodElement = lastLogEntry.querySelector(".method");
+      const urlElement = lastLogEntry.querySelector(".url");
+      const messageElement = lastLogEntry.querySelector(".message");
+      Ploiu.assertNull(
+        methodElement,
+        "error logs should not have method parts",
+      );
+      Ploiu.assertNull(urlElement, "error logs should not have a url part");
+      Ploiu.assertNotNull(
+        messageElement,
+        "error logs should have a message part",
+      );
+      Ploiu.assertEquals(
+        "requested route /test, method GET not found",
+        messageElement.innerText,
+        "error log should match the requested route and method",
+      );
+    }, 1_000);
+  },
+);
+
+await Ploiu.testAsync(
+  "should clear logs when clear log button is clicked",
+  async () => {
+    const clearLogButton = document.querySelector("#clear-logs-button");
+    Ploiu.assertNotNull(
+      clearLogButton,
+      "The clear logs button should be displayed",
+    );
+    await Ploiu.clickAndWait(clearLogButton);
+    const logEntries = [...document.querySelectorAll(".log")];
+    Ploiu.assertEquals(
+      0,
+      logEntries.length,
+      "Clicking the clear logs button should clear all logs",
+    );
+  },
+);
+
 // show the test results to the UI
 const dialog = document.createElement("dialog");
 document.body.appendChild(dialog);
