@@ -7,7 +7,19 @@
 @darker-background: #111;
 @border-radius: 6px;
 
+// request method colors
+@get: @success;
+@post: #FBAF00;
+@put: #3F84E5;
+@head: #42c67c;
+@delete: @error;
+@connect: plum;
+@options: lightseagreen;
+@trace: #b313b0;
+@patch: #5f5d9e;
+
 @colors: primary, secondary, success, error;
+@http-methods: get, post, put, head, delete, connect, options, trace, patch;
 
 // TODO possibly remove this since we're moving to LESS
 :root {
@@ -32,6 +44,7 @@ body, html {
 
 .container {
   padding: 0 2em;
+  height: 80%;
 }
 
 #route-panel {
@@ -227,6 +240,7 @@ button {
   }
 }
 
+// the little popup bar
 .info-message {
   position: absolute;
   bottom: 0;
@@ -253,10 +267,88 @@ button {
   })
 }
 
+// a horizontal row of connected buttons
+.button-list {
+  margin-bottom: 2em;
+
+  > button {
+    border-radius: 0;
+
+    &:first-child {
+      border-top-left-radius: @border-radius;
+      border-bottom-left-radius: @border-radius;
+    }
+
+    &:last-child {
+      border-top-right-radius: @border-radius;
+      border-bottom-right-radius: @border-radius;
+    }
+  }
+}
+
+// anything with a `text-*` color should have that text as a color
 * {
   each(@colors, {
     .text-@{value} {
       color: @@value;
     }
   })
+}
+
+.view {
+  height: 100%;
+  width: 100%;
+}
+
+#route-log-view {
+  .log-panel {
+    padding: 2em;
+    background-color: @darker-background;
+    border-radius: @border-radius;
+    height: 100%;
+    overflow-y: auto;
+
+    // a log entry
+    .log {
+      margin: 1em 0;
+      display: grid;
+      grid-auto-columns: 13% 6% auto;
+
+      > .timestamp {
+        font-style: italic;
+        color: @secondary;
+        grid-column-start: 1;
+        grid-column-end: 2;
+      }
+
+      > .message {
+        color: @error;
+        margin-left: 1rem;
+        grid-column-start: 2;
+        grid-column-end: 4;
+      }
+
+      > .method {
+        color: @darker-background;
+        padding: .25em;
+        border-radius: @border-radius;
+        margin-left: 1rem;
+        grid-column-start: 2;
+        grid-column-end: 3;
+        text-align: center;
+
+        each(@http-methods, {
+          &.@{value} {
+            background-color: @@value;
+          }
+        })
+      }
+
+      > .url {
+        grid-column-start: 3;
+        grid-column-end: 4;
+        margin-left: 1rem;
+      }
+    }
+  }
 }

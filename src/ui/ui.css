@@ -19,6 +19,7 @@ html {
 }
 .container {
   padding: 0 2em;
+  height: 80%;
 }
 #route-panel {
   resize: horizontal;
@@ -280,6 +281,20 @@ button.error.outline:active {
   color: #582117;
   border: 1px solid #582117;
 }
+.button-list {
+  margin-bottom: 2em;
+}
+.button-list > button {
+  border-radius: 0;
+}
+.button-list > button:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+.button-list > button:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
 * .text-primary {
   color: #7C35AA;
 }
@@ -291,5 +306,74 @@ button.error.outline:active {
 }
 * .text-error {
   color: #CD533B;
+}
+.view {
+  height: 100%;
+  width: 100%;
+}
+#route-log-view .log-panel {
+  padding: 2em;
+  background-color: #111;
+  border-radius: 6px;
+  height: 100%;
+  overflow-y: auto;
+}
+#route-log-view .log-panel .log {
+  margin: 1em 0;
+  display: grid;
+  grid-auto-columns: 13% 6% auto;
+}
+#route-log-view .log-panel .log > .timestamp {
+  font-style: italic;
+  color: #8D99AE;
+  grid-column-start: 1;
+  grid-column-end: 2;
+}
+#route-log-view .log-panel .log > .message {
+  color: #CD533B;
+  margin-left: 1rem;
+  grid-column-start: 2;
+  grid-column-end: 4;
+}
+#route-log-view .log-panel .log > .method {
+  color: #111;
+  padding: 0.25em;
+  border-radius: 6px;
+  margin-left: 1rem;
+  grid-column-start: 2;
+  grid-column-end: 3;
+  text-align: center;
+}
+#route-log-view .log-panel .log > .method.get {
+  background-color: #A5C882;
+}
+#route-log-view .log-panel .log > .method.post {
+  background-color: #FBAF00;
+}
+#route-log-view .log-panel .log > .method.put {
+  background-color: #3F84E5;
+}
+#route-log-view .log-panel .log > .method.head {
+  background-color: #42c67c;
+}
+#route-log-view .log-panel .log > .method.delete {
+  background-color: #CD533B;
+}
+#route-log-view .log-panel .log > .method.connect {
+  background-color: plum;
+}
+#route-log-view .log-panel .log > .method.options {
+  background-color: lightseagreen;
+}
+#route-log-view .log-panel .log > .method.trace {
+  background-color: #b313b0;
+}
+#route-log-view .log-panel .log > .method.patch {
+  background-color: #5f5d9e;
+}
+#route-log-view .log-panel .log > .url {
+  grid-column-start: 3;
+  grid-column-end: 4;
+  margin-left: 1rem;
 }
 /*# sourceMappingURL=ui.css.map */

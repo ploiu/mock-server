@@ -41,10 +41,9 @@ export default class LogRoute extends Route {
       try {
         const logs = JSON.stringify(LogManager.getLogs());
         if (logs !== "[]") {
-          console.info("sending logs");
           await this.write(
             request,
-            "event: ping\r\ndata: " + logs + "\r\n\r\n",
+            "data: " + logs + "\r\n\r\n",
           );
         }
       } catch (e) {

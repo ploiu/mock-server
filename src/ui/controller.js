@@ -21,6 +21,15 @@ const ui = {
       // informational message
       message: null,
       messageType: null,
+      logs: [],
+      dateFormat: new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }),
     };
   },
   methods: {
@@ -109,6 +118,22 @@ const ui = {
         this.messageType = null;
       }, 3_000);
     },
+    /** switches our currentView to the passed viewName */
+    switchView(viewName) {
+      this.currentView = viewName;
+    },
+    /**
+         *
+         * @param {{url: string, method: string, body: any | null, timestamp: Number | string}} log
+         */
+    addLog(log) {
+      log.timestamp = this.dateFormat.format(log.timestamp);
+      this.logs.push(log);
+    },
+    scrollLogPanel() {
+      const logPanel = document.querySelector("#logArea");
+      logPanel.scrollTo(0, logPanel.scrollHeight);
+    },
   },
   async mounted() {
     const routes = await (await fetch("/mock-server-routes")).json();
@@ -118,6 +143,18 @@ const ui = {
       }
       this.routes = routes;
     }
+    // set up an event source to retrieve logs
+    const source = new EventSource("/logs");
+    source.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+      for (const log of data) {
+        this.addLog(log);
+      }
+      this.$nextTick(() => {
+        this.scrollLogPanel();
+      });
+    };
   },
 };
 Vue.createApp(ui).mount("#main");

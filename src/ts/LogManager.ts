@@ -9,6 +9,7 @@ import {
   bgRed,
   bgYellow,
   black,
+  yellow,
 } from "https://deno.land/std@0.100.0/fmt/colors.ts";
 
 /**
@@ -19,20 +20,34 @@ import { RequestMethod } from "./request/RequestMethod.ts";
 
 export class LogManager {
   private static sseLogs: LogEntry[] = [];
+  // determines if we can read logs. This lock is in place because we clear the list when read
+  private static canReadLogs = true;
 
   /**
      * Logs the entry to the console and stores the entry in our sseLogs object
      * @param url
      * @param method
      * @param body
+     * @param message
      */
-  public static newEntry(url: string, method: string, body: string = ""): void {
-    this.sseLogs.push(new LogEntry(url, method, body, +new Date()));
+  public static newEntry(
+    url: string | null,
+    method: string | null,
+    body: string | null = "",
+    message: string | null = null,
+  ): void {
+    LogManager.canReadLogs = false;
+    this.sseLogs.push(new LogEntry(url, method, body, +new Date(), message));
     // TODO log
     const color = this.getColorForMethod(
-      <RequestMethod> method.toUpperCase(),
+      <RequestMethod> method?.toUpperCase(),
     );
-    console.log(color(` ${method.toUpperCase()} `) + " " + url);
+    if (method && url) {
+      console.log(color(` ${method?.toUpperCase()} `) + " " + url);
+    } else if (message) {
+      console.log(yellow(message));
+    }
+    LogManager.canReadLogs = true;
   }
 
   private static getColorForMethod(method: RequestMethod): Function {
@@ -65,7 +80,11 @@ export class LogManager {
      * clears and returns all the stored logs to be sent to the client
      */
   public static getLogs(): LogEntry[] {
-    return LogManager.sseLogs.splice(0, this.sseLogs.length);
+    if (LogManager.canReadLogs) {
+      return LogManager.sseLogs.splice(0, this.sseLogs.length);
+    } else {
+      return [];
+    }
   }
 }
 
@@ -74,10 +93,11 @@ export class LogManager {
  */
 export class LogEntry {
   constructor(
-    public url: string,
-    public method: string,
+    public url: string | null,
+    public method: string | null,
     public body: any,
     public timestamp: Number,
+    public message: string | null,
   ) {
   }
 }
