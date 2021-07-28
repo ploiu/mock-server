@@ -11,13 +11,12 @@ import {
   black,
   yellow,
 } from "https://deno.land/std@0.100.0/fmt/colors.ts";
+import { RequestMethod } from "./request/RequestMethod.ts";
 
 /**
  * A class that logs to the console when certain routes are hit, and stores those logs for the
  * `LogRoutes` route to consume every time it needs to poll for log updates
  */
-import { RequestMethod } from "./request/RequestMethod.ts";
-
 export class LogManager {
   private static sseLogs: LogEntry[] = [];
   // determines if we can read logs. This lock is in place because we clear the list when read

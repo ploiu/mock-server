@@ -6,6 +6,7 @@ import {
 } from "https://deno.land/std@0.100.0/http/mod.ts";
 import RouteManager from "../RouteManager.ts";
 import { readConfigFile, writeConfigFile } from "../../config/ConfigManager.ts";
+import { readAll } from "https://deno.land/std@0.100.0/io/util.ts";
 
 /**
  * handles saving the passed request json into our config file, and then refreshes the config
@@ -28,7 +29,7 @@ export default class SaveRoutesRoute extends Route {
   async execute(request: ServerRequest): Promise<Response> {
     try {
       // our json is passed in as bytes, so we need to read them into a buffer and parse the buffer into a JSON string
-      const buffer = await Deno.readAll(request.body); // FIXME
+      const buffer = await readAll(request.body);
       let requestJson = "";
       for (let charCode of buffer) {
         requestJson += String.fromCharCode(charCode);

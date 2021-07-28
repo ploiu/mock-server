@@ -43,7 +43,6 @@ export default class LogRoute extends Route {
     const sendData = async () => {
       try {
         backLogs = [...backLogs, ...LogManager.getLogs()];
-        // console.log(`doneWriting: %c${this.doneWriting}\nbackLogs size: %c${backLogs.length}`, 'color: seagreen', 'color: royalblue')
         // if we're not done writing, we should store our logs in our backLogs and re-try sending everything next time
         if (this.doneWriting) {
           await this.write(

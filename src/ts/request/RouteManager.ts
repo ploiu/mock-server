@@ -13,7 +13,7 @@ export default class RouteManager {
    * @param {Config} config
    */
   public setupRoutes(config: Config) {
-    this.routes = config.routes.map((it) => Route.fromObject(it));
+    this.routes = config.routes.map((it: any) => Route.fromObject(it));
   }
 
   /**

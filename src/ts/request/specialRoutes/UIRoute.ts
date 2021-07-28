@@ -1,5 +1,4 @@
 import Route from "../Route.ts";
-import RouteManager from "../RouteManager.ts";
 import { RequestMethod } from "../RequestMethod.ts";
 import {
   Response,
@@ -8,9 +7,7 @@ import {
 import { serveFile } from "https://deno.land/std@0.100.0/http/file_server.ts";
 
 export default class UIRoute extends Route {
-  constructor(
-    private routeManager: RouteManager,
-  ) {
+  constructor() {
     super(
       "UI",
       "/mock-server-ui",
@@ -24,7 +21,9 @@ export default class UIRoute extends Route {
   doesUrlMatch(url: string = ""): boolean {
     return url.toLowerCase().includes("/mock-server-ui") ||
       url.toLowerCase().includes("ui.css") ||
-      url.toLowerCase().includes("ui.js");
+      url.toLowerCase().includes("ui.js") ||
+      // we technically match on this since it's UI-related, but we don't serve any icon. This prevents the log from showing the requests for favicon.ico
+      url.toLowerCase().includes("favicon.ico");
   }
 
   /**

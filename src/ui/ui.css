@@ -23,6 +23,7 @@ html {
 }
 #route-panel {
   resize: horizontal;
+  overflow-y: auto;
   border-right: 1px solid var(--secondary);
   padding-right: 2em;
   margin-right: 2em;
@@ -58,6 +59,8 @@ html {
   display: grid;
   grid-auto-columns: auto auto auto;
   grid-auto-rows: auto auto auto auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 #route-editor #method-and-url #route-name {
   grid-row-start: 1;
@@ -112,6 +115,9 @@ select.full-width,
 input.full-width,
 textarea.full-width {
   width: 98%;
+}
+textarea {
+  resize: vertical;
 }
 .input-group > select:first-child,
 .input-group input:first-child {

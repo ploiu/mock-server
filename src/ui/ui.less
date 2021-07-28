@@ -49,6 +49,7 @@ body, html {
 
 #route-panel {
   resize: horizontal;
+  overflow-y: auto;
   border-right: 1px solid var(--secondary);
   padding-right: 2em;
   margin-right: 2em;
@@ -91,6 +92,8 @@ body, html {
   display: grid;
   grid-auto-columns: auto auto auto;
   grid-auto-rows: auto auto auto auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   #method-and-url {
     #route-name {
@@ -150,6 +153,10 @@ select, input, textarea {
   &.full-width {
     width: 98%;
   }
+}
+
+textarea {
+  resize: vertical;
 }
 
 .input-group {
