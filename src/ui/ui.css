@@ -22,8 +22,6 @@ html {
   height: 80%;
 }
 #route-panel {
-  resize: horizontal;
-  overflow-y: auto;
   border-right: 1px solid var(--secondary);
   padding-right: 2em;
   margin-right: 2em;
@@ -33,6 +31,8 @@ html {
 #route-panel .route-list {
   list-style-type: none;
   padding-left: 0;
+  overflow-y: auto;
+  max-height: 75%;
 }
 #route-panel .route-list li.clickable {
   padding: 0.5em;
@@ -58,41 +58,47 @@ html {
   grid-column-end: 3;
   display: grid;
   grid-auto-columns: auto auto auto;
-  grid-auto-rows: auto auto auto auto;
+  grid-auto-rows: 5% 12% 12% min-content min-content;
   overflow-y: auto;
   overflow-x: hidden;
+  height: 90%;
 }
-#route-editor #method-and-url #route-name {
-  grid-row-start: 1;
-  grid-row-end: 2;
+#route-editor #route-name {
+  grid-row-start: 2;
+  grid-row-end: 3;
   grid-column-start: 1;
   grid-column-end: 4;
 }
-#route-editor #method-and-url #method-url-bar {
-  grid-row-start: 2;
-  grid-row-end: 3;
-  display: grid;
-  grid-auto-columns: 10% auto;
-}
-#route-editor #method-and-url #method-url-bar > select {
-  grid-column-start: 1;
-  grid-column-end: 2;
-}
-#route-editor #method-and-url #method-url-bar > input {
-  grid-column-start: 2;
-  grid-column-end: 3;
-}
-#route-editor #method-and-url #response-headers {
+#route-editor #method-and-url {
   grid-row-start: 3;
   grid-row-end: 4;
   grid-column-start: 1;
   grid-column-end: 4;
 }
-#route-editor #method-and-url #response-body {
+#route-editor #method-and-url > #method-url-bar {
+  display: grid;
+  grid-auto-columns: 10% auto;
+}
+#route-editor #method-and-url > #method-url-bar > select {
+  grid-column-start: 1;
+  grid-column-end: 2;
+}
+#route-editor #method-and-url > #method-url-bar > input {
+  grid-column-start: 2;
+  grid-column-end: 3;
+}
+#route-editor #response-headers {
   grid-row-start: 4;
   grid-row-end: 5;
   grid-column-start: 1;
   grid-column-end: 4;
+}
+#route-editor #response-body {
+  grid-row-start: 5;
+  grid-row-end: 6;
+  grid-column-start: 1;
+  grid-column-end: 4;
+  margin-bottom: 5em;
 }
 select,
 input,

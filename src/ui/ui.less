@@ -48,8 +48,6 @@ body, html {
 }
 
 #route-panel {
-  resize: horizontal;
-  overflow-y: auto;
   border-right: 1px solid var(--secondary);
   padding-right: 2em;
   margin-right: 2em;
@@ -59,6 +57,8 @@ body, html {
   .route-list {
     list-style-type: none;
     padding-left: 0;
+    overflow-y: auto;
+    max-height: 75%;
 
     li.clickable {
       padding: .5em;
@@ -91,21 +91,25 @@ body, html {
   // even though it's in a grid, it is a container of other grid items
   display: grid;
   grid-auto-columns: auto auto auto;
-  grid-auto-rows: auto auto auto auto;
+  grid-auto-rows: 5% 12% 12% min-content min-content;
   overflow-y: auto;
   overflow-x: hidden;
+  height: 90%;
+
+  #route-name {
+    grid-row-start: 2;
+    grid-row-end: 3;
+    grid-column-start: 1;
+    grid-column-end: 4;
+  }
 
   #method-and-url {
-    #route-name {
-      grid-row-start: 1;
-      grid-row-end: 2;
-      grid-column-start: 1;
-      grid-column-end: 4;
-    }
+    grid-row-start: 3;
+    grid-row-end: 4;
+    grid-column-start: 1;
+    grid-column-end: 4;
 
-    #method-url-bar {
-      grid-row-start: 2;
-      grid-row-end: 3;
+    > #method-url-bar {
       display: grid;
       grid-auto-columns: 10% auto;
 
@@ -119,20 +123,21 @@ body, html {
         grid-column-end: 3;
       }
     }
+  }
 
-    #response-headers {
-      grid-row-start: 3;
-      grid-row-end: 4;
-      grid-column-start: 1;
-      grid-column-end: 4;
-    }
+  #response-headers {
+    grid-row-start: 4;
+    grid-row-end: 5;
+    grid-column-start: 1;
+    grid-column-end: 4;
+  }
 
-    #response-body {
-      grid-row-start: 4;
-      grid-row-end: 5;
-      grid-column-start: 1;
-      grid-column-end: 4;
-    }
+  #response-body {
+    grid-row-start: 5;
+    grid-row-end: 6;
+    grid-column-start: 1;
+    grid-column-end: 4;
+    margin-bottom: 5em;
   }
 }
 
