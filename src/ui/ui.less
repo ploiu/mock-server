@@ -35,6 +35,10 @@
   --text: @text;
   --darker-background: @darker-background;
   --border-radius: @border-radius;
+  // accordion element overrides
+  --accordion-title-background: @body-background;
+  --accordion-border-radius: @border-radius;
+  --accordion-open-title-background: @body-background;
 }
 
 body, html {
@@ -328,30 +332,23 @@ button {
     // a log entry
     .log {
       margin: 1em 0;
-      display: grid;
-      grid-auto-columns: 13% 6% auto;
 
-      > .timestamp {
+      .timestamp {
         font-style: italic;
         color: @secondary;
-        grid-column-start: 1;
-        grid-column-end: 2;
       }
 
-      > .message {
+      .message {
         color: @error;
         margin-left: 1rem;
-        grid-column-start: 2;
-        grid-column-end: 4;
+        text-transform: none !important;
       }
 
-      > .method {
+      .method {
         color: @darker-background;
         padding: .25em;
         border-radius: @border-radius;
         margin-left: 1rem;
-        grid-column-start: 2;
-        grid-column-end: 3;
         text-align: center;
 
         each(@http-methods, {
@@ -361,11 +358,26 @@ button {
         })
       }
 
-      > .url {
+      .url {
         grid-column-start: 3;
         grid-column-end: 4;
         margin-left: 1rem;
       }
     }
   }
+}
+
+// expanded accordion elements with a class that matches one of our request methods should change the title element background color to the method color
+accordion-element {
+  each(@http-methods, {
+    &.@{value}.open {
+      > .ploiu-accordion-title {
+        background-color: @@value;
+        .timestamp, .method, .url {
+          font-weight: bold;
+          color: if(luma(@@value) < 50%, white, black) !important;
+        }
+      }
+    }
+  })
 }

@@ -24,6 +24,9 @@
   --text: #dfd8e3;
   --darker-background: #111;
   --border-radius: 6px;
+  --accordion-title-background: #333;
+  --accordion-border-radius: 6px;
+  --accordion-open-title-background: #333;
 }
 body,
 html {
@@ -350,60 +353,134 @@ button.error.outline:active {
 }
 #route-log-view .log-panel .log {
   margin: 1em 0;
-  display: grid;
-  grid-auto-columns: 13% 6% auto;
 }
-#route-log-view .log-panel .log > .timestamp {
+#route-log-view .log-panel .log .timestamp {
   font-style: italic;
   color: #8D99AE;
-  grid-column-start: 1;
-  grid-column-end: 2;
 }
-#route-log-view .log-panel .log > .message {
+#route-log-view .log-panel .log .message {
   color: #CD533B;
   margin-left: 1rem;
-  grid-column-start: 2;
-  grid-column-end: 4;
+  text-transform: none !important;
 }
-#route-log-view .log-panel .log > .method {
+#route-log-view .log-panel .log .method {
   color: #111;
   padding: 0.25em;
   border-radius: 6px;
   margin-left: 1rem;
-  grid-column-start: 2;
-  grid-column-end: 3;
   text-align: center;
 }
-#route-log-view .log-panel .log > .method.get {
+#route-log-view .log-panel .log .method.get {
   background-color: #A5C882;
 }
-#route-log-view .log-panel .log > .method.post {
+#route-log-view .log-panel .log .method.post {
   background-color: #FBAF00;
 }
-#route-log-view .log-panel .log > .method.put {
+#route-log-view .log-panel .log .method.put {
   background-color: #3F84E5;
 }
-#route-log-view .log-panel .log > .method.head {
+#route-log-view .log-panel .log .method.head {
   background-color: #42c67c;
 }
-#route-log-view .log-panel .log > .method.delete {
+#route-log-view .log-panel .log .method.delete {
   background-color: #CD533B;
 }
-#route-log-view .log-panel .log > .method.connect {
+#route-log-view .log-panel .log .method.connect {
   background-color: plum;
 }
-#route-log-view .log-panel .log > .method.options {
+#route-log-view .log-panel .log .method.options {
   background-color: lightseagreen;
 }
-#route-log-view .log-panel .log > .method.trace {
+#route-log-view .log-panel .log .method.trace {
   background-color: #b313b0;
 }
-#route-log-view .log-panel .log > .method.patch {
+#route-log-view .log-panel .log .method.patch {
   background-color: #5f5d9e;
 }
-#route-log-view .log-panel .log > .url {
+#route-log-view .log-panel .log .url {
   grid-column-start: 3;
   grid-column-end: 4;
   margin-left: 1rem;
+}
+accordion-element.get.open > .ploiu-accordion-title {
+  background-color: #A5C882;
+}
+accordion-element.get.open > .ploiu-accordion-title .timestamp,
+accordion-element.get.open > .ploiu-accordion-title .method,
+accordion-element.get.open > .ploiu-accordion-title .url {
+  font-weight: bold;
+  color: black !important;
+}
+accordion-element.post.open > .ploiu-accordion-title {
+  background-color: #FBAF00;
+}
+accordion-element.post.open > .ploiu-accordion-title .timestamp,
+accordion-element.post.open > .ploiu-accordion-title .method,
+accordion-element.post.open > .ploiu-accordion-title .url {
+  font-weight: bold;
+  color: black !important;
+}
+accordion-element.put.open > .ploiu-accordion-title {
+  background-color: #3F84E5;
+}
+accordion-element.put.open > .ploiu-accordion-title .timestamp,
+accordion-element.put.open > .ploiu-accordion-title .method,
+accordion-element.put.open > .ploiu-accordion-title .url {
+  font-weight: bold;
+  color: white !important;
+}
+accordion-element.head.open > .ploiu-accordion-title {
+  background-color: #42c67c;
+}
+accordion-element.head.open > .ploiu-accordion-title .timestamp,
+accordion-element.head.open > .ploiu-accordion-title .method,
+accordion-element.head.open > .ploiu-accordion-title .url {
+  font-weight: bold;
+  color: white !important;
+}
+accordion-element.delete.open > .ploiu-accordion-title {
+  background-color: #CD533B;
+}
+accordion-element.delete.open > .ploiu-accordion-title .timestamp,
+accordion-element.delete.open > .ploiu-accordion-title .method,
+accordion-element.delete.open > .ploiu-accordion-title .url {
+  font-weight: bold;
+  color: white !important;
+}
+accordion-element.connect.open > .ploiu-accordion-title {
+  background-color: plum;
+}
+accordion-element.connect.open > .ploiu-accordion-title .timestamp,
+accordion-element.connect.open > .ploiu-accordion-title .method,
+accordion-element.connect.open > .ploiu-accordion-title .url {
+  font-weight: bold;
+  color: white !important;
+}
+accordion-element.options.open > .ploiu-accordion-title {
+  background-color: lightseagreen;
+}
+accordion-element.options.open > .ploiu-accordion-title .timestamp,
+accordion-element.options.open > .ploiu-accordion-title .method,
+accordion-element.options.open > .ploiu-accordion-title .url {
+  font-weight: bold;
+  color: white !important;
+}
+accordion-element.trace.open > .ploiu-accordion-title {
+  background-color: #b313b0;
+}
+accordion-element.trace.open > .ploiu-accordion-title .timestamp,
+accordion-element.trace.open > .ploiu-accordion-title .method,
+accordion-element.trace.open > .ploiu-accordion-title .url {
+  font-weight: bold;
+  color: white !important;
+}
+accordion-element.patch.open > .ploiu-accordion-title {
+  background-color: #5f5d9e;
+}
+accordion-element.patch.open > .ploiu-accordion-title .timestamp,
+accordion-element.patch.open > .ploiu-accordion-title .method,
+accordion-element.patch.open > .ploiu-accordion-title .url {
+  font-weight: bold;
+  color: white !important;
 }
 /*# sourceMappingURL=ui.css.map */

@@ -10,8 +10,11 @@ if (import.meta.main) {
   const jsFiles = [
     Deno.readTextFileSync("./src/ui/controller.js"),
     parsedArgs.test ? Deno.readTextFileSync("./src/test/uiTests.js") : "",
+    Deno.readTextFileSync("./src/ui/AccordionElement.min.js"),
   ];
   const cssFiles = [
+    // accordion needs to go first because we override some of its variables
+    Deno.readTextFileSync("./src/ui/accordion.min.css"),
     Deno.readTextFileSync("./src/ui/ui.css"),
   ];
   let css = "";

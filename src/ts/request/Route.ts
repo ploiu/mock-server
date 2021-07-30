@@ -6,6 +6,7 @@ import {
 } from "https://deno.land/std@0.100.0/http/mod.ts";
 import { red } from "https://deno.land/std@0.100.0/fmt/colors.ts";
 import { LogManager } from "../LogManager.ts";
+import { readAll } from "https://deno.land/std@0.100.0/io/util.ts";
 
 /**
  * Object that matches against a request and generates a mock response
@@ -76,7 +77,20 @@ export default class Route {
      *
      */
   public async execute(request: ServerRequest): Promise<Response> {
-    LogManager.newEntry(request.url, request.method.toUpperCase());
+    // in case the request body is huge, we don't want to block the response, so use the classic promise-based approach instead of await
+    readAll(request.body).then((requestBody) => {
+      let bodyString = "";
+      for (let charCode of requestBody) {
+        bodyString += String.fromCharCode(charCode);
+      }
+      LogManager.newEntry(
+        request.url,
+        request.method.toUpperCase(),
+        bodyString,
+      );
+    }).catch((exception) =>
+      LogManager.newEntry(null, null, null, "Failed to read request body")
+    );
     try {
       const url = request.url;
       const responseBody = this.populateBodyTemplate(url);
