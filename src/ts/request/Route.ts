@@ -87,9 +87,10 @@ export default class Route {
         request.url,
         request.method.toUpperCase(),
         bodyString,
+        request.headers,
       );
     }).catch((exception) =>
-      LogManager.newEntry(null, null, null, "Failed to read request body")
+      LogManager.newEntry(null, null, null, null, "Failed to read request body")
     );
     try {
       const url = request.url;
@@ -292,12 +293,12 @@ export default class Route {
       const allUrlArgs = splitUrl.filter((it) => it.startsWith(":"));
       const requiredArgs = allUrlArgs.filter((it) => !it.endsWith("?"));
       /*
-                now iterate through allUrlArgs.
-                1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
-                2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
-                  a. if there are enough, fill it and splice
-                  b. if there are not enough, ignore it
-                 */
+                      now iterate through allUrlArgs.
+                      1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
+                      2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
+                        a. if there are enough, fill it and splice
+                        b. if there are not enough, ignore it
+                       */
       for (let i = 0; i < allUrlArgs.length; i++) {
         const arg = allUrlArgs[i];
         const isRequired = !arg.endsWith("?");

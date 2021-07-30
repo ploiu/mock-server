@@ -27,16 +27,20 @@ export class LogManager {
      * @param url
      * @param method
      * @param body
+     * @param headers
      * @param message
      */
   public static newEntry(
     url: string | null,
     method: string | null,
     body: string | null = "",
+    headers: Headers | null = null,
     message: string | null = null,
   ): void {
     LogManager.canReadLogs = false;
-    this.sseLogs.push(new LogEntry(url, method, body, +new Date(), message));
+    this.sseLogs.push(
+      new LogEntry(url, method, body, headers, +new Date(), message),
+    );
     // TODO log
     const color = this.getColorForMethod(
       <RequestMethod> method?.toUpperCase(),
@@ -91,12 +95,21 @@ export class LogManager {
  * Represents a log entry to be transformed into a console log on the server side and an event entry to be sent to the client side
  */
 export class LogEntry {
+  public headers: any = {};
+
   constructor(
     public url: string | null,
     public method: string | null,
     public body: any,
+    requestHeaders: Headers | null,
     public timestamp: Number,
     public message: string | null,
   ) {
+    // the `Headers` prototype doesn't map to a simple object, so we need to do that ourselves
+    if (requestHeaders) {
+      for (let headerPair of requestHeaders.entries()) {
+        this.headers[headerPair[0]] = headerPair[1];
+      }
+    }
   }
 }

@@ -10,8 +10,12 @@
     <h1 style="display: inline-block">Ploiu Mock Server</h1>
     <!--buttons that change the view-->
     <div class="button-list" style="display: inline-block; margin-left: 2em;">
-        <button id="edit-route-view-button" class="primary" :class="{outline: currentView !== 'editRoute'}" @click="switchView('editRoute')">Edit Routes</button>
-        <button id="view-logs-view-button" class="success" :class="{outline: currentView !== 'viewLogs'}" @click="switchView('viewLogs')">View Route Log</button>
+        <button id="edit-route-view-button" class="primary" :class="{outline: currentView !== 'editRoute'}"
+                @click="switchView('editRoute')">Edit Routes
+        </button>
+        <button id="view-logs-view-button" class="success" :class="{outline: currentView !== 'viewLogs'}"
+                @click="switchView('viewLogs')">View Route Log
+        </button>
     </div>
     <!--route list and edit route view-->
     <div id="edit-route-view" class="view" v-if="currentView === 'editRoute'">
@@ -98,10 +102,16 @@
                     <span class="url" v-if="log.url">{{log.url}}</span>
                     <span class="message" v-if="log.message">{{log.message}}</span>
                 </div>
-                <accordion-element data-title="Request Body" :data-group="'request-' + i">
-                    {{log.body}}
-                </accordion-element>
-                <accordion-element data-title="Request Headers" :data-group="'request-' + i">TODO</accordion-element>
+                <accordion-fan>
+                    <accordion-element v-if="!log.message" data-request-headers data-title="Request Headers">
+                        <div v-for="(value, key) in log.headers">
+                            <span class="text-primary">{{key}}</span><span>: </span><span class="text-secondary">{{value}}</span>
+                        </div>
+                    </accordion-element>
+                    <accordion-element v-if="!log.message" data-request-body data-title="Request Body">
+                        {{log.body}}
+                    </accordion-element>
+                </accordion-fan>
             </accordion-element>
         </div>
     </div>
