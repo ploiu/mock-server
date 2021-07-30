@@ -1,8 +1,25 @@
 :root {
   --primary: #7C35AA;
+  --primary-darker: #6e2f97;
+  --primary-darkest: #602983;
   --secondary: #8D99AE;
+  --secondary-darker: #7e8ca3;
+  --secondary-darkest: #6f7e99;
   --success: #A5C882;
+  --success-darker: #98c070;
+  --success-darkest: #8cb85f;
   --error: #CD533B;
+  --error-darker: #be4830;
+  --error-darkest: #aa402b;
+  --color-get: #A5C882;
+  --color-post: #FBAF00;
+  --color-put: #3F84E5;
+  --color-head: #42c67c;
+  --color-delete: #CD533B;
+  --color-connect: plum;
+  --color-options: lightseagreen;
+  --color-trace: #b313b0;
+  --color-patch: #5f5d9e;
   --body-background: #333;
   --text: #dfd8e3;
   --darker-background: #111;
@@ -12,9 +29,9 @@ body,
 html {
   width: 100%;
   height: 100%;
-  background-color: var(--body-background);
+  background-color: #333;
   overflow: hidden;
-  color: var(--text);
+  color: #dfd8e3;
   font-family: "Fira Code", Consolas, monospace;
 }
 .container {
@@ -22,7 +39,7 @@ html {
   height: 80%;
 }
 #route-panel {
-  border-right: 1px solid var(--secondary);
+  border-right: 1px solid #8D99AE;
   padding-right: 2em;
   margin-right: 2em;
   grid-column-start: 1;
@@ -37,17 +54,17 @@ html {
 #route-panel .route-list li.clickable {
   padding: 0.5em;
   border-radius: 6px;
-  background-color: var(--darker-background);
+  background-color: #111;
   margin: 0.5em 0;
   white-space: break-spaces;
   word-break: break-word;
 }
 #route-panel .route-list li.clickable:hover {
-  background-color: var(--secondary);
+  background-color: #8D99AE;
   cursor: pointer;
 }
 #route-panel .route-list li.clickable.selected {
-  background-color: var(--primary);
+  background-color: #7C35AA;
 }
 #edit-route-view {
   display: grid;
@@ -62,6 +79,7 @@ html {
   overflow-y: auto;
   overflow-x: hidden;
   height: 90%;
+  grid-row-gap: 3em;
 }
 #route-editor #route-name {
   grid-row-start: 2;
@@ -98,23 +116,23 @@ html {
   grid-row-end: 6;
   grid-column-start: 1;
   grid-column-end: 4;
-  margin-bottom: 5em;
+  margin-bottom: 2em;
 }
 select,
 input,
 textarea {
   border-radius: 6px;
   padding: 1em;
-  background-color: var(--darker-background);
-  color: var(--text);
-  border-color: var(--secondary);
+  background-color: #111;
+  color: #dfd8e3;
+  border-color: #8D99AE;
   border-width: 1px;
   border-style: solid;
 }
 select:focus,
 input:focus,
 textarea:focus {
-  border-color: var(--primary);
+  border-color: #7C35AA;
   outline: none;
 }
 select.full-width,

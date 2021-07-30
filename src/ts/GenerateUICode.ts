@@ -1,40 +1,50 @@
 import { parse } from "https://deno.land/std@0.100.0/flags/mod.ts";
 /**
- * Reads the contents of /src/html/ui.html and puts it into the ui string in {/src/ts/MockServer.ts#createUIFileIfNotExists}
+ * Reads the contents of our ui files and inserts them into the ui strings in {/src/ts/MockServer.ts#createUIFileIfNotExists}
  */
 if (import.meta.main) {
   const { args } = Deno;
   const parsedArgs = parse(args);
   const html = Deno.readTextFileSync("./src/ui/ui.html");
-  const css = Deno.readTextFileSync("./src/ui/ui.css");
-  let js = Deno.readTextFileSync("./src/ui/controller.js");
-
-  // properly format the html and css so that it doesn't interfere with the js, since it's inserted into js code
-  const formattedHtml = html.replaceAll(/\r?\n/g, "\\n").replaceAll(
-    /'/g,
-    "\\'",
-  );
-  const formattedCss = css.replaceAll(/\r?\n/g, "\\n").replaceAll(/'/g, "\\'");
-  // if we pass in the test flag, we should include the test js
-  if (parsedArgs.test) {
-    js += ";\n" + Deno.readTextFileSync("./src/test/uiTests.js");
+  // using an array like this will make it easier to add new files in the future if we need to
+  const jsFiles = [
+    Deno.readTextFileSync("./src/ui/controller.js"),
+    parsedArgs.test ? Deno.readTextFileSync("./src/test/uiTests.js") : "",
+  ];
+  const cssFiles = [
+    Deno.readTextFileSync("./src/ui/ui.css"),
+  ];
+  let css = "";
+  let js = "";
+  // populate the css and js files
+  for (let cssFile of cssFiles) {
+    css += "\n" + cssFile;
   }
-  const formattedJs = js.replaceAll(/\\/g, "\\\\").replaceAll(/\r?\n/g, "\\n")
-    .replaceAll(/'/g, "\\'");
+  for (let jsFile of jsFiles) {
+    js += ";\n" + jsFile;
+  }
+  // properly format the html and css so that it doesn't interfere with the js, since it's inserted into js code
+  const formattedHtml = fixBackSlashesAndQuotes(html);
+  const formattedCss = fixBackSlashesAndQuotes(css);
+  const formattedJs = fixBackSlashesAndQuotes(js.replaceAll(/\\/g, "\\\\"));
   const tsFile = Deno.readTextFileSync("./src/ts/MockServer.ts");
-  const replacedContents =
+  const replacedContents = tsFile
     // replace the html string
-    tsFile.replace(
-      /(?<=const uiHtml: string =[\r\n ]*).*?(?=;(\r\n)?$)/mgi,
-      `'${formattedHtml}'`,
-    )
-      // replace the css string
-      .replace(
-        /(?<=const uiCss: string =[\r\n ]*).*?(?=;(\r\n)?$)/mgi,
-        `'${formattedCss}'`,
-      ).replace(
-        /(?<=const uiJs: string =[\r\n ]*).*?(?=;(\r\n)?$)/mgi,
-        `'${formattedJs}'`,
-      );
+    .replace(getRegexForUIString("uiHtml"), `'${formattedHtml}'`)
+    // replace the css string
+    .replace(getRegexForUIString("uiCss"), `'${formattedCss}'`)
+    // replace the js string
+    .replace(getRegexForUIString("uiJs"), `'${formattedJs}'`);
   Deno.writeTextFileSync("./src/ts/MockServer.ts", replacedContents);
+}
+
+function getRegexForUIString(uiStringName: string): RegExp {
+  return new RegExp(
+    `(?<=const ${uiStringName}: string =[\r\n ]*).*?(?=;(\r\n)?$)`,
+    "mgi",
+  );
+}
+
+function fixBackSlashesAndQuotes(text: string) {
+  return text.replaceAll(/\r?\n/g, "\\n").replaceAll(/'/g, "\\'");
 }
