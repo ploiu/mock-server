@@ -3,8 +3,8 @@ import { RequestMethod } from "../RequestMethod.ts";
 import {
   Response,
   ServerRequest,
-} from "https://deno.land/std@0.100.0/http/mod.ts";
-import { serveFile } from "https://deno.land/std@0.100.0/http/file_server.ts";
+} from "https://deno.land/std@0.103.0/http/mod.ts";
+import { serveFile } from "https://deno.land/std@0.103.0/http/file_server.ts";
 
 export default class UIRoute extends Route {
   constructor() {

@@ -3,10 +3,10 @@ import UrlVariable from "./UrlVariable.ts";
 import {
   Response,
   ServerRequest,
-} from "https://deno.land/std@0.100.0/http/mod.ts";
-import { red } from "https://deno.land/std@0.100.0/fmt/colors.ts";
+} from "https://deno.land/std@0.103.0/http/mod.ts";
+import { red } from "https://deno.land/std@0.103.0/fmt/colors.ts";
 import { LogManager } from "../LogManager.ts";
-import { readAll } from "https://deno.land/std@0.100.0/io/util.ts";
+import { readAll } from "https://deno.land/std@0.103.0/io/util.ts";
 
 /**
  * Object that matches against a request and generates a mock response

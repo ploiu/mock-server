@@ -4,7 +4,7 @@ import { RequestMethod } from "../RequestMethod.ts";
 import {
   Response,
   ServerRequest,
-} from "https://deno.land/std@0.100.0/http/mod.ts";
+} from "https://deno.land/std@0.103.0/http/mod.ts";
 import { LogEntry, LogManager } from "../../LogManager.ts";
 
 /**

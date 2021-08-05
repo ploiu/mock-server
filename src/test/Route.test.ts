@@ -2,9 +2,9 @@ import {
   assert,
   assertEquals,
   assertNotEquals,
-} from "https://deno.land/std@0.100.0/testing/asserts.ts";
+} from "https://deno.land/std@0.103.0/testing/asserts.ts";
 import Route from "../ts/request/Route.ts";
-import { ServerRequest } from "https://deno.land/std@0.100.0/http/mod.ts";
+import { ServerRequest } from "https://deno.land/std@0.103.0/http/mod.ts";
 
 Deno.test("fromObject differentiates between response as object and response as string", () => {
   const routeStringResponse = Route.fromObject({

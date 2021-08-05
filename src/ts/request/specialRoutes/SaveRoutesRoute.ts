@@ -3,10 +3,10 @@ import { RequestMethod } from "../RequestMethod.ts";
 import {
   Response,
   ServerRequest,
-} from "https://deno.land/std@0.100.0/http/mod.ts";
+} from "https://deno.land/std@0.103.0/http/mod.ts";
 import RouteManager from "../RouteManager.ts";
 import { readConfigFile, writeConfigFile } from "../../config/ConfigManager.ts";
-import { readAll } from "https://deno.land/std@0.100.0/io/util.ts";
+import { readAll } from "https://deno.land/std@0.103.0/io/util.ts";
 
 /**
  * handles saving the passed request json into our config file, and then refreshes the config

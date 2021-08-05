@@ -2,7 +2,7 @@
 import {
   ensureFileSync,
   existsSync,
-} from "https://deno.land/std@0.100.0/fs/mod.ts";
+} from "https://deno.land/std@0.103.0/fs/mod.ts";
 import Config from "./Config.ts";
 import Route from "../request/Route.ts";
 
