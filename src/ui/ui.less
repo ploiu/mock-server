@@ -39,6 +39,7 @@
   --accordion-title-background: @body-background;
   --accordion-border-radius: @border-radius;
   --accordion-open-title-background: @body-background;
+  --accordion-fan-accordion-border-style: 1px solid @darker-background;
 }
 
 body, html {
@@ -359,9 +360,9 @@ button {
       }
 
       .url {
-        grid-column-start: 3;
-        grid-column-end: 4;
         margin-left: 1rem;
+        word-wrap: break-word;
+        line-height: 2em;
       }
     }
   }

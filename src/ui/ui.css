@@ -27,6 +27,7 @@
   --accordion-title-background: #333;
   --accordion-border-radius: 6px;
   --accordion-open-title-background: #333;
+  --accordion-fan-accordion-border-style: 1px solid #111;
 }
 body,
 html {
@@ -398,9 +399,9 @@ button.error.outline:active {
   background-color: #5f5d9e;
 }
 #route-log-view .log-panel .log .url {
-  grid-column-start: 3;
-  grid-column-end: 4;
   margin-left: 1rem;
+  word-wrap: break-word;
+  line-height: 2em;
 }
 accordion-element.get.open > .ploiu-accordion-title {
   background-color: #A5C882;
