@@ -24,7 +24,8 @@ export default class FetchRoutesRoute extends Route {
     this.responseHeaders.append("Content-Type", "application/json");
   }
 
-  async execute(request: Request): Promise<Response> {
+  //deno-lint-ignore require-await
+  async execute(_request: Request): Promise<Response> {
     // get all the routes in the route manager
     const routes = this.routeManager.routes.filter((it: Route) =>
       !this.excludedRoutes.includes(it.url)

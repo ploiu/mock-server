@@ -1,3 +1,4 @@
+//deno-lint-ignore-file no-explicit-any
 import Route from "./Route.ts";
 import Config from "../config/Config.ts";
 

@@ -1,4 +1,4 @@
-FLAGS = --allow-read --allow-write --allow-net
+FLAGS = --allow-read --allow-write --allow-net --unstable
 
 test:
 	deno test

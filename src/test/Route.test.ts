@@ -6,7 +6,6 @@ import {
 import Route from "../ts/request/Route.ts";
 import { readAll } from "https://deno.land/std@0.111.0/streams/conversion.ts";
 import { readerFromStreamReader } from "https://deno.land/std@0.111.0/io/mod.ts";
-import { StringReader } from "https://deno.land/std@0.111.0/io/readers.ts";
 
 Deno.test("fromObject differentiates between response as object and response as string", () => {
   const routeStringResponse = Route.fromObject({

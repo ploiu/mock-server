@@ -2,8 +2,10 @@ import Route from "../Route.ts";
 import { RequestMethod } from "../RequestMethod.ts";
 import RouteManager from "../RouteManager.ts";
 import { readConfigFile, writeConfigFile } from "../../config/ConfigManager.ts";
-import { readAll } from "https://deno.land/std@0.111.0/streams/conversion.ts";
-import { readerFromStreamReader } from "https://deno.land/std@0.111.0/streams/conversion.ts";
+import {
+  readAll,
+  readerFromStreamReader,
+} from "https://deno.land/std@0.111.0/streams/conversion.ts";
 
 /**
  * handles saving the passed request json into our config file, and then refreshes the config

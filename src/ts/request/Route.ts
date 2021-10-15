@@ -1,3 +1,4 @@
+//deno-lint-ignore-file no-explicit-any
 import { RequestMethod } from "./RequestMethod.ts";
 import UrlVariable from "./UrlVariable.ts";
 import { red } from "https://deno.land/std@0.111.0/fmt/colors.ts";
@@ -41,9 +42,10 @@ export default class Route {
       url,
       method,
       responseHeaders,
+      // return response if it's a string
       (typeof response === "string")
         ? response
-        : !!response
+        : response !== null && response !== undefined
         ? JSON.stringify(response)
         : null,
       Number(responseStatus),
@@ -269,7 +271,7 @@ export default class Route {
    * @returns {any}
    * @private
    */
-  private parsePathVars(request: string): Object {
+  private parsePathVars(request: string): any {
     const result: any = {};
     // first build a list of where each of our path variables are
     const splitRequest = request.split("?")[0].split("/");
@@ -285,19 +287,19 @@ export default class Route {
       }
     } else {
       // some optional inputs were excluded; first remove any parts of the input that exactly match a part for our route
-      let inputArgs = splitRequest.filter((it) => !splitUrl.includes(it));
+      const inputArgs = splitRequest.filter((it) => !splitUrl.includes(it));
       const allUrlArgs = splitUrl.filter((it) => it.startsWith(":"));
       const requiredArgs = allUrlArgs.filter((it) => !it.endsWith("?"));
       /*
-                      now iterate through allUrlArgs.
-                      1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
-                      2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
-                        a. if there are enough, fill it and splice
-                        b. if there are not enough, ignore it
-                       */
+        now iterate through allUrlArgs.
+        1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
+        2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
+          a. if there are enough, fill it and splice
+          b. if there are not enough, ignore it
+         */
       for (let i = 0; i < allUrlArgs.length; i++) {
         const arg = allUrlArgs[i];
-        let isRequired = !arg.endsWith("?");
+        const isRequired = !arg.endsWith("?");
         // 1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
         if (isRequired) {
           result[arg.replaceAll(/[:]/g, "")] = inputArgs.splice(0, 1)[0];

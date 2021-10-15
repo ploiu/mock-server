@@ -147,7 +147,11 @@ const ui = {
      * @returns {Promise<any[]>}
      */
     async fetchLogs() {
-      return await (await fetch("/mock-server-logs")).json();
+      try {
+        return await (await fetch("/mock-server-logs")).json();
+      } catch {
+        return []
+      }
     },
   },
   async mounted() {

@@ -28,6 +28,7 @@ export default class UpdateConfigRoute extends Route {
     return super.doesUrlMatch(url);
   }
 
+  //deno-lint-ignore require-await
   async execute(request: Request): Promise<Response> {
     LogManager.newEntry(
       Route.getPath(request.url),
