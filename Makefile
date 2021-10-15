@@ -23,6 +23,6 @@ generate-ui:
 	deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts
 
 run-server-for-browser-tests:
-	del config-test.json
+	rm -f config-test.json
 	deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts --test
 	deno run ${FLAGS} ./src/ts/MockServer.ts --load-ui --config ./config-test.json

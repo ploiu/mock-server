@@ -80,12 +80,12 @@
     ////// util methods
 
     /**
-         * Types the passed text into the passed element
-         * @param {string} text the text to type
-         * @param {HTMLElement} inputElement the input element to fill with the text
-         * @param {Number} keyIntervalMS the interval in milliseconds between each keystroke
-         * @return {Promise<void>}
-         */
+     * Types the passed text into the passed element
+     * @param {string} text the text to type
+     * @param {HTMLElement} inputElement the input element to fill with the text
+     * @param {Number} keyIntervalMS the interval in milliseconds between each keystroke
+     * @return {Promise<void>}
+     */
     async type(text, inputElement, keyIntervalMS = 10) {
       return new Promise((resolve) => {
         const splitText = text.split("");
@@ -110,20 +110,20 @@
       });
     },
     /**
-         * selects an option in the passed `selectElement`
-         * @param {number} index
-         * @param {HTMLSelectElement} selectElement
-         */
+     * selects an option in the passed `selectElement`
+     * @param {number} index
+     * @param {HTMLSelectElement} selectElement
+     */
     select(index, selectElement) {
       selectElement.selectedIndex = index;
       selectElement.dispatchEvent(new Event("change", {}));
     },
     /**
-         * clicks the passed element and waits the passed duration before resolving
-         * @param element
-         * @param waitDurationMS
-         * @return {Promise<void>}
-         */
+     * clicks the passed element and waits the passed duration before resolving
+     * @param element
+     * @param waitDurationMS
+     * @return {Promise<void>}
+     */
     async clickAndWait(element, waitDurationMS = 250) {
       return new Promise((resolve) => {
         element.click();

@@ -10,7 +10,7 @@ import {
   bgYellow,
   black,
   yellow,
-} from "https://deno.land/std@0.103.0/fmt/colors.ts";
+} from "https://deno.land/std@0.111.0/fmt/colors.ts";
 import { RequestMethod } from "./request/RequestMethod.ts";
 
 /**
@@ -23,13 +23,13 @@ export class LogManager {
   private static canReadLogs = true;
 
   /**
-     * Logs the entry to the console and stores the entry in our sseLogs object
-     * @param url
-     * @param method
-     * @param body
-     * @param headers
-     * @param message
-     */
+   * Logs the entry to the console and stores the entry in our sseLogs object
+   * @param url
+   * @param method
+   * @param body
+   * @param headers
+   * @param message
+   */
   public static newEntry(
     url: string | null,
     method: string | null,
@@ -80,8 +80,8 @@ export class LogManager {
   }
 
   /**
-     * clears and returns all the stored logs to be sent to the client
-     */
+   * clears and returns all the stored logs to be sent to the client
+   */
   public static getLogs(): LogEntry[] {
     if (LogManager.canReadLogs) {
       return LogManager.sseLogs.splice(0, this.sseLogs.length);

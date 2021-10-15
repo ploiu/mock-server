@@ -1,12 +1,9 @@
 import Route from "../Route.ts";
 import { RequestMethod } from "../RequestMethod.ts";
-import {
-  Response,
-  ServerRequest,
-} from "https://deno.land/std@0.103.0/http/mod.ts";
 import RouteManager from "../RouteManager.ts";
 import { readConfigFile, writeConfigFile } from "../../config/ConfigManager.ts";
-import { readAll } from "https://deno.land/std@0.103.0/io/util.ts";
+import { readAll } from "https://deno.land/std@0.111.0/streams/conversion.ts";
+import { readerFromStreamReader } from "https://deno.land/std@0.111.0/streams/conversion.ts";
 
 /**
  * handles saving the passed request json into our config file, and then refreshes the config
@@ -26,13 +23,18 @@ export default class SaveRoutesRoute extends Route {
     );
   }
 
-  async execute(request: ServerRequest): Promise<Response> {
+  async execute(request: Request): Promise<Response> {
     try {
       // our json is passed in as bytes, so we need to read them into a buffer and parse the buffer into a JSON string
-      const buffer = await readAll(request.body);
+      const requestBody: ReadableStream | null = request.body;
       let requestJson = "";
-      for (let charCode of buffer) {
-        requestJson += String.fromCharCode(charCode);
+      if (requestBody) {
+        const buffer = await readAll(
+          readerFromStreamReader(request.body!.getReader()),
+        );
+        for (let charCode of buffer) {
+          requestJson += String.fromCharCode(charCode);
+        }
       }
       const config = readConfigFile(this.configLocation);
       // clear all config routes in order to re-write them
@@ -44,17 +46,11 @@ export default class SaveRoutesRoute extends Route {
       }
       writeConfigFile(this.configLocation, config);
       this.routeManager.setupRoutes(config);
-      return <Response> {
-        body: '{"success": true}',
-        status: 200,
-      };
+      return new Response('{"success": true}', { status: 200 });
     } catch (e) {
       console.error("Failed to save routes!");
       console.trace(e);
-      return <Response> {
-        body: '{"error": true}',
-        status: 500,
-      };
+      return new Response('{"error": true}', { status: 500 });
     }
   }
 }

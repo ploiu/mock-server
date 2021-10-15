@@ -2,9 +2,11 @@ import {
   assert,
   assertEquals,
   assertNotEquals,
-} from "https://deno.land/std@0.103.0/testing/asserts.ts";
+} from "https://deno.land/std@0.111.0/testing/asserts.ts";
 import Route from "../ts/request/Route.ts";
-import { ServerRequest } from "https://deno.land/std@0.103.0/http/mod.ts";
+import { readAll } from "https://deno.land/std@0.111.0/streams/conversion.ts";
+import { readerFromStreamReader } from "https://deno.land/std@0.111.0/io/mod.ts";
+import { StringReader } from "https://deno.land/std@0.111.0/io/readers.ts";
 
 Deno.test("fromObject differentiates between response as object and response as string", () => {
   const routeStringResponse = Route.fromObject({
@@ -383,13 +385,13 @@ Deno.test("execute should template out the response body from url parameters", a
     responseStatus: 200,
   });
   const res = await route.execute(
-    <ServerRequest> {
+    <Request> {
       url: "/test/ploiu/23/green?favoriteFood=pasta",
       method: "GET",
     },
   );
   assertEquals(
-    res.body,
+    await bodyToText(res.body),
     "Hello, ploiu! You are 23 years old and you probably like green pasta",
   );
 });
@@ -406,13 +408,13 @@ Deno.test("execute should use default variables if an optional variable is not i
   });
 
   const res = await route.execute(
-    <ServerRequest> {
+    <Request> {
       url: "/test/ploiu/23?favoriteFood=pasta",
       method: "GET",
     },
   );
   assertEquals(
-    res.body,
+    await bodyToText(res.body),
     "Hello, ploiu! You are 23 years old and you probably like green pasta. My favorite color is blue",
     "default values should be used if the variable is not included",
   );
@@ -430,13 +432,13 @@ Deno.test("execute should fill in default variable fields if the variable is inc
   });
 
   const res = await route.execute(
-    <ServerRequest> {
+    <Request> {
       url: "/test/ploiu/23?favoriteFood=pasta&favoriteColor=orange",
       method: "GET",
     },
   );
   assertEquals(
-    res.body,
+    await bodyToText(res.body),
     "Hello, ploiu! You are 23 years old and you probably like orange pasta. My favorite color is orange",
     "default value templates should be filled if the variable is included",
   );
@@ -453,7 +455,7 @@ Deno.test("execute should set the proper response status code", async () => {
     responseStatus: 418,
   });
   const res = await route.execute(
-    <ServerRequest> {
+    <Request> {
       url: "/test/ploiu/23/green?favoriteFood=pasta",
       method: "GET",
     },
@@ -474,7 +476,7 @@ Deno.test("execute should set the proper response headers", async () => {
     responseStatus: 418,
   });
   const res = await route.execute(
-    <ServerRequest> {
+    <Request> {
       url: "/test/ploiu/23/green?favoriteFood=pasta",
       method: "GET",
     },
@@ -498,10 +500,27 @@ Deno.test("execute should properly handle `null` for response body", async () =>
     responseStatus: 418,
   });
   const res = await route.execute(
-    <ServerRequest> {
+    <Request> {
       url: "/test/",
       method: "GET",
     },
   );
   assertEquals(res.body, null, "response body should be null");
 });
+
+async function bodyToText(
+  body: ReadableStream<Uint8Array> | null,
+): Promise<string> {
+  let reader: Deno.Reader;
+  let contents = "";
+  if (body) {
+    reader = readerFromStreamReader(body.getReader());
+    const rawContents = await readAll(reader);
+    for (const code of rawContents) {
+      contents += String.fromCharCode(code);
+    }
+  } else {
+    contents = "";
+  }
+  return contents;
+}

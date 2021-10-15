@@ -1,7 +1,3 @@
-import {
-  Response,
-  ServerRequest,
-} from "https://deno.land/std@0.103.0/http/mod.ts";
 import Route from "../Route.ts";
 import RouteManager from "../RouteManager.ts";
 import { RequestMethod } from "../RequestMethod.ts";
@@ -32,8 +28,11 @@ export default class UpdateConfigRoute extends Route {
     return super.doesUrlMatch(url);
   }
 
-  async execute(request: ServerRequest): Promise<Response> {
-    LogManager.newEntry(request.url, request.method.toUpperCase());
+  async execute(request: Request): Promise<Response> {
+    LogManager.newEntry(
+      Route.getPath(request.url),
+      request.method.toUpperCase(),
+    );
     const args = this.parseVariablesFromUrl(request.url);
     const configPath = args.location ?? this.configPath;
     console.log(configPath);

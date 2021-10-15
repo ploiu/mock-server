@@ -105,10 +105,10 @@ const ui = {
       }
     },
     /**
-         * shows the message bar at the bottom of the screen, and then hides it after 3 seconds
-         * @param {string} message
-         * @param {string} messageType
-         */
+     * shows the message bar at the bottom of the screen, and then hides it after 3 seconds
+     * @param {string} message
+     * @param {string} messageType
+     */
     showMessage(message, messageType) {
       this.message = message;
       this.messageType = messageType;
@@ -123,9 +123,9 @@ const ui = {
       this.currentView = viewName;
     },
     /**
-         * adds a single log to our log list
-         * @param {{url: string, method: string, body: any | null, timestamp: Number | string}} log
-         */
+     * adds a single log to our log list
+     * @param {{url: string, method: string, body: any | null, timestamp: Number | string}} log
+     */
     addLog(log) {
       log.timestamp = this.dateFormat.format(log.timestamp);
       this.logs.push(log);
@@ -135,11 +135,18 @@ const ui = {
       this.logs.splice(0, this.logs.length);
     },
     /**
-         * Scrolls our log panel to the bottom of its contents
-         */
+     * Scrolls our log panel to the bottom of its contents
+     */
     scrollLogPanel() {
       const logPanel = document.querySelector("#logArea");
       logPanel?.scrollTo(0, logPanel.scrollHeight);
+    },
+    /**
+     * fetches the latest batch of logged routes and returns them
+     * @returns {Promise<any[]>}
+     */
+    async fetchLogs() {
+      return await (await fetch("/mock-server-logs")).json();
     },
   },
   async mounted() {
@@ -151,18 +158,20 @@ const ui = {
       this.routes = routes;
     }
     // set up an event source to retrieve logs
-    const source = new EventSource("/logs");
-    source.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.length > 0) {
-        for (const log of data) {
-          this.addLog(log);
+    const self = this;
+    window.setInterval(async () => {
+      if (this.currentView === "viewLogs") {
+        const data = await this.fetchLogs();
+        if (data.length > 0) {
+          for (const log of data) {
+            this.addLog(log);
+          }
+          self.$nextTick(() => {
+            this.scrollLogPanel();
+          });
         }
-        this.$nextTick(() => {
-          this.scrollLogPanel();
-        });
       }
-    };
+    }, 1000);
   },
 };
 Vue.createApp(ui).mount("#main");

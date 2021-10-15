@@ -1,10 +1,6 @@
 import Route from "../Route.ts";
 import RouteManager from "../RouteManager.ts";
 import { RequestMethod } from "../RequestMethod.ts";
-import {
-  Response,
-  ServerRequest,
-} from "https://deno.land/std@0.103.0/http/mod.ts";
 
 export default class FetchRoutesRoute extends Route {
   /** Routes not provided by the user */
@@ -13,7 +9,7 @@ export default class FetchRoutesRoute extends Route {
     "/mock-server-ui",
     "/refreshConfig",
     "/mock-ui-save-routes",
-    "/logs",
+    "/mock-server-logs",
   ];
 
   constructor(private routeManager: RouteManager) {
@@ -28,14 +24,11 @@ export default class FetchRoutesRoute extends Route {
     this.responseHeaders.append("Content-Type", "application/json");
   }
 
-  async execute(request: ServerRequest): Promise<Response> {
+  async execute(request: Request): Promise<Response> {
     // get all the routes in the route manager
     const routes = this.routeManager.routes.filter((it: Route) =>
       !this.excludedRoutes.includes(it.url)
     );
-    return <Response> {
-      body: JSON.stringify(routes),
-      status: 200,
-    };
+    return new Response(JSON.stringify(routes), { status: 200 });
   }
 }
