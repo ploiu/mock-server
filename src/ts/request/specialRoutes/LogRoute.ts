@@ -19,9 +19,7 @@ export default class LogRoute extends Route {
   }
 
   /**
-   * Sets up the request to start sending server-sent events to the client. This is an adaptation of
-   * [this answer](https://stackoverflow.com/a/67119889) on stackoverflow
-   * @param request
+   * sends the current batch of logs to the client. This is meant to be periodically polled
    */
   async execute(request: Request): Promise<Response> {
     // if we're not done writing, we should store our logs in our backLogs and re-try sending everything next time

@@ -2,9 +2,6 @@ import { RequestMethod } from "./RequestMethod.ts";
 import UrlVariable from "./UrlVariable.ts";
 import { red } from "https://deno.land/std@0.111.0/fmt/colors.ts";
 import { LogManager } from "../LogManager.ts";
-import { readAll } from "https://deno.land/std@0.111.0/streams/conversion.ts";
-import { readerFromStreamReader } from "https://deno.land/std@0.111.0/io/mod.ts";
-import { StringReader } from "https://deno.land/std@0.111.0/io/readers.ts";
 
 /**
  * Object that matches against a request and generates a mock response
@@ -36,7 +33,7 @@ export default class Route {
   }
 
   static fromObject(
-    // @ts-ignore
+    // @ts-ignore this is object destructuring, and I can't specify types
     { title, url, method, responseHeaders, response, responseStatus },
   ): Route {
     return new Route(
@@ -61,7 +58,7 @@ export default class Route {
    */
   private createResponseHeaders(): Headers {
     const headers = new Headers();
-    for (let [key, value] of Object.entries(this.responseHeaders)) {
+    for (const [key, value] of Object.entries(this.responseHeaders)) {
       headers.append(key, String(value));
     }
     return headers;
@@ -74,27 +71,15 @@ export default class Route {
    * @param request
    */
   public async execute(request: Request): Promise<Response> {
-    let reader: Deno.Reader;
+    let bodyString = "";
     if (request.body) {
-      reader = readerFromStreamReader(request.body.getReader());
-    } else {
-      reader = new StringReader("");
+      bodyString = await request.text();
     }
-    // in case the request body is huge, we don't want to block the response, so use the classic promise-based approach instead of await
-    readAll(reader).then((requestBody) => {
-      let bodyString = "";
-      for (let charCode of requestBody) {
-        bodyString += String.fromCharCode(charCode);
-      }
-      LogManager.newEntry(
-        Route.getPath(request.url),
-        request.method.toUpperCase(),
-        bodyString,
-        request.headers,
-      );
-    }).catch((exception) =>
-      !(exception instanceof Deno.errors.BadResource) &&
-      LogManager.newEntry(null, null, null, null, "Failed to read request body")
+    LogManager.newEntry(
+      Route.getPath(request.url),
+      request.method.toUpperCase(),
+      bodyString,
+      request.headers,
     );
     try {
       const url = request.url;
@@ -115,14 +100,14 @@ export default class Route {
    * @param {string} url
    * @returns {boolean}
    */
-  public doesUrlMatch(url: string = ""): boolean {
+  public doesUrlMatch(url = ""): boolean {
     url = url.toLowerCase();
     // make sure it passes the general format of this url
     const basicPatternMatches = url === this.url ||
       this.#compiledUrlRegex.test(url);
     // make sure all mandatory query parameters are present
     let hasAllMandatoryQueryFlags = true;
-    for (let queryVariable of this.#queryVariables) {
+    for (const queryVariable of this.#queryVariables) {
       if (!queryVariable.optional) {
         const queryRegex = new RegExp(`[?&]${queryVariable.name}=[^&]+`, "i");
         hasAllMandatoryQueryFlags = hasAllMandatoryQueryFlags &&
@@ -195,7 +180,7 @@ export default class Route {
       // retrieve the url variables from the url
       const urlVars = this.parseVariablesFromUrl(url);
       // now replace each instance of our var placeholders
-      for (let [varName, varValue] of Object.entries(urlVars)) {
+      for (const [varName, varValue] of Object.entries(urlVars)) {
         const replaceRegex = new RegExp(`{{${varName}(:[^}]+)?}}`, "ig");
         if (varValue) {
           bodyCopy = bodyCopy.replaceAll(replaceRegex, <string> varValue);
@@ -204,7 +189,7 @@ export default class Route {
       // now replace all of our remaining placeholders
       const remainingVars = bodyCopy.match(/{{[a-zA-Z\-_0-9]+:.*?}}/g);
       if (remainingVars) {
-        for (let remainingVar of remainingVars) {
+        for (const remainingVar of remainingVars) {
           const defaultVal = remainingVar.match(/(?<=:)[^}]+(?=}})/) ?? [];
           bodyCopy = bodyCopy.replace(remainingVar, defaultVal[0]);
         }
@@ -225,14 +210,14 @@ export default class Route {
     // match and pull out our path variables
     const matchedPathVars = this.url.match(pathVarRegex);
     if (matchedPathVars) {
-      for (let pathVar of matchedPathVars) {
+      for (const pathVar of matchedPathVars) {
         this.#pathVariables.push(UrlVariable.fromString(pathVar));
       }
     }
     // match and pull out our query variables
     const matchedQueryVars = this.url.match(queryVarRegex);
     if (matchedQueryVars) {
-      for (let queryVar of matchedQueryVars) {
+      for (const queryVar of matchedQueryVars) {
         this.#queryVariables.push(UrlVariable.fromString(queryVar));
       }
     }
@@ -284,7 +269,7 @@ export default class Route {
    * @returns {any}
    * @private
    */
-  private parsePathVars(request: string): any {
+  private parsePathVars(request: string): Object {
     const result: any = {};
     // first build a list of where each of our path variables are
     const splitRequest = request.split("?")[0].split("/");
@@ -300,7 +285,7 @@ export default class Route {
       }
     } else {
       // some optional inputs were excluded; first remove any parts of the input that exactly match a part for our route
-      const inputArgs = splitRequest.filter((it) => !splitUrl.includes(it));
+      let inputArgs = splitRequest.filter((it) => !splitUrl.includes(it));
       const allUrlArgs = splitUrl.filter((it) => it.startsWith(":"));
       const requiredArgs = allUrlArgs.filter((it) => !it.endsWith("?"));
       /*
@@ -312,7 +297,7 @@ export default class Route {
                        */
       for (let i = 0; i < allUrlArgs.length; i++) {
         const arg = allUrlArgs[i];
-        const isRequired = !arg.endsWith("?");
+        let isRequired = !arg.endsWith("?");
         // 1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
         if (isRequired) {
           result[arg.replaceAll(/[:]/g, "")] = inputArgs.splice(0, 1)[0];
@@ -348,15 +333,14 @@ export default class Route {
       const optionalVars = this.#queryVariables.filter((it) => it.optional).map(
         (it) => it.name,
       );
-      for (let mandatoryVar of mandatoryVars) {
+      for (const mandatoryVar of mandatoryVars) {
         // get the variable from the query string
         const varRegex = new RegExp(`(?<=[?&])${mandatoryVar}=[^&]+`);
         // at this point the request url has been validated against our pattern, so we don't have to check if it exists
-        // @ts-ignore
-        result[mandatoryVar] = request.match(varRegex)[0].split("=")[1];
+        result[mandatoryVar] = request.match(varRegex)![0].split("=")[1];
       }
       // now pull out the optional vars
-      for (let optionalVar of optionalVars) {
+      for (const optionalVar of optionalVars) {
         // get the variable from the query string
         const varRegex = new RegExp(`(?<=[?&])${optionalVar}=[^&]+`);
         const match = request.match(varRegex);

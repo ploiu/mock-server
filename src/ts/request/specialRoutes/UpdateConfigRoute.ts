@@ -24,7 +24,7 @@ export default class UpdateConfigRoute extends Route {
     );
   }
 
-  doesUrlMatch(url: string = ""): boolean {
+  doesUrlMatch(url = ""): boolean {
     return super.doesUrlMatch(url);
   }
 

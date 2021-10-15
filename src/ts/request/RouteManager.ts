@@ -12,6 +12,7 @@ export default class RouteManager {
    * @param {Config} config
    */
   public setupRoutes(config: Config) {
+    // @ts-ignore there's no type to cast it to aside from Object, and typescript doesn't like that either
     this.routes = config.routes.map((it: any) => Route.fromObject(it));
   }
 
@@ -34,7 +35,7 @@ export default class RouteManager {
     const method = request.method;
     // put specialRoutes first as they have priority
     const routesToMatchOn = [...specialRoutes, ...this.routes];
-    for (let route of routesToMatchOn) {
+    for (const route of routesToMatchOn) {
       if (
         (route.method === method || method === "HEAD") &&
         route.doesUrlMatch(url)

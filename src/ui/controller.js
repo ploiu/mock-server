@@ -128,6 +128,7 @@ const ui = {
      */
     addLog(log) {
       log.timestamp = this.dateFormat.format(log.timestamp);
+      console.log("adding log");
       this.logs.push(log);
     },
     /** removes all logs from our list */
@@ -158,7 +159,6 @@ const ui = {
       this.routes = routes;
     }
     // set up an event source to retrieve logs
-    const self = this;
     window.setInterval(async () => {
       if (this.currentView === "viewLogs") {
         const data = await this.fetchLogs();
@@ -166,7 +166,7 @@ const ui = {
           for (const log of data) {
             this.addLog(log);
           }
-          self.$nextTick(() => {
+          this.$nextTick(() => {
             this.scrollLogPanel();
           });
         }

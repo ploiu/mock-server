@@ -53,7 +53,9 @@ export class LogManager {
     LogManager.canReadLogs = true;
   }
 
-  private static getColorForMethod(method: RequestMethod): Function {
+  private static getColorForMethod(
+    method: RequestMethod,
+  ): (arg0: string) => void {
     switch (method) {
       case "GET":
         return (str: string) => bgGreen(black(str));
@@ -102,12 +104,12 @@ export class LogEntry {
     public method: string | null,
     public body: any,
     requestHeaders: Headers | null,
-    public timestamp: Number,
+    public timestamp: number,
     public message: string | null,
   ) {
     // the `Headers` prototype doesn't map to a simple object, so we need to do that ourselves
     if (requestHeaders) {
-      for (let headerPair of requestHeaders.entries()) {
+      for (const headerPair of requestHeaders.entries()) {
         this.headers[headerPair[0]] = headerPair[1];
       }
     }

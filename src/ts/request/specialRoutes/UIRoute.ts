@@ -14,7 +14,7 @@ export default class UIRoute extends Route {
     );
   }
 
-  doesUrlMatch(url: string = ""): boolean {
+  doesUrlMatch(url = ""): boolean {
     return url.toLowerCase().includes("/mock-server-ui") ||
       url.toLowerCase().includes("ui.css") ||
       url.toLowerCase().includes("ui.js") ||

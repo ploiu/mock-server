@@ -91,7 +91,7 @@
         const splitText = text.split("");
         // list of promises to wait for
         const promises = [];
-        for (let i = 0; i < splitText.length; i++) {
+        for ( let i = 0; i < splitText.length; i++) {
           promises.push(
             new Promise((resolve) => {
               window.setTimeout(() => {
@@ -394,7 +394,7 @@
         url,
         "Url should match request url",
       );
-    }, 1_000);
+    }, 1_500);
   });
 
   await Ploiu.testAsync(
@@ -483,7 +483,6 @@
       await Ploiu.clickAndWait(
         accordionBody.querySelector(".ploiu-accordion-title"),
       );
-      debugger;
       await Ploiu.clickAndWait(
         accordionBody.querySelector(
           "[data-request-body] .ploiu-accordion-title",
@@ -511,7 +510,7 @@
       (() => {
         let failedTests = Ploiu.failedTests;
         let listHtml = "";
-        for (let testName of failedTests) {
+        for ( const testName of failedTests) {
           listHtml += "<li>" + testName + "</li>";
         }
         return listHtml;

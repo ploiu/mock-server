@@ -32,7 +32,7 @@ export default class SaveRoutesRoute extends Route {
         const buffer = await readAll(
           readerFromStreamReader(request.body!.getReader()),
         );
-        for (let charCode of buffer) {
+        for (const charCode of buffer) {
           requestJson += String.fromCharCode(charCode);
         }
       }
@@ -41,7 +41,7 @@ export default class SaveRoutesRoute extends Route {
       config.routes = [];
       const rawRoutes = JSON.parse(requestJson);
       // routes must first be converted to an actual Route object
-      for (let route of rawRoutes) {
+      for (const route of rawRoutes) {
         config.routes.push(Route.fromObject(route));
       }
       writeConfigFile(this.configLocation, config);

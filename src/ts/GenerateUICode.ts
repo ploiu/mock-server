@@ -20,10 +20,10 @@ if (import.meta.main) {
   let css = "";
   let js = "";
   // populate the css and js files
-  for (let cssFile of cssFiles) {
+  for (const cssFile of cssFiles) {
     css += "\n" + cssFile;
   }
-  for (let jsFile of jsFiles) {
+  for (const jsFile of jsFiles) {
     js += ";\n" + jsFile;
   }
   // properly format the html and css so that it doesn't interfere with the js, since it's inserted into js code

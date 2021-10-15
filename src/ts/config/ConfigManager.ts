@@ -45,7 +45,7 @@ function setupConfigFile(location: string = CONFIG_FILE_LOCATION) {
   config.routes.push(route);
   const textContents = JSON.stringify(config, null, 2);
   // write to the file and close it
-  const bytesWritten = Deno.writeTextFileSync(
+  Deno.writeTextFileSync(
     location,
     textContents,
   );

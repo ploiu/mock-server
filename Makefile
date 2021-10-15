@@ -1,9 +1,5 @@
 FLAGS = --allow-read --allow-write --allow-net --unstable
 
-format:
-	deno fmt --ext ts
-	deno fmt --ext js
-
 test:
 	deno test
 
