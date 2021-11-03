@@ -3,6 +3,7 @@ import { RequestMethod } from "./RequestMethod.ts";
 import UrlVariable from "./UrlVariable.ts";
 import { red } from "https://deno.land/std@0.111.0/fmt/colors.ts";
 import { LogManager } from "../LogManager.ts";
+import compile = WebAssembly.compile;
 
 /**
  * Object that matches against a request and generates a mock response
@@ -11,6 +12,7 @@ export default class Route {
   #pathVariables: UrlVariable[] = [];
   #queryVariables: UrlVariable[] = [];
   #compiledUrlRegex: RegExp;
+  #hasImpliedQueryParams: boolean;
 
   constructor(
     // a name to help the user distinguish which route is which
@@ -29,6 +31,7 @@ export default class Route {
     this.parseUrlVariables();
     // remove trailing `/` from the path
     this.url = this.url.replace(/\/$/, "").replace(/\/\?/, "?");
+    this.#hasImpliedQueryParams = /[?&]:\*/g.test(this.url);
     this.#compiledUrlRegex = this.buildUrlRegex();
     // make sure all the required fields exist TODO
   }
@@ -127,7 +130,7 @@ export default class Route {
    * @returns {any}
    */
   public parseVariablesFromUrl(url: string): any {
-    if (this.#pathVariables.length === 0 && this.#queryVariables.length === 0) {
+    if ((this.#pathVariables.length === 0 && this.#queryVariables.length === 0) && !this.#hasImpliedQueryParams) {
       return {};
     } else {
       const pathVars = this.parsePathVars(url);
@@ -240,6 +243,7 @@ export default class Route {
     const nonOptionalQueryRegex =
       /(\\?)?[?&]:(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=&)))/g;
     const optionalQueryRegex = /(\\?)?[?&]:[a-zA-Z_\-0-9]+(?=\?)\?/g;
+    const anythingQueryRegex = /(\\?)?[?&]:\*/g
     // first replace any query string question marks since `?` is a special regex char
     compiledUrlString = compiledUrlString.replace(/\?:/g, "\\?:");
     // for non-optional path param
@@ -262,6 +266,8 @@ export default class Route {
       optionalQueryRegex,
       "([?&][^=/?&]+=[^&]+)?",
     );
+    // for anything query param
+    compiledUrlString = compiledUrlString.replaceAll(anythingQueryRegex, "([?&][^=/?&]+=[^&]+)*")
     return new RegExp(`^${compiledUrlString}\$`, "i");
   }
 
@@ -325,15 +331,15 @@ export default class Route {
    */
   private parseQueryVars(request: string): any {
     // if we don't have any query variables, return an empty object
-    if (this.#queryVariables.length === 0) {
+    if (this.#queryVariables.length === 0 && !this.#hasImpliedQueryParams) {
       return {};
     } else {
       const result: any = {};
       // for each mandatory query variable, get its value
       const mandatoryVars = this.#queryVariables.filter((it) => !it.optional)
-        .map((it) => it.name);
+          .map((it) => it.name);
       const optionalVars = this.#queryVariables.filter((it) => it.optional).map(
-        (it) => it.name,
+          (it) => it.name,
       );
       for (const mandatoryVar of mandatoryVars) {
         // get the variable from the query string
@@ -354,7 +360,11 @@ export default class Route {
           result[optionalVar] = null;
         }
       }
-      return result;
+      // we don't want to re-include vars that we explicitly called out
+      const explicitVarNames = [...mandatoryVars, ...optionalVars];
+      const impliedQueryVars = (request.match(/(?<=[?&])[^&]*/g) ?? []).filter(it => it && it.length > 0).map(it => it.split('=')).filter(it => !explicitVarNames.includes(it[0]))
+      impliedQueryVars.forEach(([key, value]) => result[key] = value)
+      return result
     }
   }
 }
