@@ -426,8 +426,8 @@ declare namespace Deno {
   }
 
   /**
-   * @deprecated Use `copy` from https://deno.land/std/io/util.ts instead.
-   * `Deno.copy` will be removed in Deno 2.0.
+   * @deprecated Use `copy` from https://deno.land/std/streams/conversion.ts
+   * instead. `Deno.copy` will be removed in Deno 2.0.
    *
    * Copies from `src` to `dst` until either EOF (`null`) is read from `src` or
    * an error occurs. It resolves to the number of bytes copied or rejects with
@@ -453,7 +453,9 @@ declare namespace Deno {
   ): Promise<number>;
 
   /**
-   * @deprecated Use iter from https://deno.land/std/io/util.ts instead. Deno.iter will be removed in Deno 2.0.
+   * @deprecated Use `iterateReader` from
+   * https://deno.land/std/streams/conversion.ts instead. `Deno.iter` will be
+   * removed in Deno 2.0.
    *
    * Turns a Reader, `r`, into an async iterator.
    *
@@ -492,7 +494,9 @@ declare namespace Deno {
   ): AsyncIterableIterator<Uint8Array>;
 
   /**
-   * @deprecated Use iterSync from https://deno.land/std/io/util.ts instead. Deno.iterSync will be removed in Deno 2.0.
+   * @deprecated Use `iterateReaderSync` from
+   * https://deno.land/std/streams/conversion.ts instead. `Deno.iterSync` will
+   * be removed in Deno 2.0.
    *
    * Turns a ReaderSync, `r`, into an iterator.
    *
@@ -978,7 +982,8 @@ declare namespace Deno {
   }
 
   /**
-   * @deprecated Use readAll from https://deno.land/std/io/util.ts instead. Deno.readAll will be removed in Deno 2.0.
+   * @deprecated Use `readAll` from https://deno.land/std/streams/conversion.ts
+   * instead. `Deno.readAll` will be removed in Deno 2.0.
    *
    * Read Reader `r` until EOF (`null`) and resolve to the content as
    * Uint8Array`.
@@ -1002,7 +1007,9 @@ declare namespace Deno {
   export function readAll(r: Reader): Promise<Uint8Array>;
 
   /**
-   * @deprecated Use readAllSync from https://deno.land/std/io/util.ts instead. Deno.readAllSync will be removed in Deno 2.0.
+   * @deprecated Use `readAllSync` from
+   * https://deno.land/std/streams/conversion.ts instead. `Deno.readAllSync`
+   * will be removed in Deno 2.0.
    *
    * Synchronously reads Reader `r` until EOF (`null`) and returns the content
    * as `Uint8Array`.
@@ -1026,7 +1033,8 @@ declare namespace Deno {
   export function readAllSync(r: ReaderSync): Uint8Array;
 
   /**
-   * @deprecated Use writeAll from https://deno.land/std/io/util.ts instead. Deno.readAll will be removed in Deno 2.0.
+   * @deprecated Use `writeAll` from https://deno.land/std/streams/conversion.ts
+   * instead. `Deno.writeAll` will be removed in Deno 2.0.
    *
    * Write all the content of the array buffer (`arr`) to the writer (`w`).
    *
@@ -1055,7 +1063,9 @@ declare namespace Deno {
   export function writeAll(w: Writer, arr: Uint8Array): Promise<void>;
 
   /**
-   * @deprecated Use writeAllSync from https://deno.land/std/io/util.ts instead. Deno.writeAllSync will be removed in Deno 2.0.
+   * @deprecated Use `writeAllSync` from
+   * https://deno.land/std/streams/conversion.ts instead. `Deno.writeAllSync`
+   * will be removed in Deno 2.0.
    *
    * Synchronously write all the content of the array buffer (`arr`) to the
    * writer (`w`).
@@ -1967,6 +1977,12 @@ declare namespace Deno {
     close(): void;
 
     /** Send a signal to process.
+     *
+     * ```ts
+     * const p = Deno.run({ cmd: [ "sleep", "20" ]});
+     * p.kill("SIGTERM");
+     * p.close();
+     * ```
      */
     kill(signo: Signal): void;
   }
@@ -2178,6 +2194,7 @@ declare namespace Deno {
 
   export interface FfiPermissionDescriptor {
     name: "ffi";
+    path?: string | URL;
   }
 
   export interface HrtimePermissionDescriptor {
@@ -2846,7 +2863,7 @@ declare interface URLPatternComponentResult {
   groups: Record<string, string>;
 }
 
-/** `URLPatternResult` is the object returned from `URLPattern.match`. */
+/** `URLPatternResult` is the object returned from `URLPattern.exec`. */
 declare interface URLPatternResult {
   /** The inputs provided when matching. */
   inputs: [URLPatternInit] | [URLPatternInit, string];
@@ -2879,7 +2896,7 @@ declare interface URLPatternResult {
  * ```ts
  * // Specify the pattern as structured data.
  * const pattern = new URLPattern({ pathname: "/users/:user" });
- * const match = pattern.match("/users/joe");
+ * const match = pattern.exec("/users/joe");
  * console.log(match.pathname.groups.user); // joe
  * ```
  *
@@ -2931,15 +2948,15 @@ declare class URLPattern {
    * const pattern = new URLPattern("https://example.com/books/:id");
    *
    * // Match a url string.
-   * let match = pattern.match("https://example.com/books/123");
+   * let match = pattern.exec("https://example.com/books/123");
    * console.log(match.pathname.groups.id); // 123
    *
    * // Match a relative url with a base.
-   * match = pattern.match("/books/123", "https://example.com");
+   * match = pattern.exec("/books/123", "https://example.com");
    * console.log(match.pathname.groups.id); // 123
    *
    * // Match an object of url components.
-   * match = pattern.match({ pathname: "/books/123" });
+   * match = pattern.exec({ pathname: "/books/123" });
    * console.log(match.pathname.groups.id); // 123
    * ```
    */
@@ -3151,26 +3168,29 @@ declare interface TextDecodeOptions {
   stream?: boolean;
 }
 
-declare class TextDecoder {
-  constructor(label?: string, options?: TextDecoderOptions);
-
+interface TextDecoder {
   /** Returns encoding's name, lowercased. */
   readonly encoding: string;
   /** Returns `true` if error mode is "fatal", and `false` otherwise. */
   readonly fatal: boolean;
   /** Returns `true` if ignore BOM flag is set, and `false` otherwise. */
-  readonly ignoreBOM = false;
+  readonly ignoreBOM: boolean;
 
   /** Returns the result of running encoding's decoder. */
   decode(input?: BufferSource, options?: TextDecodeOptions): string;
 }
+
+declare var TextDecoder: {
+  prototype: TextDecoder;
+  new (label?: string, options?: TextDecoderOptions): TextDecoder;
+};
 
 declare interface TextEncoderEncodeIntoResult {
   read: number;
   written: number;
 }
 
-declare class TextEncoder {
+interface TextEncoder {
   /** Returns "utf-8". */
   readonly encoding: "utf-8";
   /** Returns the result of running UTF-8's encoder. */
@@ -3178,26 +3198,40 @@ declare class TextEncoder {
   encodeInto(input: string, dest: Uint8Array): TextEncoderEncodeIntoResult;
 }
 
-declare class TextDecoderStream {
+declare var TextEncoder: {
+  prototype: TextEncoder;
+  new (): TextEncoder;
+};
+
+interface TextDecoderStream {
   /** Returns encoding's name, lowercased. */
   readonly encoding: string;
   /** Returns `true` if error mode is "fatal", and `false` otherwise. */
   readonly fatal: boolean;
   /** Returns `true` if ignore BOM flag is set, and `false` otherwise. */
-  readonly ignoreBOM = false;
-  constructor(label?: string, options?: TextDecoderOptions);
+  readonly ignoreBOM: boolean;
   readonly readable: ReadableStream<string>;
   readonly writable: WritableStream<BufferSource>;
   readonly [Symbol.toStringTag]: string;
 }
 
-declare class TextEncoderStream {
+declare var TextDecoderStream: {
+  prototype: TextDecoderStream;
+  new (label?: string, options?: TextDecoderOptions): TextDecoderStream;
+};
+
+interface TextEncoderStream {
   /** Returns "utf-8". */
   readonly encoding: "utf-8";
   readonly readable: ReadableStream<Uint8Array>;
   readonly writable: WritableStream<string>;
   readonly [Symbol.toStringTag]: string;
 }
+
+declare var TextEncoderStream: {
+  prototype: TextEncoderStream;
+  new (): TextEncoderStream;
+};
 
 /** A controller object that allows you to abort one or more DOM requests as and
  * when desired. */
@@ -3458,18 +3492,25 @@ interface QueuingStrategy<T = any> {
 
 /** This Streams API interface provides a built-in byte length queuing strategy
  * that can be used when constructing streams. */
-declare class CountQueuingStrategy implements QueuingStrategy {
-  constructor(options: { highWaterMark: number });
+interface CountQueuingStrategy extends QueuingStrategy {
   highWaterMark: number;
   size(chunk: any): 1;
 }
 
-declare class ByteLengthQueuingStrategy
-  implements QueuingStrategy<ArrayBufferView> {
-  constructor(options: { highWaterMark: number });
+declare var CountQueuingStrategy: {
+  prototype: CountQueuingStrategy;
+  new (options: { highWaterMark: number }): CountQueuingStrategy;
+};
+
+interface ByteLengthQueuingStrategy extends QueuingStrategy<ArrayBufferView> {
   highWaterMark: number;
   size(chunk: ArrayBufferView): number;
 }
+
+declare var ByteLengthQueuingStrategy: {
+  prototype: ByteLengthQueuingStrategy;
+  new (options: { highWaterMark: number }): ByteLengthQueuingStrategy;
+};
 
 /** This Streams API interface represents a readable stream of byte data. The
  * Fetch API offers a concrete instance of a ReadableStream through the body
@@ -3555,6 +3596,8 @@ interface WritableStreamDefaultController {
   error(error?: any): void;
 }
 
+declare var WritableStreamDefaultController: WritableStreamDefaultController;
+
 /** This Streams API interface is the object returned by
  * WritableStream.getWriter() and once created locks the < writer to the
  * WritableStream ensuring that no other streams can write to the underlying
@@ -3594,6 +3637,8 @@ interface TransformStreamDefaultController<O = any> {
   error(reason?: any): void;
   terminate(): void;
 }
+
+declare var TransformStreamDefaultController: TransformStreamDefaultController;
 
 interface Transformer<I = any, O = any> {
   flush?: TransformStreamDefaultControllerCallback<O>;
@@ -3740,11 +3785,7 @@ type FormDataEntryValue = File | string;
  * form fields and their values, which can then be easily sent using the
  * XMLHttpRequest.send() method. It uses the same format a form would use if the
  * encoding type were set to "multipart/form-data". */
-declare class FormData implements DomIterable<string, FormDataEntryValue> {
-  // TODO(ry) FormData constructor is non-standard.
-  // new(form?: HTMLFormElement): FormData;
-  constructor();
-
+interface FormData {
   append(name: string, value: string | Blob, fileName?: string): void;
   delete(name: string): void;
   get(name: string): FormDataEntryValue | null;
@@ -3760,6 +3801,11 @@ declare class FormData implements DomIterable<string, FormDataEntryValue> {
     thisArg?: any,
   ): void;
 }
+
+declare var FormData: {
+  prototype: FormData;
+  new (): FormData;
+};
 
 interface Body {
   /** A simple getter used to expose a `ReadableStream` of the body contents. */

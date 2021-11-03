@@ -9,10 +9,10 @@ import compile = WebAssembly.compile;
  * Object that matches against a request and generates a mock response
  */
 export default class Route {
-  #pathVariables: UrlVariable[] = [];
-  #queryVariables: UrlVariable[] = [];
-  #compiledUrlRegex: RegExp;
-  #hasImpliedQueryParams: boolean;
+  private pathVariables: UrlVariable[] = [];
+  private queryVariables: UrlVariable[] = [];
+  private compiledUrlRegex: RegExp;
+  private hasImpliedQueryParams: boolean;
 
   constructor(
     // a name to help the user distinguish which route is which
@@ -31,8 +31,8 @@ export default class Route {
     this.parseUrlVariables();
     // remove trailing `/` from the path
     this.url = this.url.replace(/\/$/, "").replace(/\/\?/, "?");
-    this.#hasImpliedQueryParams = /[?&]:\*/g.test(this.url);
-    this.#compiledUrlRegex = this.buildUrlRegex();
+    this.hasImpliedQueryParams = /[?&]:\*/g.test(this.url);
+    this.compiledUrlRegex = this.buildUrlRegex();
     // make sure all the required fields exist TODO
   }
 
@@ -109,10 +109,10 @@ export default class Route {
     url = url.toLowerCase();
     // make sure it passes the general format of this url
     const basicPatternMatches = url === this.url ||
-      this.#compiledUrlRegex.test(url);
+      this.compiledUrlRegex.test(url);
     // make sure all mandatory query parameters are present
     let hasAllMandatoryQueryFlags = true;
-    for (const queryVariable of this.#queryVariables) {
+    for (const queryVariable of this.queryVariables) {
       if (!queryVariable.optional) {
         const queryRegex = new RegExp(`[?&]${queryVariable.name}=[^&]+`, "i");
         hasAllMandatoryQueryFlags = hasAllMandatoryQueryFlags &&
@@ -130,7 +130,10 @@ export default class Route {
    * @returns {any}
    */
   public parseVariablesFromUrl(url: string): any {
-    if ((this.#pathVariables.length === 0 && this.#queryVariables.length === 0) && !this.#hasImpliedQueryParams) {
+    if (
+      (this.pathVariables.length === 0 && this.queryVariables.length === 0) &&
+      !this.hasImpliedQueryParams
+    ) {
       return {};
     } else {
       const pathVars = this.parsePathVars(url);
@@ -146,7 +149,7 @@ export default class Route {
    * @returns {boolean}
    */
   public hasPathVariable(name: string, optional: boolean): boolean {
-    return this.#pathVariables.filter((it) =>
+    return this.pathVariables.filter((it) =>
       it.name === name && it.optional === optional
     ).length > 0;
   }
@@ -158,7 +161,7 @@ export default class Route {
    * @returns {boolean}
    */
   public hasQueryVariable(name: string, optional: boolean): boolean {
-    return this.#queryVariables.filter((it) =>
+    return this.queryVariables.filter((it) =>
       it.name === name && it.optional === optional
     ).length > 0;
   }
@@ -216,14 +219,14 @@ export default class Route {
     const matchedPathVars = this.url.match(pathVarRegex);
     if (matchedPathVars) {
       for (const pathVar of matchedPathVars) {
-        this.#pathVariables.push(UrlVariable.fromString(pathVar));
+        this.pathVariables.push(UrlVariable.fromString(pathVar));
       }
     }
     // match and pull out our query variables
     const matchedQueryVars = this.url.match(queryVarRegex);
     if (matchedQueryVars) {
       for (const queryVar of matchedQueryVars) {
-        this.#queryVariables.push(UrlVariable.fromString(queryVar));
+        this.queryVariables.push(UrlVariable.fromString(queryVar));
       }
     }
   }
@@ -243,7 +246,7 @@ export default class Route {
     const nonOptionalQueryRegex =
       /(\\?)?[?&]:(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=&)))/g;
     const optionalQueryRegex = /(\\?)?[?&]:[a-zA-Z_\-0-9]+(?=\?)\?/g;
-    const anythingQueryRegex = /(\\?)?[?&]:\*/g
+    const anythingQueryRegex = /(\\?)?[?&]:\*/g;
     // first replace any query string question marks since `?` is a special regex char
     compiledUrlString = compiledUrlString.replace(/\?:/g, "\\?:");
     // for non-optional path param
@@ -267,7 +270,10 @@ export default class Route {
       "([?&][^=/?&]+=[^&]+)?",
     );
     // for anything query param
-    compiledUrlString = compiledUrlString.replaceAll(anythingQueryRegex, "([?&][^=/?&]+=[^&]+)*")
+    compiledUrlString = compiledUrlString.replaceAll(
+      anythingQueryRegex,
+      "([?&][^=/?&]+=[^&]+)*",
+    );
     return new RegExp(`^${compiledUrlString}\$`, "i");
   }
 
@@ -331,15 +337,15 @@ export default class Route {
    */
   private parseQueryVars(request: string): any {
     // if we don't have any query variables, return an empty object
-    if (this.#queryVariables.length === 0 && !this.#hasImpliedQueryParams) {
+    if (this.queryVariables.length === 0 && !this.hasImpliedQueryParams) {
       return {};
     } else {
       const result: any = {};
       // for each mandatory query variable, get its value
-      const mandatoryVars = this.#queryVariables.filter((it) => !it.optional)
-          .map((it) => it.name);
-      const optionalVars = this.#queryVariables.filter((it) => it.optional).map(
-          (it) => it.name,
+      const mandatoryVars = this.queryVariables.filter((it) => !it.optional)
+        .map((it) => it.name);
+      const optionalVars = this.queryVariables.filter((it) => it.optional).map(
+        (it) => it.name,
       );
       for (const mandatoryVar of mandatoryVars) {
         // get the variable from the query string
@@ -362,9 +368,13 @@ export default class Route {
       }
       // we don't want to re-include vars that we explicitly called out
       const explicitVarNames = [...mandatoryVars, ...optionalVars];
-      const impliedQueryVars = (request.match(/(?<=[?&])[^&]*/g) ?? []).filter(it => it && it.length > 0).map(it => it.split('=')).filter(it => !explicitVarNames.includes(it[0]))
-      impliedQueryVars.forEach(([key, value]) => result[key] = value)
-      return result
+      const impliedQueryVars = (request.match(/(?<=[?&])[^&]*/g) ?? []).filter(
+        (it) => it && it.length > 0
+      ).map((it) => it.split("=")).filter((it) =>
+        !explicitVarNames.includes(it[0])
+      );
+      impliedQueryVars.forEach(([key, value]) => result[key] = value);
+      return result;
     }
   }
 }

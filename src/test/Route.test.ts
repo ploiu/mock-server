@@ -269,11 +269,14 @@ Deno.test("doesUrlMatch matches any query params if the url specifies ?:*", () =
     url: "/test?:*",
     responseHeaders: {},
     response: "hi",
-    responseStatus: 200
-  })
-  assert(route.doesUrlMatch("/test?a=b&c=3&d=5"), "url should accept any query params")
-  assert(route.doesUrlMatch("/test"), "url should accept zero query params")
-})
+    responseStatus: 200,
+  });
+  assert(
+    route.doesUrlMatch("/test?a=b&c=3&d=5"),
+    "url should accept any query params",
+  );
+  assert(route.doesUrlMatch("/test"), "url should accept zero query params");
+});
 
 Deno.test("doesUrlMatch still requires explicitly-named query params if ?:* or &:* is passed", () => {
   const route = Route.fromObject({
@@ -282,11 +285,18 @@ Deno.test("doesUrlMatch still requires explicitly-named query params if ?:* or &
     url: "/test?:name&:*",
     responseHeaders: {},
     response: "hi",
-    responseStatus: 200
-  })
-  assert(route.doesUrlMatch("/test?name=test&a=3"), "url should still accept required query params")
-  assertEquals(false, route.doesUrlMatch("/test?a=3"), "url should still require query params")
-})
+    responseStatus: 200,
+  });
+  assert(
+    route.doesUrlMatch("/test?name=test&a=3"),
+    "url should still accept required query params",
+  );
+  assertEquals(
+    false,
+    route.doesUrlMatch("/test?a=3"),
+    "url should still require query params",
+  );
+});
 
 Deno.test("parseVariablesFromUrl should return an empty js object if there are no variables to parse", () => {
   const route = Route.fromObject({
@@ -406,11 +416,18 @@ Deno.test("parseVariablesFromUrl should parse non-named query variables allowed 
     url: "/test?:*",
     responseHeaders: {},
     response: "{{a}}, {{b}}, {{c}}, {{d:test}}",
-    responseStatus: 200
-  })
-  const result = await (await route.execute(<Request>{url: "/test?a=1&b=2&c=3", method: "GET"})).text()
-  assertEquals("1, 2, 3, test", result, "should parse non-explicitly named variables")
-})
+    responseStatus: 200,
+  });
+  const result =
+    await (await route.execute(
+      <Request> { url: "/test?a=1&b=2&c=3", method: "GET" },
+    )).text();
+  assertEquals(
+    "1, 2, 3, test",
+    result,
+    "should parse non-explicitly named variables",
+  );
+});
 
 Deno.test("execute should template out the response body from url parameters", async () => {
   const route = Route.fromObject({
