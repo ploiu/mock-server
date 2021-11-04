@@ -418,10 +418,9 @@ Deno.test("parseVariablesFromUrl should parse non-named query variables allowed 
     response: "{{a}}, {{b}}, {{c}}, {{d:test}}",
     responseStatus: 200,
   });
-  const result =
-    await (await route.execute(
-      <Request> { url: "/test?a=1&b=2&c=3", method: "GET" },
-    )).text();
+  const result = await (await route.execute(
+    <Request> { url: "/test?a=1&b=2&c=3", method: "GET" },
+  )).text();
   assertEquals(
     "1, 2, 3, test",
     result,

@@ -369,7 +369,7 @@ export default class Route {
       // we don't want to re-include vars that we explicitly called out
       const explicitVarNames = [...mandatoryVars, ...optionalVars];
       const impliedQueryVars = (request.match(/(?<=[?&])[^&]*/g) ?? []).filter(
-        (it) => it && it.length > 0
+        (it) => it && it.length > 0,
       ).map((it) => it.split("=")).filter((it) =>
         !explicitVarNames.includes(it[0])
       );
