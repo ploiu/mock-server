@@ -1,9 +1,8 @@
 //deno-lint-ignore-file no-explicit-any
 import { RequestMethod } from "./RequestMethod.ts";
 import UrlVariable from "./UrlVariable.ts";
-import { red } from "https://deno.land/std@0.111.0/fmt/colors.ts";
+import { red } from "https://deno.land/std@0.114.0/fmt/colors.ts";
 import { LogManager } from "../LogManager.ts";
-import compile = WebAssembly.compile;
 
 /**
  * Object that matches against a request and generates a mock response

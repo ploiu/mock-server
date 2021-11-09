@@ -2,10 +2,8 @@ import {
   assert,
   assertEquals,
   assertNotEquals,
-} from "https://deno.land/std@0.111.0/testing/asserts.ts";
+} from "https://deno.land/std@0.114.0/testing/asserts.ts";
 import Route from "../ts/request/Route.ts";
-import { readAll } from "https://deno.land/std@0.111.0/streams/conversion.ts";
-import { readerFromStreamReader } from "https://deno.land/std@0.111.0/io/mod.ts";
 
 Deno.test("fromObject differentiates between response as object and response as string", () => {
   const routeStringResponse = Route.fromObject({
@@ -445,7 +443,7 @@ Deno.test("execute should template out the response body from url parameters", a
     },
   );
   assertEquals(
-    await bodyToText(res.body),
+    await res.text(),
     "Hello, ploiu! You are 23 years old and you probably like green pasta",
   );
 });
@@ -468,7 +466,7 @@ Deno.test("execute should use default variables if an optional variable is not i
     },
   );
   assertEquals(
-    await bodyToText(res.body),
+    await res.text(),
     "Hello, ploiu! You are 23 years old and you probably like green pasta. My favorite color is blue",
     "default values should be used if the variable is not included",
   );
@@ -492,7 +490,7 @@ Deno.test("execute should fill in default variable fields if the variable is inc
     },
   );
   assertEquals(
-    await bodyToText(res.body),
+    await res.text(),
     "Hello, ploiu! You are 23 years old and you probably like orange pasta. My favorite color is orange",
     "default value templates should be filled if the variable is included",
   );
@@ -561,20 +559,3 @@ Deno.test("execute should properly handle `null` for response body", async () =>
   );
   assertEquals(res.body, null, "response body should be null");
 });
-
-async function bodyToText(
-  body: ReadableStream<Uint8Array> | null,
-): Promise<string> {
-  let reader: Deno.Reader;
-  let contents = "";
-  if (body) {
-    reader = readerFromStreamReader(body.getReader());
-    const rawContents = await readAll(reader);
-    for (const code of rawContents) {
-      contents += String.fromCharCode(code);
-    }
-  } else {
-    contents = "";
-  }
-  return contents;
-}

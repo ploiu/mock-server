@@ -1,13 +1,13 @@
-import { listenAndServe } from "https://deno.land/std@0.111.0/http/mod.ts";
-import { parse } from "https://deno.land/std@0.111.0/flags/mod.ts";
-import { emptyDirSync } from "https://deno.land/std@0.111.0/fs/mod.ts";
+import { listenAndServe } from "https://deno.land/std@0.114.0/http/mod.ts";
+import { parse } from "https://deno.land/std@0.114.0/flags/mod.ts";
+import { emptyDirSync } from "https://deno.land/std@0.114.0/fs/mod.ts";
 import Config from "./config/Config.ts";
 import { readConfigFile } from "./config/ConfigManager.ts";
 import {
   cyan,
   green,
   magenta,
-} from "https://deno.land/std@0.111.0/fmt/colors.ts";
+} from "https://deno.land/std@0.114.0/fmt/colors.ts";
 import RouteManager from "./request/RouteManager.ts";
 import Route from "./request/Route.ts";
 import UpdateConfigRoute from "./request/specialRoutes/UpdateConfigRoute.ts";

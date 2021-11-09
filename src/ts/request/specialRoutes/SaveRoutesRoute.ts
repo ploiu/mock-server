@@ -2,10 +2,6 @@ import Route from "../Route.ts";
 import { RequestMethod } from "../RequestMethod.ts";
 import RouteManager from "../RouteManager.ts";
 import { readConfigFile, writeConfigFile } from "../../config/ConfigManager.ts";
-import {
-  readAll,
-  readerFromStreamReader,
-} from "https://deno.land/std@0.111.0/streams/conversion.ts";
 
 /**
  * handles saving the passed request json into our config file, and then refreshes the config
@@ -31,12 +27,7 @@ export default class SaveRoutesRoute extends Route {
       const requestBody: ReadableStream | null = request.body;
       let requestJson = "";
       if (requestBody) {
-        const buffer = await readAll(
-          readerFromStreamReader(request.body!.getReader()),
-        );
-        for (const charCode of buffer) {
-          requestJson += String.fromCharCode(charCode);
-        }
+        requestJson = await request.text();
       }
       const config = readConfigFile(this.configLocation);
       // clear all config routes in order to re-write them
