@@ -15,6 +15,7 @@ export default class LogRoute extends Route {
       new Headers(),
       null,
       200,
+      true,
     );
   }
 

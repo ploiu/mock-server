@@ -26,6 +26,8 @@ export default class Route {
     public response: string | null,
     // the http status code
     public responseStatus: number,
+    // whether the route is "turned on"
+    public isEnabled: boolean,
   ) {
     this.parseUrlVariables();
     // remove trailing `/` from the path
@@ -36,8 +38,8 @@ export default class Route {
   }
 
   static fromObject(
-    // @ts-ignore this is object destructuring, and I can't specify types
-    { title, url, method, responseHeaders, response, responseStatus },
+    // @ts-ignore deno-fmt-ignore this is object destructuring, and I can't specify types
+    {title, url, method, responseHeaders, response, responseStatus, isEnabled,},
   ): Route {
     return new Route(
       title,
@@ -51,6 +53,7 @@ export default class Route {
         ? JSON.stringify(response)
         : null,
       Number(responseStatus),
+      isEnabled,
     );
   }
 
@@ -302,12 +305,12 @@ export default class Route {
       const allUrlArgs = splitUrl.filter((it) => it.startsWith(":"));
       const requiredArgs = allUrlArgs.filter((it) => !it.endsWith("?"));
       /*
-        now iterate through allUrlArgs.
-        1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
-        2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
-          a. if there are enough, fill it and splice
-          b. if there are not enough, ignore it
-         */
+              now iterate through allUrlArgs.
+              1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
+              2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
+                a. if there are enough, fill it and splice
+                b. if there are not enough, ignore it
+               */
       for (let i = 0; i < allUrlArgs.length; i++) {
         const arg = allUrlArgs[i];
         const isRequired = !arg.endsWith("?");
@@ -375,5 +378,22 @@ export default class Route {
       impliedQueryVars.forEach(([key, value]) => result[key] = value);
       return result;
     }
+  }
+
+  public toJSON(): string {
+    const result: any = {};
+    for (const key in this) {
+      if (
+        ![
+          "pathVariables",
+          "queryVariables",
+          "compiledUrlRegex",
+          "hasImpliedQueryParams",
+        ].includes(key)
+      ) {
+        result[key] = this[key];
+      }
+    }
+    return result;
   }
 }

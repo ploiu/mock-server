@@ -39,7 +39,8 @@ export default class RouteManager {
     for (const route of routesToMatchOn) {
       if (
         (route.method === method || method === "HEAD") &&
-        route.doesUrlMatch(url)
+        route.doesUrlMatch(url) &&
+        route.isEnabled
       ) {
         matchingRoute = route;
         break;

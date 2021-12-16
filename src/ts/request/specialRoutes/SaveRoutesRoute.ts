@@ -18,6 +18,7 @@ export default class SaveRoutesRoute extends Route {
       new Headers(),
       null,
       200,
+      true,
     );
   }
 
@@ -37,7 +38,7 @@ export default class SaveRoutesRoute extends Route {
       for (const route of rawRoutes) {
         config.routes.push(Route.fromObject(route));
       }
-      writeConfigFile(this.configLocation, config);
+      writeConfigFile(config, this.configLocation);
       this.routeManager.setupRoutes(config);
       return new Response('{"success": true}', { status: 200 });
     } catch (e) {

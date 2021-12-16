@@ -21,6 +21,7 @@ export default class UpdateConfigRoute extends Route {
       new Headers(),
       "Refreshed Config\n",
       200,
+      true,
     );
   }
 

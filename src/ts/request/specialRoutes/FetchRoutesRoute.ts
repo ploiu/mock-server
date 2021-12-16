@@ -20,6 +20,7 @@ export default class FetchRoutesRoute extends Route {
       new Headers(),
       null,
       200,
+      true,
     );
     this.responseHeaders.append("Content-Type", "application/json");
   }

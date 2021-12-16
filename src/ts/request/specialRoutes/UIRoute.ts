@@ -11,6 +11,7 @@ export default class UIRoute extends Route {
       new Headers(),
       null,
       200,
+      true,
     );
   }
 

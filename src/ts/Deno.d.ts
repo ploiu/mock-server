@@ -2007,9 +2007,23 @@ declare namespace Deno {
    */
   export function resources(): ResourceMap;
 
+  /**
+   * Additional information for FsEvent objects with the "other" kind.
+   *
+   * - "rescan": rescan notices indicate either a lapse in the events or a
+   *    change in the filesystem such that events received so far can no longer
+   *    be relied on to represent the state of the filesystem now. An
+   *    application that simply reacts to file changes may not care about this.
+   *    An application that keeps an in-memory representation of the filesystem
+   *    will need to care, and will need to refresh that representation directly
+   *    from the filesystem.
+   */
+  export type FsEventFlag = "rescan";
+
   export interface FsEvent {
-    kind: "any" | "access" | "create" | "modify" | "remove";
+    kind: "any" | "access" | "create" | "modify" | "remove" | "other";
     paths: string[];
+    flag?: FsEventFlag;
   }
 
   /**
@@ -3379,7 +3393,7 @@ declare class AbortController {
   readonly signal: AbortSignal;
   /** Invoking this method will set this object's AbortSignal's aborted flag and
    * signal to any observers that the associated activity is to be aborted. */
-  abort(): void;
+  abort(reason?: any): void;
 }
 
 interface AbortSignalEventMap {
@@ -3392,6 +3406,7 @@ interface AbortSignal extends EventTarget {
   /** Returns true if this AbortSignal's AbortController has signaled to abort,
    * and false otherwise. */
   readonly aborted: boolean;
+  readonly reason?: unknown;
   onabort: ((this: AbortSignal, ev: Event) => any) | null;
   addEventListener<K extends keyof AbortSignalEventMap>(
     type: K,
@@ -3418,6 +3433,7 @@ interface AbortSignal extends EventTarget {
 declare var AbortSignal: {
   prototype: AbortSignal;
   new (): AbortSignal;
+  abort(reason?: any): AbortSignal;
 };
 
 interface FileReaderEventMap {

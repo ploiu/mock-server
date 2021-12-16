@@ -39,6 +39,14 @@
         this.fail(message);
       }
     },
+    assertNotEquals(notExpected, actual, message = "") {
+      if (notExpected === actual) {
+        if (message && message !== "") {
+          console.error(message);
+        }
+        this.fail(message);
+      }
+    },
     assertNull(value, message = "") {
       this.assert(value === null || value === undefined, message);
     },
@@ -91,19 +99,19 @@
         const splitText = text.split("");
         // list of promises to wait for
         const promises = [];
-        for ( let i = 0; i < splitText.length; i++) {
+        for (let i = 0; i < splitText.length; i++) {
           promises.push(
-            new Promise((resolve) => {
-              window.setTimeout(() => {
-                const event = new Event("input", {
-                  bubbles: true,
-                  cancelable: true,
-                });
-                inputElement.value += splitText[i];
-                inputElement.dispatchEvent(event);
-                resolve();
-              }, keyIntervalMS * i);
-            }),
+              new Promise((resolve) => {
+                window.setTimeout(() => {
+                  const event = new Event("input", {
+                    bubbles: true,
+                    cancelable: true,
+                  });
+                  inputElement.value += splitText[i];
+                  inputElement.dispatchEvent(event);
+                  resolve();
+                }, keyIntervalMS * i);
+              }),
           );
         }
         Promise.allSettled(promises).then(() => resolve());
@@ -143,7 +151,35 @@
         }, delayTime);
       });
     },
+
+    ////// misc methods
+    showResults() {
+      const dialog = document.createElement("dialog");
+      document.body.appendChild(dialog);
+      dialog.style.color = "darkgray";
+      if (Ploiu.failedTests.length > 0) {
+        dialog.innerHTML = `
+    <h1 style="color: red">There are test failures:</h1>
+    <ul>
+    ${
+            (() => {
+              let failedTests = Ploiu.failedTests;
+              let listHtml = "";
+              for (const testName of failedTests) {
+                listHtml += "<li>" + testName + "</li>";
+              }
+              return listHtml;
+            })()
+        }
+    </ul>
+  `;
+      } else {
+        dialog.innerHTML = '<h1 style="color: forestgreen">All Tests Passed</h1>';
+      }
+      dialog.showModal();
+    }
   };
+  ;
 
   console.log("starting tests...");
   await Ploiu.testAsync("should show only 1 route on page load", async () => {
@@ -497,30 +533,5 @@
     },
   );
 
-  // show the test results to the UI
-  const dialog = document.createElement("dialog");
-  document.body.appendChild(dialog);
-  dialog.style.backgroundColor = "black";
-  dialog.style.color = "white";
-  if (Ploiu.failedTests.length > 0) {
-    dialog.innerHTML = `
-    <h1 class="text-error">There are test failures:</h1>
-    <ul>
-    ${
-      (() => {
-        let failedTests = Ploiu.failedTests;
-        let listHtml = "";
-        for ( const testName of failedTests) {
-          listHtml += "<li>" + testName + "</li>";
-        }
-        return listHtml;
-      })()
-    }
-    </ul>
-  `;
-  } else {
-    dialog.innerHTML = '<h1 class="text-success">All Tests Passed</h1>';
-  }
-
-  dialog.showModal();
+  Ploiu.showResults()
 })();
