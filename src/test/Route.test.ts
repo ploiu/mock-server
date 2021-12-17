@@ -2,7 +2,7 @@ import {
   assert,
   assertEquals,
   assertNotEquals,
-} from "https://deno.land/std@0.114.0/testing/asserts.ts";
+} from "https://deno.land/std@0.118.0/testing/asserts.ts";
 import Route from "../ts/request/Route.ts";
 
 Deno.test("fromObject differentiates between response as object and response as string", () => {
@@ -14,6 +14,7 @@ Deno.test("fromObject differentiates between response as object and response as 
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
 
   const routeObjectResponse = Route.fromObject({
@@ -24,6 +25,7 @@ Deno.test("fromObject differentiates between response as object and response as 
     responseHeaders: {},
     response: { value: "hi" },
     responseStatus: 200,
+    isEnabled: true,
   });
 
   assertEquals(routeStringResponse.response, "hi");
@@ -39,6 +41,7 @@ Deno.test("properly parses path variables", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.hasPathVariable("name", false),
@@ -59,6 +62,7 @@ Deno.test("properly parses query variables", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.hasQueryVariable("name", false),
@@ -78,6 +82,7 @@ Deno.test("doesUrlMatch matches simple url", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(route.doesUrlMatch("/test"), "url should match /test");
   // make sure other routes starting with /test don't match
@@ -96,6 +101,7 @@ Deno.test("doesUrlMatch matches urls with non-alphanumeric characters", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.doesUrlMatch("/test/test@example.com/123456"),
@@ -111,6 +117,7 @@ Deno.test("doesUrlMatch matches simple url with multiple path sections", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(route.doesUrlMatch("/test/a/b/c"), "url should match /test/a/b/c");
   // ensure other routes that don't match aren't counted
@@ -129,6 +136,7 @@ Deno.test("doesUrlMatch matches url with path variables", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.doesUrlMatch("/test/ploiu/23"),
@@ -149,6 +157,7 @@ Deno.test("doesUrlMatch matches url with optional path variables", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.doesUrlMatch("/test/ploiu/23"),
@@ -170,6 +179,7 @@ Deno.test("doesUrlMatch matches url with query variables", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.doesUrlMatch("/test?name=ploiu&age=23"),
@@ -190,6 +200,7 @@ Deno.test("doesUrlMatch ensures query variable names are included", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assertNotEquals(
     route.doesUrlMatch("/test?abc=ploiu&efg=23"),
@@ -211,6 +222,7 @@ Deno.test("doesUrlMatch matches url with optional query variables", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.doesUrlMatch("/test?name=ploiu&age=23"),
@@ -230,6 +242,7 @@ Deno.test("doesUrlMatch matches url with mandatory and optional path and query p
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.doesUrlMatch("/test/ploiu/23?favoriteColor=green&favoriteFood=pasta"),
@@ -249,6 +262,7 @@ Deno.test("doesUrlMatch matches url with mandatory and optional path and query p
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.doesUrlMatch("/test/ploiu/23?favoriteColor=green&favoriteFood=pasta"),
@@ -268,6 +282,7 @@ Deno.test("doesUrlMatch matches any query params if the url specifies ?:*", () =
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.doesUrlMatch("/test?a=b&c=3&d=5"),
@@ -284,6 +299,7 @@ Deno.test("doesUrlMatch still requires explicitly-named query params if ?:* or &
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assert(
     route.doesUrlMatch("/test?name=test&a=3"),
@@ -304,6 +320,7 @@ Deno.test("parseVariablesFromUrl should return an empty js object if there are n
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
   assertEquals(route.parseVariablesFromUrl("/test/a/b/c"), {});
 });
@@ -316,6 +333,7 @@ Deno.test("parseVariablesFromUrl should return an object with path variables in 
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
 
   assertEquals(route.parseVariablesFromUrl("/test/ploiu/23"), {
@@ -332,6 +350,7 @@ Deno.test("parseVariablesFromUrl should return an object with path variables in 
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
 
   assertEquals(route.parseVariablesFromUrl("/test/ploiu/hi/23"), {
@@ -348,6 +367,7 @@ Deno.test("parseVariablesFromUrl should set non-included path variables as null"
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
 
   assertEquals(route.parseVariablesFromUrl("/test/ploiu/23"), {
@@ -365,6 +385,7 @@ Deno.test("parseVariablesFromUrl should set non-included path variables for vari
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
 
   assertEquals(route.parseVariablesFromUrl("/test/hi/23"), {
@@ -382,6 +403,7 @@ Deno.test("parseVariablesFromUrl should include query parameters", () => {
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
 
   assertEquals(route.parseVariablesFromUrl("/test?name=ploiu&age=23"), {
@@ -398,6 +420,7 @@ Deno.test("parseVariablesFromUrl should set non-included query variables as null
     responseHeaders: {},
     response: "hi",
     responseStatus: 200,
+    isEnabled: true,
   });
 
   assertEquals(route.parseVariablesFromUrl("/test?age=23"), {
@@ -415,6 +438,7 @@ Deno.test("parseVariablesFromUrl should parse non-named query variables allowed 
     responseHeaders: {},
     response: "{{a}}, {{b}}, {{c}}, {{d:test}}",
     responseStatus: 200,
+    isEnabled: true,
   });
   const result = await (await route.execute(
     <Request> { url: "/test?a=1&b=2&c=3", method: "GET" },
@@ -435,6 +459,7 @@ Deno.test("execute should template out the response body from url parameters", a
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor}} {{favoriteFood}}`,
     method: "GET",
     responseStatus: 200,
+    isEnabled: true,
   });
   const res = await route.execute(
     <Request> {
@@ -457,6 +482,7 @@ Deno.test("execute should use default variables if an optional variable is not i
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor:green}} {{favoriteFood}}. My favorite color is {{favoriteColor:blue}}`,
     method: "GET",
     responseStatus: 200,
+    isEnabled: true,
   });
 
   const res = await route.execute(
@@ -481,6 +507,7 @@ Deno.test("execute should fill in default variable fields if the variable is inc
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor:green}} {{favoriteFood}}. My favorite color is {{favoriteColor:blue}}`,
     method: "GET",
     responseStatus: 200,
+    isEnabled: true,
   });
 
   const res = await route.execute(
@@ -505,6 +532,7 @@ Deno.test("execute should set the proper response status code", async () => {
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor}} {{favoriteFood}}`,
     method: "GET",
     responseStatus: 418,
+    isEnabled: true,
   });
   const res = await route.execute(
     <Request> {
@@ -526,6 +554,7 @@ Deno.test("execute should set the proper response headers", async () => {
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor}} {{favoriteFood}}`,
     method: "GET",
     responseStatus: 418,
+    isEnabled: true,
   });
   const res = await route.execute(
     <Request> {
@@ -550,6 +579,7 @@ Deno.test("execute should properly handle `null` for response body", async () =>
     response: null,
     method: "GET",
     responseStatus: 418,
+    isEnabled: true,
   });
   const res = await route.execute(
     <Request> {

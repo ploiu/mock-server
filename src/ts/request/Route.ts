@@ -1,7 +1,7 @@
 //deno-lint-ignore-file no-explicit-any
 import { RequestMethod } from "./RequestMethod.ts";
 import UrlVariable from "./UrlVariable.ts";
-import { red } from "https://deno.land/std@0.114.0/fmt/colors.ts";
+import { red } from "https://deno.land/std@0.118.0/fmt/colors.ts";
 import { LogManager } from "../LogManager.ts";
 
 /**
@@ -305,14 +305,13 @@ export default class Route {
       const allUrlArgs = splitUrl.filter((it) => it.startsWith(":"));
       const requiredArgs = allUrlArgs.filter((it) => !it.endsWith("?"));
       /*
-              now iterate through allUrlArgs.
-              1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
-              2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
-                a. if there are enough, fill it and splice
-                b. if there are not enough, ignore it
-               */
-      for (let i = 0; i < allUrlArgs.length; i++) {
-        const arg = allUrlArgs[i];
+        now iterate through allUrlArgs.
+        1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
+        2. if the arg is optional, check if there are enough inputArgs to cover it and all other required args
+          a. if there are enough, fill it and splice
+          b. if there are not enough, ignore it
+       */
+      for (const arg of allUrlArgs) {
         const isRequired = !arg.endsWith("?");
         // 1. if the arg is required, populate it with index 0 of inputArgs and splice out the inputArg
         if (isRequired) {

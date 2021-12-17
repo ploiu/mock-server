@@ -1,3 +1,13 @@
+// so vue has an issue in chrome where using a DateTimeFormat in data throws an exception when trying to call .format. This only happens in chrome, not edge or firefox
+globalThis.dateFormat = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+})
+
 const ui = {
   data() {
     return {
@@ -22,14 +32,6 @@ const ui = {
       message: null,
       messageType: null,
       logs: [],
-      dateFormat: new Intl.DateTimeFormat("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      }),
     };
   },
   methods: {
@@ -58,7 +60,7 @@ const ui = {
     },
     /** creates a new route object, adds it to our route list, and sets it as the selected route */
     addNew() {
-      const route = {};
+      const route = {isEnabled: true};
       this.routes.push(route);
       this.selectedRoute = route;
     },
@@ -127,7 +129,7 @@ const ui = {
      * @param {{url: string, method: string, body: any | null, timestamp: Number | string}} log
      */
     addLog(log) {
-      log.timestamp = this.dateFormat.format(log.timestamp);
+      log.timestamp = globalThis.dateFormat.format(log.timestamp);
       console.log("adding log");
       this.logs.push(log);
     },

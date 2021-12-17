@@ -426,8 +426,8 @@
         "log method should match request method",
       );
       Ploiu.assertEquals(
-        "/HelloWorld/ploiu?age=23",
-        url,
+        "/helloworld/ploiu?age=23",
+        url.toLowerCase(),
         "Url should match request url",
       );
     }, 1_500);
@@ -533,5 +533,30 @@
     },
   );
 
+  await Ploiu.testAsync("should allow toggling between enabled and disabled state", async () => {
+      await Ploiu.clickAndWait(document.querySelector('#clear-logs-button'))
+      const editRoutesButton = document.querySelector('#edit-route-view-button')
+      await Ploiu.clickAndWait(editRoutesButton)
+      const addNewButton = document.querySelector('#add-new-button')
+      await Ploiu.clickAndWait(addNewButton)
+      await Ploiu.type('test disable', document.querySelector('#route-name-input'))
+      await Ploiu.type('200', document.querySelector('#route-status-code-input'))
+      await Ploiu.select(0, document.querySelector('select#route-request-method-input'))
+      await Ploiu.type('/testDisabled', document.querySelector('#route-request-url'))
+      // now time to disable the route
+      const disableButton = document.querySelector('#route-enable-toggle-button')
+      Ploiu.assertNotNull(disableButton, 'the disable button should display')
+      Ploiu.assertEquals('Enabled', disableButton.innerText, 'The disable button should default to enabled')
+      await Ploiu.clickAndWait(disableButton)
+      Ploiu.assertEquals('Disabled', disableButton.innerText, 'After being clicked, the disable button should allow for re-enabling the route')
+      await Ploiu.clickAndWait(document.querySelector('#view-logs-view-button'))
+      const result = await fetch('/testDisabled')
+      Ploiu.assertEquals(404, result.status, "The route should return a 404 since it's disabled")
+      await Ploiu.delay(() => {}, 1_250)
+      const logs = [...document.querySelectorAll('#logArea > accordion-element > div.ploiu-accordion-title')]
+      // we only want 1 log, saying that the route was not found
+      Ploiu.assertEquals(1, logs.length, "there should only be 1 log for this test, instead there are " + logs.length)
+      Ploiu.assert(logs[0].innerText.includes('requested route /testDisabled, method GET not found'), 'log should show that the route was not found')
+  })
   Ploiu.showResults()
 })();

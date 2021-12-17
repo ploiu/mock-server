@@ -11,7 +11,7 @@ import {
   bgYellow,
   black,
   yellow,
-} from "https://deno.land/std@0.114.0/fmt/colors.ts";
+} from "https://deno.land/std@0.118.0/fmt/colors.ts";
 import { RequestMethod } from "./request/RequestMethod.ts";
 
 /**

@@ -63,6 +63,9 @@ html {
   white-space: break-spaces;
   word-break: break-word;
 }
+#route-panel .route-list li.clickable.disabled {
+  text-decoration: 3px line-through;
+}
 #route-panel .route-list li.clickable:hover {
   background-color: #8D99AE;
   cursor: pointer;

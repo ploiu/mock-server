@@ -1,4 +1,4 @@
-import { parse } from "https://deno.land/std@0.114.0/flags/mod.ts";
+import { parse } from "https://deno.land/std@0.118.0/flags/mod.ts";
 /**
  * Reads the contents of our ui files and inserts them into the ui strings in {/src/ts/MockServer.ts#createUIFileIfNotExists}
  */

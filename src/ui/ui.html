@@ -27,7 +27,7 @@
             <ul id="route-panel-list" class="route-list">
                 <div v-for="(route, index) in routes" :key="index" class="grid one-x-two align-center">
                     <li class="clickable"
-                        :class="{selected: selectedRoute === route, 'col-1': true}" @click="selectedRoute = route">
+                        :class="{selected: selectedRoute === route, 'col-1': true, disabled: !route.isEnabled}" @click="selectedRoute = route">
                         {{route.title}}
                     </li>
                     <button class="error col-2" @click="removeRoute(route)">Delete</button>
@@ -39,6 +39,14 @@
         <!--panel to edit routes-->
         <div id="route-editor" v-if="selectedRoute !== null">
             <h3>Current Route</h3>
+           <div>
+               <button id="route-enable-toggle-button"
+                       v-if="selectedRoute"
+                       :class="{success: selectedRoute.isEnabled, error: !selectedRoute.isEnabled}"
+                       @click="selectedRoute.isEnabled = !selectedRoute.isEnabled">
+                   {{selectedRoute.isEnabled ? 'Enabled' : 'Disabled'}}
+               </button>
+           </div>
             <!--row with route name-->
             <div id="route-name">
                 <h5>Route Name & Status</h5>
@@ -117,7 +125,7 @@
     </div>
     <div id="messageBar" class="info-message" :class="messageType, {visible: message !== null}">{{message}}</div>
 </div>
-<script src="https://unpkg.com/vue@3.1.4"></script>
+<script src="https://unpkg.com/vue@3.2.26/dist/vue.global.prod.js"></script>
 <!--intellij might say this file doesn't exist, but it gets generated before startup-->
 <script src="ui.js" type="module"></script>
 </body>
