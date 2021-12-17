@@ -179,7 +179,6 @@
       dialog.showModal();
     }
   };
-  ;
 
   console.log("starting tests...");
   await Ploiu.testAsync("should show only 1 route on page load", async () => {
