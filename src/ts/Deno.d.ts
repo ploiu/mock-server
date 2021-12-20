@@ -315,11 +315,11 @@ declare namespace Deno {
    * ```ts
    * import {assert, fail, assertEquals} from "https://deno.land/std/testing/asserts.ts";
    *
-   * Deno.test("My test description", ():void => {
+   * Deno.test("My test description", (): void => {
    *   assertEquals("hello", "hello");
    * });
    *
-   * Deno.test("My async test description", async ():Promise<void> => {
+   * Deno.test("My async test description", async (): Promise<void> => {
    *   const decoder = new TextDecoder("utf-8");
    *   const data = await Deno.readFile("hello_world.txt");
    *   assertEquals(decoder.decode(data), "Hello world");
@@ -331,6 +331,95 @@ declare namespace Deno {
     fn: (t: TestContext) => void | Promise<void>,
   ): void;
 
+  /** Register a test which will be run when `deno test` is used on the command
+   * line and the containing module looks like a test module.
+   * `fn` can be async if required. Declared function must have a name.
+   *
+   * ```ts
+   * import {assert, fail, assertEquals} from "https://deno.land/std/testing/asserts.ts";
+   *
+   * Deno.test(function myTestName(): void {
+   *   assertEquals("hello", "hello");
+   * });
+   *
+   * Deno.test(async function myOtherTestName(): Promise<void> {
+   *   const decoder = new TextDecoder("utf-8");
+   *   const data = await Deno.readFile("hello_world.txt");
+   *   assertEquals(decoder.decode(data), "Hello world");
+   * });
+   * ```
+   */
+  export function test(fn: (t: TestContext) => void | Promise<void>): void;
+
+  /** Register a test which will be run when `deno test` is used on the command
+   * line and the containing module looks like a test module.
+   * `fn` can be async if required.
+   *
+   * ```ts
+   * import {assert, fail, assertEquals} from "https://deno.land/std/testing/asserts.ts";
+   *
+   * Deno.test("My test description", { permissions: { read: true } }, (): void => {
+   *   assertEquals("hello", "hello");
+   * });
+   *
+   * Deno.test("My async test description", { permissions: { read: false } }, async (): Promise<void> => {
+   *   const decoder = new TextDecoder("utf-8");
+   *   const data = await Deno.readFile("hello_world.txt");
+   *   assertEquals(decoder.decode(data), "Hello world");
+   * });
+   * ```
+   */
+  export function test(
+    name: string,
+    options: Omit<TestDefinition, "fn" | "name">,
+    fn: (t: TestContext) => void | Promise<void>,
+  ): void;
+
+  /** Register a test which will be run when `deno test` is used on the command
+   * line and the containing module looks like a test module.
+   * `fn` can be async if required.
+   *
+   * ```ts
+   * import {assert, fail, assertEquals} from "https://deno.land/std/testing/asserts.ts";
+   *
+   * Deno.test({ name: "My test description", permissions: { read: true } }, (): void => {
+   *   assertEquals("hello", "hello");
+   * });
+   *
+   * Deno.test({ name: "My async test description", permissions: { read: false } }, async (): Promise<void> => {
+   *   const decoder = new TextDecoder("utf-8");
+   *   const data = await Deno.readFile("hello_world.txt");
+   *   assertEquals(decoder.decode(data), "Hello world");
+   * });
+   * ```
+   */
+  export function test(
+    options: Omit<TestDefinition, "fn">,
+    fn: (t: TestContext) => void | Promise<void>,
+  ): void;
+
+  /** Register a test which will be run when `deno test` is used on the command
+   * line and the containing module looks like a test module.
+   * `fn` can be async if required. Declared function must have a name.
+   *
+   * ```ts
+   * import {assert, fail, assertEquals} from "https://deno.land/std/testing/asserts.ts";
+   *
+   * Deno.test({ permissions: { read: true } }, function myTestName(): void {
+   *   assertEquals("hello", "hello");
+   * });
+   *
+   * Deno.test({ permissions: { read: false } }, async function myOtherTestName(): Promise<void> {
+   *   const decoder = new TextDecoder("utf-8");
+   *   const data = await Deno.readFile("hello_world.txt");
+   *   assertEquals(decoder.decode(data), "Hello world");
+   * });
+   * ```
+   */
+  export function test(
+    options: Omit<TestDefinition, "fn" | "name">,
+    fn: (t: TestContext) => void | Promise<void>,
+  ): void;
   /** Exit the Deno process with optional exit code. If no exit code is supplied
    * then Deno will exit with return code of 0.
    *
@@ -565,9 +654,6 @@ declare namespace Deno {
   }
 
   /**
-   * @deprecated Use `copy` from https://deno.land/std/streams/conversion.ts
-   * instead. `Deno.copy` will be removed in Deno 2.0.
-   *
    * Copies from `src` to `dst` until either EOF (`null`) is read from `src` or
    * an error occurs. It resolves to the number of bytes copied or rejects with
    * the first error encountered while copying.
@@ -578,6 +664,9 @@ declare namespace Deno {
    * const destination = await Deno.create("my_file_2.txt");
    * const bytesCopied2 = await Deno.copy(source, destination);
    * ```
+   *
+   * @deprecated Use `copy` from https://deno.land/std/streams/conversion.ts
+   * instead. `Deno.copy` will be removed in Deno 2.0.
    *
    * @param src The source to copy from
    * @param dst The destination to copy to
@@ -592,10 +681,6 @@ declare namespace Deno {
   ): Promise<number>;
 
   /**
-   * @deprecated Use `iterateReader` from
-   * https://deno.land/std/streams/conversion.ts instead. `Deno.iter` will be
-   * removed in Deno 2.0.
-   *
    * Turns a Reader, `r`, into an async iterator.
    *
    * ```ts
@@ -624,6 +709,10 @@ declare namespace Deno {
    * a view on that buffer on each iteration. It is therefore caller's
    * responsibility to copy contents of the buffer if needed; otherwise the
    * next iteration will overwrite contents of previously returned chunk.
+   *
+   * @deprecated Use `iterateReader` from
+   * https://deno.land/std/streams/conversion.ts instead. `Deno.iter` will be
+   * removed in Deno 2.0.
    */
   export function iter(
     r: Reader,
@@ -633,10 +722,6 @@ declare namespace Deno {
   ): AsyncIterableIterator<Uint8Array>;
 
   /**
-   * @deprecated Use `iterateReaderSync` from
-   * https://deno.land/std/streams/conversion.ts instead. `Deno.iterSync` will
-   * be removed in Deno 2.0.
-   *
    * Turns a ReaderSync, `r`, into an iterator.
    *
    * ```ts
@@ -665,6 +750,10 @@ declare namespace Deno {
    * a view on that buffer on each iteration. It is therefore caller's
    * responsibility to copy contents of the buffer if needed; otherwise the
    * next iteration will overwrite contents of previously returned chunk.
+   *
+   * @deprecated Use `iterateReaderSync` from
+   * https://deno.land/std/streams/conversion.ts instead. `Deno.iterSync` will
+   * be removed in Deno 2.0.
    */
   export function iterSync(
     r: ReaderSync,
@@ -1121,9 +1210,6 @@ declare namespace Deno {
   }
 
   /**
-   * @deprecated Use `readAll` from https://deno.land/std/streams/conversion.ts
-   * instead. `Deno.readAll` will be removed in Deno 2.0.
-   *
    * Read Reader `r` until EOF (`null`) and resolve to the content as
    * Uint8Array`.
    *
@@ -1142,14 +1228,13 @@ declare namespace Deno {
    * const reader = new Deno.Buffer(myData.buffer as ArrayBuffer);
    * const bufferContent = await Deno.readAll(reader);
    * ```
+   *
+   * @deprecated Use `readAll` from https://deno.land/std/streams/conversion.ts
+   * instead. `Deno.readAll` will be removed in Deno 2.0.
    */
   export function readAll(r: Reader): Promise<Uint8Array>;
 
   /**
-   * @deprecated Use `readAllSync` from
-   * https://deno.land/std/streams/conversion.ts instead. `Deno.readAllSync`
-   * will be removed in Deno 2.0.
-   *
    * Synchronously reads Reader `r` until EOF (`null`) and returns the content
    * as `Uint8Array`.
    *
@@ -1168,13 +1253,14 @@ declare namespace Deno {
    * const reader = new Deno.Buffer(myData.buffer as ArrayBuffer);
    * const bufferContent = Deno.readAllSync(reader);
    * ```
+   *
+   * @deprecated Use `readAllSync` from
+   * https://deno.land/std/streams/conversion.ts instead. `Deno.readAllSync`
+   * will be removed in Deno 2.0.
    */
   export function readAllSync(r: ReaderSync): Uint8Array;
 
   /**
-   * @deprecated Use `writeAll` from https://deno.land/std/streams/conversion.ts
-   * instead. `Deno.writeAll` will be removed in Deno 2.0.
-   *
    * Write all the content of the array buffer (`arr`) to the writer (`w`).
    *
    * ```ts
@@ -1198,14 +1284,13 @@ declare namespace Deno {
    * await Deno.writeAll(writer, contentBytes);
    * console.log(writer.bytes().length);  // 11
    * ```
+   *
+   * @deprecated Use `writeAll` from https://deno.land/std/streams/conversion.ts
+   * instead. `Deno.writeAll` will be removed in Deno 2.0.
    */
   export function writeAll(w: Writer, arr: Uint8Array): Promise<void>;
 
   /**
-   * @deprecated Use `writeAllSync` from
-   * https://deno.land/std/streams/conversion.ts instead. `Deno.writeAllSync`
-   * will be removed in Deno 2.0.
-   *
    * Synchronously write all the content of the array buffer (`arr`) to the
    * writer (`w`).
    *
@@ -1230,6 +1315,10 @@ declare namespace Deno {
    * Deno.writeAllSync(writer, contentBytes);
    * console.log(writer.bytes().length);  // 11
    * ```
+   *
+   * @deprecated Use `writeAllSync` from
+   * https://deno.land/std/streams/conversion.ts instead. `Deno.writeAllSync`
+   * will be removed in Deno 2.0.
    */
   export function writeAllSync(w: WriterSync, arr: Uint8Array): void;
 
@@ -2037,9 +2126,10 @@ declare namespace Deno {
     readonly rid: number;
     /** Stops watching the file system and closes the watcher resource. */
     close(): void;
-    /** @deprecated
+    /**
      * Stops watching the file system and closes the watcher resource.
-     * Will be removed at 2.0.
+     *
+     * @deprecated Will be removed at 2.0.
      */
     return?(value?: any): Promise<IteratorResult<FsEvent>>;
     [Symbol.asyncIterator](): AsyncIterableIterator<FsEvent>;
@@ -2475,11 +2565,12 @@ declare namespace Deno {
   export const args: string[];
 
   /**
-   * @deprecated A symbol which can be used as a key for a custom method which will be
+   * A symbol which can be used as a key for a custom method which will be
    * called when `Deno.inspect()` is called, or when the object is logged to
    * the console.
    *
-   * This symbol is deprecated since 1.9. Use `Symbol.for("Deno.customInspect")` instead.
+   * @deprecated This symbol is deprecated since 1.9. Use
+   * `Symbol.for("Deno.customInspect")` instead.
    */
   export const customInspect: unique symbol;
 
@@ -3135,7 +3226,7 @@ declare class URLPattern {
 
 // Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
 
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-var
 
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
@@ -3428,6 +3519,10 @@ interface AbortSignal extends EventTarget {
     listener: EventListenerOrEventListenerObject,
     options?: boolean | EventListenerOptions,
   ): void;
+
+  /** Throws this AbortSignal's abort reason, if its AbortController has
+   * signaled to abort; otherwise, does nothing. */
+  throwIfAborted(): void;
 }
 
 declare var AbortSignal: {
@@ -3943,7 +4038,7 @@ declare function structuredClone(
 
 // Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
 
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-var
 
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
@@ -5628,7 +5723,7 @@ type BinaryType = "arraybuffer" | "blob";
 
 // Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
 
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-var
 
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
@@ -5670,6 +5765,8 @@ declare var Storage: {
 };
 
 // Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+
+// deno-lint-ignore-file no-var
 
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
@@ -5740,6 +5837,10 @@ interface EcKeyGenParams extends Algorithm {
   namedCurve: NamedCurve;
 }
 
+interface EcImportParams extends Algorithm {
+  namedCurve: NamedCurve;
+}
+
 interface EcdsaParams extends Algorithm {
   hash: HashAlgorithmIdentifier;
 }
@@ -5768,6 +5869,10 @@ interface RsaOaepParams extends Algorithm {
 interface HmacImportParams extends Algorithm {
   hash: HashAlgorithmIdentifier;
   length?: number;
+}
+
+interface RsaHashedImportParams extends Algorithm {
+  hash: HashAlgorithmIdentifier;
 }
 
 interface EcKeyAlgorithm extends KeyAlgorithm {
@@ -5860,14 +5965,22 @@ interface SubtleCrypto {
   importKey(
     format: "jwk",
     keyData: JsonWebKey,
-    algorithm: AlgorithmIdentifier | HmacImportParams,
+    algorithm:
+      | AlgorithmIdentifier
+      | HmacImportParams
+      | RsaHashedImportParams
+      | EcImportParams,
     extractable: boolean,
     keyUsages: KeyUsage[],
   ): Promise<CryptoKey>;
   importKey(
     format: Exclude<KeyFormat, "jwk">,
     keyData: BufferSource,
-    algorithm: AlgorithmIdentifier | HmacImportParams | RsaHashedImportParams,
+    algorithm:
+      | AlgorithmIdentifier
+      | HmacImportParams
+      | RsaHashedImportParams
+      | EcImportParams,
     extractable: boolean,
     keyUsages: KeyUsage[],
   ): Promise<CryptoKey>;
@@ -5928,6 +6041,22 @@ interface SubtleCrypto {
     wrappingKey: CryptoKey,
     wrapAlgorithm: AlgorithmIdentifier | RsaOaepParams,
   ): Promise<ArrayBuffer>;
+  unwrapKey(
+    format: KeyFormat,
+    wrappedKey: BufferSource,
+    unwrappingKey: CryptoKey,
+    unwrapAlgorithm:
+      | AlgorithmIdentifier
+      | RsaOaepParams
+      | AesCbcParams,
+    unwrappedKeyAlgorithm:
+      | AlgorithmIdentifier
+      | RsaHashedImportParams
+      | HmacImportParams
+      | AesKeyAlgorithm,
+    extractable: boolean,
+    keyUsages: KeyUsage[],
+  ): Promise<CryptoKey>;
 }
 
 declare interface Crypto {
@@ -5958,7 +6087,7 @@ declare var SubtleCrypto: {
 
 // Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
 
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-var
 
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
@@ -6066,11 +6195,14 @@ declare namespace Deno {
     closeWrite(): Promise<void>;
   }
 
+  // deno-lint-ignore no-empty-interface
+  export interface TlsHandshakeInfo {}
+
   export interface TlsConn extends Conn {
     /** Runs the client or server handshake protocol to completion if that has
      * not happened yet. Calling this method is optional; the TLS handshake
      * will be completed automatically as soon as data is sent or received. */
-    handshake(): Promise<void>;
+    handshake(): Promise<TlsHandshakeInfo>;
   }
 
   export interface ListenOptions {
@@ -6150,10 +6282,10 @@ declare namespace Deno {
      * If not specified, defaults to `127.0.0.1`. */
     hostname?: string;
     /**
+     * Server certificate file.
+     *
      * @deprecated This option is deprecated and will be removed in a future
      * release.
-     *
-     * Server certificate file.
      */
     certFile?: string;
     /** A list of root certificates that will be used in addition to the
