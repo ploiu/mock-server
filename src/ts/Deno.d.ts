@@ -1,4 +1,4 @@
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
@@ -85,6 +85,7 @@ declare namespace Deno {
     export class BadResource extends Error {}
     export class Http extends Error {}
     export class Busy extends Error {}
+    export class NotSupported extends Error {}
   }
 
   /** The current process id of the runtime. */
@@ -113,8 +114,40 @@ declare namespace Deno {
    * See: https://no-color.org/ */
   export const noColor: boolean;
 
-  /** **UNSTABLE**: New option, yet to be vetted. */
   export interface TestContext {
+    /** Run a sub step of the parent test or step. Returns a promise
+     * that resolves to a boolean signifying if the step completed successfully.
+     * The returned promise never rejects unless the arguments are invalid.
+     * If the test was ignored the promise returns `false`.
+     */
+    step(t: TestStepDefinition): Promise<boolean>;
+
+    /** Run a sub step of the parent test or step. Returns a promise
+     * that resolves to a boolean signifying if the step completed successfully.
+     * The returned promise never rejects unless the arguments are invalid.
+     * If the test was ignored the promise returns `false`.
+     */
+    step(
+      name: string,
+      fn: (t: TestContext) => void | Promise<void>,
+    ): Promise<boolean>;
+  }
+
+  export interface TestStepDefinition {
+    fn: (t: TestContext) => void | Promise<void>;
+    name: string;
+    ignore?: boolean;
+    /** Check that the number of async completed ops after the test step is the same
+     * as number of dispatched ops. Defaults to the parent test or step's value. */
+    sanitizeOps?: boolean;
+    /** Ensure the test step does not "leak" resources - ie. the resource table
+     * after the test has exactly the same contents as before the test. Defaults
+     * to the parent test or step's value. */
+    sanitizeResources?: boolean;
+    /** Ensure the test step does not prematurely cause the process to exit,
+     * for example via a call to `Deno.exit`. Defaults to the parent test or
+     * step's value. */
+    sanitizeExit?: boolean;
   }
 
   export interface TestDefinition {
@@ -762,7 +795,7 @@ declare namespace Deno {
     },
   ): IterableIterator<Uint8Array>;
 
-  /** Synchronously open a file and return an instance of `Deno.File`.  The
+  /** Synchronously open a file and return an instance of `Deno.FsFile`.  The
    * file does not need to previously exist if using the `create` or `createNew`
    * open options.  It is the callers responsibility to close the file when finished
    * with it.
@@ -775,9 +808,9 @@ declare namespace Deno {
    *
    * Requires `allow-read` and/or `allow-write` permissions depending on options.
    */
-  export function openSync(path: string | URL, options?: OpenOptions): File;
+  export function openSync(path: string | URL, options?: OpenOptions): FsFile;
 
-  /** Open a file and resolve to an instance of `Deno.File`.  The
+  /** Open a file and resolve to an instance of `Deno.FsFile`.  The
    * file does not need to previously exist if using the `create` or `createNew`
    * open options.  It is the callers responsibility to close the file when finished
    * with it.
@@ -793,10 +826,10 @@ declare namespace Deno {
   export function open(
     path: string | URL,
     options?: OpenOptions,
-  ): Promise<File>;
+  ): Promise<FsFile>;
 
   /** Creates a file if none exists or truncates an existing file and returns
-   *  an instance of `Deno.File`.
+   *  an instance of `Deno.FsFile`.
    *
    * ```ts
    * const file = Deno.createSync("/foo/bar.txt");
@@ -804,10 +837,10 @@ declare namespace Deno {
    *
    * Requires `allow-read` and `allow-write` permissions.
    */
-  export function createSync(path: string | URL): File;
+  export function createSync(path: string | URL): FsFile;
 
   /** Creates a file if none exists or truncates an existing file and resolves to
-   *  an instance of `Deno.File`.
+   *  an instance of `Deno.FsFile`.
    *
    * ```ts
    * const file = await Deno.create("/foo/bar.txt");
@@ -815,7 +848,7 @@ declare namespace Deno {
    *
    * Requires `allow-read` and `allow-write` permissions.
    */
-  export function create(path: string | URL): Promise<File>;
+  export function create(path: string | URL): Promise<FsFile>;
 
   /** Synchronously read from a resource ID (`rid`) into an array buffer (`buffer`).
    *
@@ -870,7 +903,7 @@ declare namespace Deno {
    *
    * Returns the number of bytes written.  This function is one of the lowest
    * level APIs and most users should not work with this directly, but rather use
-   * Deno.writeAllSync() instead.
+   * `writeAllSync()` from https://deno.land/std/streams/conversion.ts instead.
    *
    * **It is not guaranteed that the full buffer will be written in a single
    * call.**
@@ -1037,6 +1070,38 @@ declare namespace Deno {
   export function close(rid: number): void;
 
   /** The Deno abstraction for reading and writing files. */
+  export class FsFile
+    implements
+      Reader,
+      ReaderSync,
+      Writer,
+      WriterSync,
+      Seeker,
+      SeekerSync,
+      Closer {
+    readonly rid: number;
+    constructor(rid: number);
+    write(p: Uint8Array): Promise<number>;
+    writeSync(p: Uint8Array): number;
+    truncate(len?: number): Promise<void>;
+    truncateSync(len?: number): void;
+    read(p: Uint8Array): Promise<number | null>;
+    readSync(p: Uint8Array): number | null;
+    seek(offset: number, whence: SeekMode): Promise<number>;
+    seekSync(offset: number, whence: SeekMode): number;
+    stat(): Promise<FileInfo>;
+    statSync(): FileInfo;
+    close(): void;
+
+    readonly readable: ReadableStream<Uint8Array>;
+    readonly writable: WritableStream<Uint8Array>;
+  }
+
+  /**
+   * @deprecated Use `Deno.FsFile` instead. `Deno.File` will be removed in Deno 2.0.
+   *
+   * The Deno abstraction for reading and writing files.
+   */
   export class File
     implements
       Reader,
@@ -1059,14 +1124,26 @@ declare namespace Deno {
     stat(): Promise<FileInfo>;
     statSync(): FileInfo;
     close(): void;
+
+    readonly readable: ReadableStream<Uint8Array>;
+    readonly writable: WritableStream<Uint8Array>;
   }
 
   /** A handle for `stdin`. */
-  export const stdin: Reader & ReaderSync & Closer & { readonly rid: number };
+  export const stdin: Reader & ReaderSync & Closer & {
+    readonly rid: number;
+    readonly readable: ReadableStream<Uint8Array>;
+  };
   /** A handle for `stdout`. */
-  export const stdout: Writer & WriterSync & Closer & { readonly rid: number };
+  export const stdout: Writer & WriterSync & Closer & {
+    readonly rid: number;
+    readonly writable: WritableStream<Uint8Array>;
+  };
   /** A handle for `stderr`. */
-  export const stderr: Writer & WriterSync & Closer & { readonly rid: number };
+  export const stderr: Writer & WriterSync & Closer & {
+    readonly rid: number;
+    readonly writable: WritableStream<Uint8Array>;
+  };
 
   export interface OpenOptions {
     /** Sets the option for read access. This option, when `true`, means that the
@@ -2175,12 +2252,18 @@ declare namespace Deno {
   export class Process<T extends RunOptions = RunOptions> {
     readonly rid: number;
     readonly pid: number;
-    readonly stdin: T["stdin"] extends "piped" ? Writer & Closer
-      : (Writer & Closer) | null;
-    readonly stdout: T["stdout"] extends "piped" ? Reader & Closer
-      : (Reader & Closer) | null;
-    readonly stderr: T["stderr"] extends "piped" ? Reader & Closer
-      : (Reader & Closer) | null;
+    readonly stdin: T["stdin"] extends "piped" ? Writer & Closer & {
+      writable: WritableStream<Uint8Array>;
+    }
+      : (Writer & Closer & { writable: WritableStream<Uint8Array> }) | null;
+    readonly stdout: T["stdout"] extends "piped" ? Reader & Closer & {
+      readable: ReadableStream<Uint8Array>;
+    }
+      : (Reader & Closer & { readable: ReadableStream<Uint8Array> }) | null;
+    readonly stderr: T["stderr"] extends "piped" ? Reader & Closer & {
+      readable: ReadableStream<Uint8Array>;
+    }
+      : (Reader & Closer & { readable: ReadableStream<Uint8Array> }) | null;
     /** Wait for the process to exit and return its exit status.
      *
      * Calling this function multiple times will return the same status.
@@ -2264,6 +2347,36 @@ declare namespace Deno {
     | "SIGWINCH"
     | "SIGXCPU"
     | "SIGXFSZ";
+
+  /** Registers the given function as a listener of the given signal event.
+   *
+   * ```ts
+   * Deno.addSignalListener("SIGTERM", () => {
+   *   console.log("SIGTERM!")
+   * });
+   * ```
+   *
+   * NOTE: This functionality is not yet implemented on Windows.
+   */
+  export function addSignalListener(signal: Signal, handler: () => void): void;
+
+  /** Removes the given signal listener that has been registered with
+   * Deno.addSignalListener.
+   *
+   * ```ts
+   * const listener = () => {
+   *   console.log("SIGTERM!")
+   * };
+   * Deno.addSignalListener("SIGTERM", listener);
+   * Deno.removeSignalListener("SIGTERM", listener);
+   * ```
+   *
+   * NOTE: This functionality is not yet implemented on Windows.
+   */
+  export function removeSignalListener(
+    signal: Signal,
+    handler: () => void,
+  ): void;
 
   export type ProcessStatus =
     | {
@@ -2745,6 +2858,14 @@ declare namespace Deno {
 
   export interface UpgradeWebSocketOptions {
     protocol?: string;
+    /**
+     * If the client does not respond to this frame with a
+     * `pong` within the timeout specified, the connection is deemed
+     * unhealthy and is closed. The `close` and `error` event will be emitted.
+     *
+     * The default is 120 seconds. Set to 0 to disable timeouts.
+     */
+    idleTimeout?: number;
   }
 
   /**
@@ -2789,11 +2910,13 @@ declare namespace Deno {
    * If `pid` is negative, the signal will be sent to the process group
    * identified by `pid`.
    *
-   *      const p = Deno.run({
-   *        cmd: ["sleep", "10000"]
-   *      });
+   * ```ts
+   * const p = Deno.run({
+   *   cmd: ["sleep", "10000"]
+   * });
    *
-   *      Deno.kill(p.pid, "SIGINT");
+   * Deno.kill(p.pid, "SIGINT");
+   * ```
    *
    * Requires `allow-run` permission. */
   export function kill(pid: number, signo: Signal): void;
@@ -2884,7 +3007,7 @@ declare namespace Deno {
   ): Promise<string[] | MXRecord[] | SRVRecord[] | string[][]>;
 }
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-explicit-any
 
@@ -2913,7 +3036,7 @@ declare interface Console {
   warn(...data: any[]): void;
 }
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-explicit-any
 
@@ -3224,7 +3347,7 @@ declare class URLPattern {
   readonly hash: string;
 }
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-explicit-any no-var
 
@@ -3393,13 +3516,17 @@ declare class ProgressEvent<T extends EventTarget = EventTarget> extends Event {
 
 /** Decodes a string of data which has been encoded using base-64 encoding.
  *
- *     console.log(atob("aGVsbG8gd29ybGQ=")); // outputs 'hello world'
+ * ```
+ * console.log(atob("aGVsbG8gd29ybGQ=")); // outputs 'hello world'
+ * ```
  */
 declare function atob(s: string): string;
 
 /** Creates a base-64 ASCII encoded string from the input string.
  *
- *     console.log(btoa("hello world"));  // outputs "aGVsbG8gd29ybGQ="
+ * ```
+ * console.log(btoa("hello world"));  // outputs "aGVsbG8gd29ybGQ="
+ * ```
  */
 declare function btoa(s: string): string;
 
@@ -4031,12 +4158,88 @@ declare class MessagePort extends EventTarget {
   ): void;
 }
 
+/**
+ * Creates a deep copy of a given value using the structured clone algorithm.
+ *
+ * Unlike a shallow copy, a deep copy does not hold the same references as the
+ * source object, meaning its properties can be changed without affecting the
+ * source. For more details, see
+ * [MDN](https://developer.mozilla.org/en-US/docs/Glossary/Deep_copy).
+ *
+ * Throws a `DataCloneError` if any part of the input value is not
+ * serializable.
+ *
+ * @example
+ * ```ts
+ * const object = { x: 0, y: 1 };
+ *
+ * const deepCopy = structuredClone(object);
+ * deepCopy.x = 1;
+ * console.log(deepCopy.x, object.x); // 1 0
+ *
+ * const shallowCopy = object;
+ * shallowCopy.x = 1;
+ * // shallowCopy.x is pointing to the same location in memory as object.x
+ * console.log(shallowCopy.x, object.x); // 1 1
+ * ```
+ */
 declare function structuredClone(
   value: any,
   options?: StructuredSerializeOptions,
 ): any;
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+/**
+ * An API for compressing a stream of data.
+ *
+ * @example
+ * ```ts
+ * await Deno.stdin.readable
+ *   .pipeThrough(new CompressionStream("gzip"))
+ *   .pipeTo(Deno.stdout.writable);
+ * ```
+ */
+declare class CompressionStream {
+  /**
+   * Creates a new `CompressionStream` object which compresses a stream of
+   * data.
+   *
+   * Throws a `TypeError` if the format passed to the constructor is not
+   * supported.
+   */
+  constructor(format: string);
+
+  readonly readable: ReadableStream<Uint8Array>;
+  readonly writable: WritableStream<Uint8Array>;
+}
+
+/**
+ * An API for decompressing a stream of data.
+ *
+ * @example
+ * ```ts
+ * const input = await Deno.open("./file.txt.gz");
+ * const output = await Deno.create("./file.txt");
+ *
+ * await input.readable
+ *   .pipeThrough(new DecompressionStream("gzip"))
+ *   .pipeTo(output.writable);
+ * ```
+ */
+declare class DecompressionStream {
+  /**
+   * Creates a new `DecompressionStream` object which decompresses a stream of
+   * data.
+   *
+   * Throws a `TypeError` if the format passed to the constructor is not
+   * supported.
+   */
+  constructor(format: string);
+
+  readonly readable: ReadableStream<Uint8Array>;
+  readonly writable: WritableStream<Uint8Array>;
+}
+
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-explicit-any no-var
 
@@ -4379,26 +4582,26 @@ declare class Request implements Body {
   /** A simple getter used to expose a `ReadableStream` of the body contents. */
   readonly body: ReadableStream<Uint8Array> | null;
   /** Stores a `Boolean` that declares whether the body has been used in a
-   * response yet.
+   * request yet.
    */
   readonly bodyUsed: boolean;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
+  /** Takes a `Request` stream and reads it to completion. It returns a promise
    * that resolves with an `ArrayBuffer`.
    */
   arrayBuffer(): Promise<ArrayBuffer>;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
+  /** Takes a `Request` stream and reads it to completion. It returns a promise
    * that resolves with a `Blob`.
    */
   blob(): Promise<Blob>;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
+  /** Takes a `Request` stream and reads it to completion. It returns a promise
    * that resolves with a `FormData` object.
    */
   formData(): Promise<FormData>;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
+  /** Takes a `Request` stream and reads it to completion. It returns a promise
    * that resolves with the result of parsing the body text as JSON.
    */
   json(): Promise<any>;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
+  /** Takes a `Request` stream and reads it to completion. It returns a promise
    * that resolves with a `USVString` (text).
    */
   text(): Promise<string>;
@@ -4462,20 +4665,22 @@ declare class Response implements Body {
   text(): Promise<string>;
 }
 
-/** Fetch a resource from the network. It returns a Promise that resolves to the
- * Response to that request, whether it is successful or not.
+/** Fetch a resource from the network. It returns a `Promise` that resolves to the
+ * `Response` to that `Request`, whether it is successful or not.
  *
- *     const response = await fetch("http://my.json.host/data.json");
- *     console.log(response.status);  // e.g. 200
- *     console.log(response.statusText); // e.g. "OK"
- *     const jsonData = await response.json();
+ * ```ts
+ * const response = await fetch("http://my.json.host/data.json");
+ * console.log(response.status);  // e.g. 200
+ * console.log(response.statusText); // e.g. "OK"
+ * const jsonData = await response.json();
+ * ```
  */
 declare function fetch(
   input: Request | URL | string,
   init?: RequestInit,
 ): Promise<Response>;
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-explicit-any no-empty-interface
 
@@ -4569,12 +4774,15 @@ declare interface GPUDeviceDescriptor extends GPUObjectDescriptorBase {
 }
 
 declare type GPUFeatureName =
-  | "depth-clamping"
+  | "depth-clip-control"
   | "depth24unorm-stencil8"
   | "depth32float-stencil8"
   | "pipeline-statistics-query"
   | "texture-compression-bc"
+  | "texture-compression-etc2"
+  | "texture-compression-astc"
   | "timestamp-query"
+  | "indirect-first-instance"
   // extended from spec
   | "mappable-primary-buffers"
   | "sampled-texture-binding-array"
@@ -4585,9 +4793,6 @@ declare type GPUFeatureName =
   | "multi-draw-indirect-count"
   | "push-constants"
   | "address-mode-clamp-to-border"
-  | "non-fill-polygon-mode"
-  | "texture-compression-etc2"
-  | "texture-compression-astc-ldr"
   | "texture-adapter-specific-format-features"
   | "shader-float64"
   | "vertex-attribute-64bit";
@@ -4791,6 +4996,44 @@ declare type GPUTextureFormat =
   | "bc6h-rgb-float"
   | "bc7-rgba-unorm"
   | "bc7-rgba-unorm-srgb"
+  | "etc2-rgb8unorm"
+  | "etc2-rgb8unorm-srgb"
+  | "etc2-rgb8a1unorm"
+  | "etc2-rgb8a1unorm-srgb"
+  | "etc2-rgba8unorm"
+  | "etc2-rgba8unorm-srgb"
+  | "eac-r11unorm"
+  | "eac-r11snorm"
+  | "eac-rg11unorm"
+  | "eac-rg11snorm"
+  | "astc-4x4-unorm"
+  | "astc-4x4-unorm-srgb"
+  | "astc-5x4-unorm"
+  | "astc-5x4-unorm-srgb"
+  | "astc-5x5-unorm"
+  | "astc-5x5-unorm-srgb"
+  | "astc-6x5-unorm"
+  | "astc-6x5-unorm-srgb"
+  | "astc-6x6-unorm"
+  | "astc-6x6-unorm-srgb"
+  | "astc-8x5-unorm"
+  | "astc-8x5-unorm-srgb"
+  | "astc-8x6-unorm"
+  | "astc-8x6-unorm-srgb"
+  | "astc-8x8-unorm"
+  | "astc-8x8-unorm-srgb"
+  | "astc-10x5-unorm"
+  | "astc-10x5-unorm-srgb"
+  | "astc-10x6-unorm"
+  | "astc-10x6-unorm-srgb"
+  | "astc-10x8-unorm"
+  | "astc-10x8-unorm-srgb"
+  | "astc-10x10-unorm"
+  | "astc-10x10-unorm-srgb"
+  | "astc-12x10-unorm"
+  | "astc-12x10-unorm-srgb"
+  | "astc-12x12-unorm"
+  | "astc-12x12-unorm-srgb"
   | "depth24unorm-stencil8"
   | "depth32float-stencil8";
 
@@ -4996,7 +5239,7 @@ declare interface GPUPrimitiveState {
   stripIndexFormat?: GPUIndexFormat;
   frontFace?: GPUFrontFace;
   cullMode?: GPUCullMode;
-  clampDepth?: boolean;
+  unclippedDepth?: boolean;
 }
 
 declare type GPUFrontFace = "ccw" | "cw";
@@ -5035,9 +5278,9 @@ declare class GPUColorWrite {
 }
 
 declare interface GPUBlendComponent {
-  srcFactor: GPUBlendFactor;
-  dstFactor: GPUBlendFactor;
-  operation: GPUBlendOperation;
+  operation?: GPUBlendOperation;
+  srcFactor?: GPUBlendFactor;
+  dstFactor?: GPUBlendFactor;
 }
 
 declare type GPUBlendFactor =
@@ -5150,8 +5393,6 @@ declare interface GPUVertexAttribute {
 
 declare class GPUCommandBuffer implements GPUObjectBase {
   label: string | null;
-
-  readonly executionTime: Promise<number>;
 }
 
 declare interface GPUCommandBufferDescriptor extends GPUObjectDescriptorBase {}
@@ -5190,6 +5431,12 @@ declare class GPUCommandEncoder implements GPUObjectBase {
     copySize: GPUExtent3D,
   ): undefined;
 
+  clearBuffer(
+    destination: GPUBuffer,
+    destinationOffset: number,
+    size: number,
+  ): undefined;
+
   pushDebugGroup(groupLabel: string): undefined;
   popDebugGroup(): undefined;
   insertDebugMarker(markerLabel: string): undefined;
@@ -5207,9 +5454,7 @@ declare class GPUCommandEncoder implements GPUObjectBase {
   finish(descriptor?: GPUCommandBufferDescriptor): GPUCommandBuffer;
 }
 
-declare interface GPUCommandEncoderDescriptor extends GPUObjectDescriptorBase {
-  measureExecutionTime?: boolean;
-}
+declare interface GPUCommandEncoderDescriptor extends GPUObjectDescriptorBase {}
 
 declare interface GPUImageDataLayout {
   offset?: number;
@@ -5608,7 +5853,7 @@ declare interface GPUExtent3DDict {
 
 declare type GPUExtent3D = number[] | GPUExtent3DDict;
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-explicit-any
 
@@ -5644,7 +5889,11 @@ interface WebSocketEventMap {
   open: Event;
 }
 
-/** Provides the API for creating and managing a WebSocket connection to a server, as well as for sending and receiving data on the connection. */
+/**
+ * Provides the API for creating and managing a WebSocket connection to a server, as well as for sending and receiving data on the connection.
+ *
+ * If you are looking to create a WebSocket server, please take a look at `Deno.upgradeWebSocket()`.
+ */
 declare class WebSocket extends EventTarget {
   constructor(url: string, protocols?: string | string[]);
 
@@ -5721,7 +5970,7 @@ declare class WebSocket extends EventTarget {
 
 type BinaryType = "arraybuffer" | "blob";
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-explicit-any no-var
 
@@ -5764,7 +6013,7 @@ declare var Storage: {
   new (): Storage;
 };
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-var
 
@@ -5828,6 +6077,17 @@ interface AesCbcParams extends Algorithm {
   iv: BufferSource;
 }
 
+interface AesGcmParams extends Algorithm {
+  iv: BufferSource;
+  additionalData?: BufferSource;
+  tagLength?: number;
+}
+
+interface AesCtrParams extends Algorithm {
+  counter: BufferSource;
+  length: number;
+}
+
 interface HmacKeyGenParams extends Algorithm {
   hash: HashAlgorithmIdentifier;
   length?: number;
@@ -5869,10 +6129,6 @@ interface RsaOaepParams extends Algorithm {
 interface HmacImportParams extends Algorithm {
   hash: HashAlgorithmIdentifier;
   length?: number;
-}
-
-interface RsaHashedImportParams extends Algorithm {
-  hash: HashAlgorithmIdentifier;
 }
 
 interface EcKeyAlgorithm extends KeyAlgorithm {
@@ -6005,12 +6261,22 @@ interface SubtleCrypto {
     data: BufferSource,
   ): Promise<ArrayBuffer>;
   encrypt(
-    algorithm: AlgorithmIdentifier | RsaOaepParams | AesCbcParams,
+    algorithm:
+      | AlgorithmIdentifier
+      | RsaOaepParams
+      | AesCbcParams
+      | AesGcmParams
+      | AesCtrParams,
     key: CryptoKey,
     data: BufferSource,
   ): Promise<ArrayBuffer>;
   decrypt(
-    algorithm: AlgorithmIdentifier | RsaOaepParams | AesCbcParams,
+    algorithm:
+      | AlgorithmIdentifier
+      | RsaOaepParams
+      | AesCbcParams
+      | AesGcmParams
+      | AesCtrParams,
     key: CryptoKey,
     data: BufferSource,
   ): Promise<ArrayBuffer>;
@@ -6039,7 +6305,11 @@ interface SubtleCrypto {
     format: KeyFormat,
     key: CryptoKey,
     wrappingKey: CryptoKey,
-    wrapAlgorithm: AlgorithmIdentifier | RsaOaepParams,
+    wrapAlgorithm:
+      | AlgorithmIdentifier
+      | RsaOaepParams
+      | AesCbcParams
+      | AesCtrParams,
   ): Promise<ArrayBuffer>;
   unwrapKey(
     format: KeyFormat,
@@ -6048,12 +6318,13 @@ interface SubtleCrypto {
     unwrapAlgorithm:
       | AlgorithmIdentifier
       | RsaOaepParams
-      | AesCbcParams,
+      | AesCbcParams
+      | AesCtrParams,
     unwrappedKeyAlgorithm:
       | AlgorithmIdentifier
-      | RsaHashedImportParams
       | HmacImportParams
-      | AesKeyAlgorithm,
+      | RsaHashedImportParams
+      | EcImportParams,
     extractable: boolean,
     keyUsages: KeyUsage[],
   ): Promise<CryptoKey>;
@@ -6085,7 +6356,7 @@ declare var SubtleCrypto: {
   new (): SubtleCrypto;
 };
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-explicit-any no-var
 
@@ -6141,7 +6412,7 @@ declare var BroadcastChannel: {
   new (name: string): BroadcastChannel;
 };
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
@@ -6193,6 +6464,9 @@ declare namespace Deno {
     /** Shuts down (`shutdown(2)`) the write side of the connection. Most
      * callers should just use `close()`. */
     closeWrite(): Promise<void>;
+
+    readonly readable: ReadableStream<Uint8Array>;
+    readonly writable: WritableStream<Uint8Array>;
   }
 
   // deno-lint-ignore no-empty-interface
@@ -6355,7 +6629,7 @@ declare namespace Deno {
   export function shutdown(rid: number): Promise<void>;
 }
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 // Documentation partially adapted from [MDN](https://developer.mozilla.org/),
 // by Mozilla Contributors, which is licensed under CC-BY-SA 2.5.
@@ -6649,7 +6923,9 @@ declare namespace WebAssembly {
 /** Sets a timer which executes a function once after the timer expires. Returns
  * an id which may be used to cancel the timeout.
  *
- *     setTimeout(() => { console.log('hello'); }, 500);
+ * ```ts
+ * setTimeout(() => { console.log('hello'); }, 500);
+ * ```
  */
 declare function setTimeout(
   /** callback function to execute when timer expires */
@@ -6662,8 +6938,10 @@ declare function setTimeout(
 
 /** Repeatedly calls a function , with a fixed time delay between each call.
  *
- *     // Outputs 'hello' to the console every 500ms
- *     setInterval(() => { console.log('hello'); }, 500);
+ * ```ts
+ * // Outputs 'hello' to the console every 500ms
+ * setInterval(() => { console.log('hello'); }, 500);
+ * ```
  */
 declare function setInterval(
   /** callback function to execute when timer expires */
@@ -6677,17 +6955,21 @@ declare function setInterval(
 /** Cancels a timed, repeating action which was previously started by a call
  * to `setInterval()`
  *
- *     const id = setInterval(() => {console.log('hello');}, 500);
- *     ...
- *     clearInterval(id);
+ * ```ts
+ * const id = setInterval(() => {console.log('hello');}, 500);
+ * // ...
+ * clearInterval(id);
+ * ```
  */
 declare function clearInterval(id?: number): void;
 
 /** Cancels a scheduled action initiated by `setTimeout()`
  *
- *     const id = setTimeout(() => {console.log('hello');}, 500);
- *     ...
- *     clearTimeout(id);
+ * ```ts
+ * const id = setTimeout(() => {console.log('hello');}, 500);
+ * // ...
+ * clearTimeout(id);
+ * ```
  */
 declare function clearTimeout(id?: number): void;
 
@@ -6701,7 +6983,9 @@ interface VoidFunction {
  * script's execution environment. This event loop may be either the main event
  * loop or the event loop driving a web worker.
  *
- *     queueMicrotask(() => { console.log('This event loop stack is complete'); });
+ * ```ts
+ * queueMicrotask(() => { console.log('This event loop stack is complete'); });
+ * ```
  */
 declare function queueMicrotask(func: VoidFunction): void;
 
@@ -6710,7 +6994,9 @@ declare function queueMicrotask(func: VoidFunction): void;
  * false if event is cancelable and at least one of the event handlers which
  * handled this event called Event.preventDefault(). Otherwise it returns true.
  *
- *     dispatchEvent(new Event('unload'));
+ * ```ts
+ * dispatchEvent(new Event('unload'));
+ * ```
  */
 declare function dispatchEvent(event: Event): boolean;
 
@@ -6910,7 +7196,7 @@ interface ErrorConstructor {
   // internally in a way that makes it unavailable for users.
 }
 
-// Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
+// Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
 /// <reference no-default-lib="true" />
 /// <reference lib="deno.ns" />
@@ -6983,9 +7269,11 @@ declare function prompt(message?: string, defaultValue?: string): string | null;
 /** Registers an event listener in the global scope, which will be called
  * synchronously whenever the event `type` is dispatched.
  *
- *     addEventListener('unload', () => { console.log('All finished!'); });
- *     ...
- *     dispatchEvent(new Event('unload'));
+ * ```ts
+ * addEventListener('unload', () => { console.log('All finished!'); });
+ * ...
+ * dispatchEvent(new Event('unload'));
+ * ```
  */
 declare function addEventListener(
   type: string,
@@ -6995,9 +7283,11 @@ declare function addEventListener(
 
 /** Remove a previously registered event listener from the global scope
  *
- *     const lstnr = () => { console.log('hello'); };
- *     addEventListener('load', lstnr);
- *     removeEventListener('load', lstnr);
+ * ```ts
+ * const listener = () => { console.log('hello'); };
+ * addEventListener('load', listener);
+ * removeEventListener('load', listener);
+ * ```
  */
 declare function removeEventListener(
   type: string,

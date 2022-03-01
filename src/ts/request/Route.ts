@@ -1,7 +1,7 @@
 //deno-lint-ignore-file no-explicit-any
 import { RequestMethod } from "./RequestMethod.ts";
 import UrlVariable from "./UrlVariable.ts";
-import { red } from "https://deno.land/std@0.118.0/fmt/colors.ts";
+import { red } from "https://deno.land/std@0.127.0/fmt/colors.ts";
 import { LogManager } from "../LogManager.ts";
 
 /**
@@ -214,7 +214,7 @@ export default class Route {
    */
   private parseUrlVariables() {
     // matches a variable name after a /, and makes sure to not count a query variable as a flag for the var to be optional
-    const pathVarRegex = /(?<=\/:)[a-zA-Z_\-0-9]+(\?(?!=:))?/g;
+    const pathVarRegex = /(?<=\/:)[a-zA-Z_\-0-9]+(\?(?!:))?/g;
     // matches a query parameter variable name
     const queryVarRegex = /(?<=[?&]:)[a-zA-Z_\-0-9]+\??/g;
     // match and pull out our path variables

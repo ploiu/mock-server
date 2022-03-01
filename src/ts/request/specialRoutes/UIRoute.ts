@@ -1,6 +1,6 @@
 import Route from "../Route.ts";
 import { RequestMethod } from "../RequestMethod.ts";
-import { serveFile } from "https://deno.land/std@0.118.0/http/file_server.ts";
+import { serveFile } from "https://deno.land/std@0.127.0/http/file_server.ts";
 
 export default class UIRoute extends Route {
   constructor() {
