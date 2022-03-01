@@ -1,28 +1,28 @@
-import Route from "../Route.ts";
-import RouteManager from "../RouteManager.ts";
-import { RequestMethod } from "../RequestMethod.ts";
+import Route from '../Route.ts';
+import RouteManager from '../RouteManager.ts';
+import { RequestMethod } from '../RequestMethod.ts';
 
 export default class FetchRoutesRoute extends Route {
   /** Routes not provided by the user */
   private excludedRoutes = [
-    "/mock-server-routes",
-    "/mock-server-ui",
-    "/refreshConfig",
-    "/mock-ui-save-routes",
-    "/mock-server-logs",
+    '/mock-server-routes',
+    '/mock-server-ui',
+    '/refreshConfig',
+    '/mock-ui-save-routes',
+    '/mock-server-logs',
   ];
 
   constructor(private routeManager: RouteManager) {
     super(
-      "Fetch Routes",
-      "/mock-server-routes",
-      <RequestMethod> "GET",
+      'Fetch Routes',
+      '/mock-server-routes',
+      <RequestMethod> 'GET',
       new Headers(),
       null,
       200,
       true,
     );
-    this.responseHeaders.append("Content-Type", "application/json");
+    this.responseHeaders.append('Content-Type', 'application/json');
   }
 
   //deno-lint-ignore require-await

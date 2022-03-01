@@ -1,7 +1,7 @@
-import Route from "../Route.ts";
-import { RequestMethod } from "../RequestMethod.ts";
+import Route from '../Route.ts';
+import { RequestMethod } from '../RequestMethod.ts';
 
-import { LogManager } from "../../LogManager.ts";
+import { LogManager } from '../../LogManager.ts';
 
 /**
  * Sends the latest route logs to the caller
@@ -9,9 +9,9 @@ import { LogManager } from "../../LogManager.ts";
 export default class LogRoute extends Route {
   constructor() {
     super(
-      "Log Route",
-      "/mock-server-logs",
-      <RequestMethod> "GET",
+      'Log Route',
+      '/mock-server-logs',
+      <RequestMethod> 'GET',
       new Headers(),
       null,
       200,
@@ -25,6 +25,8 @@ export default class LogRoute extends Route {
   //deno-lint-ignore require-await
   async execute(_request: Request): Promise<Response> {
     // if we're not done writing, we should store our logs in our backLogs and re-try sending everything next time
-    return new Response(JSON.stringify(LogManager.getLogs()), { status: 200 });
+    return new Response(JSON.stringify(LogManager.getLogs()), {
+      status: 200,
+    });
   }
 }

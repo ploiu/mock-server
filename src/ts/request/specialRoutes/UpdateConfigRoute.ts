@@ -1,8 +1,8 @@
-import Route from "../Route.ts";
-import RouteManager from "../RouteManager.ts";
-import { RequestMethod } from "../RequestMethod.ts";
-import { readConfigFile } from "../../config/ConfigManager.ts";
-import { LogManager } from "../../LogManager.ts";
+import Route from '../Route.ts';
+import RouteManager from '../RouteManager.ts';
+import { RequestMethod } from '../RequestMethod.ts';
+import { readConfigFile } from '../../config/ConfigManager.ts';
+import { LogManager } from '../../LogManager.ts';
 
 /**
  * A special route that refreshes the config file for the mock server
@@ -11,21 +11,21 @@ import { LogManager } from "../../LogManager.ts";
  */
 export default class UpdateConfigRoute extends Route {
   constructor(
-    private configPath: string = "./config.json",
+    private configPath: string = './config.json',
     private routeManager: RouteManager,
   ) {
     super(
-      "Custom Update Config Route",
-      "/refreshConfig?:location?",
-      <RequestMethod> "POST",
+      'Custom Update Config Route',
+      '/refreshConfig?:location?',
+      <RequestMethod> 'POST',
       new Headers(),
-      "Refreshed Config\n",
+      'Refreshed Config\n',
       200,
       true,
     );
   }
 
-  doesUrlMatch(url = ""): boolean {
+  doesUrlMatch(url = ''): boolean {
     return super.doesUrlMatch(url);
   }
 

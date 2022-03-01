@@ -11,8 +11,8 @@ import {
   bgYellow,
   black,
   yellow,
-} from "./deps.ts";
-import { RequestMethod } from "./request/RequestMethod.ts";
+} from './deps.ts';
+import { RequestMethod } from './request/RequestMethod.ts';
 
 /**
  * A class that logs to the console when certain routes are hit, and stores those logs for the
@@ -34,7 +34,7 @@ export class LogManager {
   public static newEntry(
     url: string | null,
     method: string | null,
-    body: string | null = "",
+    body: string | null = '',
     headers: Headers | null = null,
     message: string | null = null,
   ): void {
@@ -47,7 +47,7 @@ export class LogManager {
       <RequestMethod> method?.toUpperCase(),
     );
     if (method && url) {
-      console.log(color(` ${method?.toUpperCase()} `) + " " + url);
+      console.log(color(` ${method?.toUpperCase()} `) + ' ' + url);
     } else if (message) {
       console.log(yellow(message));
     }
@@ -58,23 +58,23 @@ export class LogManager {
     method: RequestMethod,
   ): (arg0: string) => void {
     switch (method) {
-      case "GET":
+      case 'GET':
         return (str: string) => bgGreen(black(str));
-      case "PUT":
+      case 'PUT':
         return (str: string) => bgBlue(black(str));
-      case "POST":
+      case 'POST':
         return (str: string) => bgYellow(black(str));
-      case "DELETE":
+      case 'DELETE':
         return (str: string) => bgRed(black(str));
-      case "HEAD":
+      case 'HEAD':
         return (str: string) => bgCyan(black(str));
-      case "CONNECT":
+      case 'CONNECT':
         return (str: string) => bgMagenta(black(str));
-      case "OPTIONS":
+      case 'OPTIONS':
         return (str: string) => bgBrightGreen(black(str));
-      case "TRACE":
+      case 'TRACE':
         return (str: string) => bgBrightMagenta(black(str));
-      case "PATCH":
+      case 'PATCH':
         return (str: string) => bgBrightBlue(black(str));
       default:
         // we should never reach here

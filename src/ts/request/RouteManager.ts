@@ -1,6 +1,6 @@
 //deno-lint-ignore-file no-explicit-any
-import Route from "./Route.ts";
-import Config from "../config/Config.ts";
+import Route from './Route.ts';
+import Config from '../config/Config.ts';
 
 /**
  * Central location for matching requests to routes and executing the responses for those routes
@@ -29,8 +29,8 @@ export default class RouteManager {
     port: number,
   ): Route | null {
     let matchingRoute: Route | null = null;
-    const url =
-      request.url.replace(/(?<=http:\/\/)127\.0\.0\.1/, "localhost").split(
+    const url = request.url.replace(/(?<=http:\/\/)127\.0\.0\.1/, 'localhost')
+      .split(
         new RegExp(`localhost:${port}`),
       )[1];
     const method = request.method;
@@ -38,7 +38,7 @@ export default class RouteManager {
     const routesToMatchOn = [...specialRoutes, ...this.routes];
     for (const route of routesToMatchOn) {
       if (
-        (route.method === method || method === "HEAD") &&
+        (route.method === method || method === 'HEAD') &&
         route.doesUrlMatch(url) &&
         route.isEnabled
       ) {

@@ -174,7 +174,7 @@ declare namespace Deno {
      *
      * Defaults to "inherit".
      */
-    permissions?: "inherit" | "none" | {
+    permissions?: 'inherit' | 'none' | {
       /** Specifies if the `net` permission should be requested or revoked.
        * If set to `"inherit"`, the current `env` permission will be inherited.
        * If set to `true`, the global `net` permission will be requested.
@@ -182,7 +182,7 @@ declare namespace Deno {
        *
        * Defaults to "inherit".
        */
-      env?: "inherit" | boolean | string[];
+      env?: 'inherit' | boolean | string[];
 
       /** Specifies if the `hrtime` permission should be requested or revoked.
        * If set to `"inherit"`, the current `hrtime` permission will be inherited.
@@ -191,7 +191,7 @@ declare namespace Deno {
        *
        * Defaults to "inherit".
        */
-      hrtime?: "inherit" | boolean;
+      hrtime?: 'inherit' | boolean;
 
       /** Specifies if the `net` permission should be requested or revoked.
        * if set to `"inherit"`, the current `net` permission will be inherited.
@@ -264,7 +264,7 @@ declare namespace Deno {
        * });
        * ```
        */
-      net?: "inherit" | boolean | string[];
+      net?: 'inherit' | boolean | string[];
 
       /** Specifies if the `ffi` permission should be requested or revoked.
        * If set to `"inherit"`, the current `ffi` permission will be inherited.
@@ -273,7 +273,7 @@ declare namespace Deno {
        *
        * Defaults to "inherit".
        */
-      ffi?: "inherit" | boolean | Array<string | URL>;
+      ffi?: 'inherit' | boolean | Array<string | URL>;
 
       /** Specifies if the `read` permission should be requested or revoked.
        * If set to `"inherit"`, the current `read` permission will be inherited.
@@ -284,7 +284,7 @@ declare namespace Deno {
        *
        * Defaults to "inherit".
        */
-      read?: "inherit" | boolean | Array<string | URL>;
+      read?: 'inherit' | boolean | Array<string | URL>;
 
       /** Specifies if the `run` permission should be requested or revoked.
        * If set to `"inherit"`, the current `run` permission will be inherited.
@@ -293,7 +293,7 @@ declare namespace Deno {
        *
        * Defaults to "inherit".
        */
-      run?: "inherit" | boolean | Array<string | URL>;
+      run?: 'inherit' | boolean | Array<string | URL>;
 
       /** Specifies if the `write` permission should be requested or revoked.
        * If set to `"inherit"`, the current `write` permission will be inherited.
@@ -304,7 +304,7 @@ declare namespace Deno {
        *
        * Defaults to "inherit".
        */
-      write?: "inherit" | boolean | Array<string | URL>;
+      write?: 'inherit' | boolean | Array<string | URL>;
     };
   }
 
@@ -404,7 +404,7 @@ declare namespace Deno {
    */
   export function test(
     name: string,
-    options: Omit<TestDefinition, "fn" | "name">,
+    options: Omit<TestDefinition, 'fn' | 'name'>,
     fn: (t: TestContext) => void | Promise<void>,
   ): void;
 
@@ -427,7 +427,7 @@ declare namespace Deno {
    * ```
    */
   export function test(
-    options: Omit<TestDefinition, "fn">,
+    options: Omit<TestDefinition, 'fn'>,
     fn: (t: TestContext) => void | Promise<void>,
   ): void;
 
@@ -450,7 +450,7 @@ declare namespace Deno {
    * ```
    */
   export function test(
-    options: Omit<TestDefinition, "fn" | "name">,
+    options: Omit<TestDefinition, 'fn' | 'name'>,
     fn: (t: TestContext) => void | Promise<void>,
   ): void;
   /** Exit the Deno process with optional exit code. If no exit code is supplied
@@ -896,7 +896,10 @@ declare namespace Deno {
    * Deno.close(file.rid);
    * ```
    */
-  export function read(rid: number, buffer: Uint8Array): Promise<number | null>;
+  export function read(
+    rid: number,
+    buffer: Uint8Array,
+  ): Promise<number | null>;
 
   /** Synchronously write to the resource ID (`rid`) the contents of the array
    * buffer (`data`).
@@ -1639,7 +1642,10 @@ declare namespace Deno {
    * directory and the `recursive` option isn't set to `true`.
    *
    * Requires `allow-write` permission. */
-  export function removeSync(path: string | URL, options?: RemoveOptions): void;
+  export function removeSync(
+    path: string | URL,
+    options?: RemoveOptions,
+  ): void;
 
   /** Removes the named file or directory.
    *
@@ -2184,10 +2190,10 @@ declare namespace Deno {
    *    will need to care, and will need to refresh that representation directly
    *    from the filesystem.
    */
-  export type FsEventFlag = "rescan";
+  export type FsEventFlag = 'rescan';
 
   export interface FsEvent {
-    kind: "any" | "access" | "create" | "modify" | "remove" | "other";
+    kind: 'any' | 'access' | 'create' | 'modify' | 'remove' | 'other';
     paths: string[];
     flag?: FsEventFlag;
   }
@@ -2252,18 +2258,24 @@ declare namespace Deno {
   export class Process<T extends RunOptions = RunOptions> {
     readonly rid: number;
     readonly pid: number;
-    readonly stdin: T["stdin"] extends "piped" ? Writer & Closer & {
+    readonly stdin: T['stdin'] extends 'piped' ? Writer & Closer & {
       writable: WritableStream<Uint8Array>;
     }
-      : (Writer & Closer & { writable: WritableStream<Uint8Array> }) | null;
-    readonly stdout: T["stdout"] extends "piped" ? Reader & Closer & {
+      : 
+        | (Writer & Closer & { writable: WritableStream<Uint8Array> })
+        | null;
+    readonly stdout: T['stdout'] extends 'piped' ? Reader & Closer & {
       readable: ReadableStream<Uint8Array>;
     }
-      : (Reader & Closer & { readable: ReadableStream<Uint8Array> }) | null;
-    readonly stderr: T["stderr"] extends "piped" ? Reader & Closer & {
+      : 
+        | (Reader & Closer & { readable: ReadableStream<Uint8Array> })
+        | null;
+    readonly stderr: T['stderr'] extends 'piped' ? Reader & Closer & {
       readable: ReadableStream<Uint8Array>;
     }
-      : (Reader & Closer & { readable: ReadableStream<Uint8Array> }) | null;
+      : 
+        | (Reader & Closer & { readable: ReadableStream<Uint8Array> })
+        | null;
     /** Wait for the process to exit and return its exit status.
      *
      * Calling this function multiple times will return the same status.
@@ -2314,39 +2326,39 @@ declare namespace Deno {
   }
 
   export type Signal =
-    | "SIGABRT"
-    | "SIGALRM"
-    | "SIGBUS"
-    | "SIGCHLD"
-    | "SIGCONT"
-    | "SIGEMT"
-    | "SIGFPE"
-    | "SIGHUP"
-    | "SIGILL"
-    | "SIGINFO"
-    | "SIGINT"
-    | "SIGIO"
-    | "SIGKILL"
-    | "SIGPIPE"
-    | "SIGPROF"
-    | "SIGPWR"
-    | "SIGQUIT"
-    | "SIGSEGV"
-    | "SIGSTKFLT"
-    | "SIGSTOP"
-    | "SIGSYS"
-    | "SIGTERM"
-    | "SIGTRAP"
-    | "SIGTSTP"
-    | "SIGTTIN"
-    | "SIGTTOU"
-    | "SIGURG"
-    | "SIGUSR1"
-    | "SIGUSR2"
-    | "SIGVTALRM"
-    | "SIGWINCH"
-    | "SIGXCPU"
-    | "SIGXFSZ";
+    | 'SIGABRT'
+    | 'SIGALRM'
+    | 'SIGBUS'
+    | 'SIGCHLD'
+    | 'SIGCONT'
+    | 'SIGEMT'
+    | 'SIGFPE'
+    | 'SIGHUP'
+    | 'SIGILL'
+    | 'SIGINFO'
+    | 'SIGINT'
+    | 'SIGIO'
+    | 'SIGKILL'
+    | 'SIGPIPE'
+    | 'SIGPROF'
+    | 'SIGPWR'
+    | 'SIGQUIT'
+    | 'SIGSEGV'
+    | 'SIGSTKFLT'
+    | 'SIGSTOP'
+    | 'SIGSYS'
+    | 'SIGTERM'
+    | 'SIGTRAP'
+    | 'SIGTSTP'
+    | 'SIGTTIN'
+    | 'SIGTTOU'
+    | 'SIGURG'
+    | 'SIGUSR1'
+    | 'SIGUSR2'
+    | 'SIGVTALRM'
+    | 'SIGWINCH'
+    | 'SIGXCPU'
+    | 'SIGXFSZ';
 
   /** Registers the given function as a listener of the given signal event.
    *
@@ -2358,7 +2370,10 @@ declare namespace Deno {
    *
    * NOTE: This functionality is not yet implemented on Windows.
    */
-  export function addSignalListener(signal: Signal, handler: () => void): void;
+  export function addSignalListener(
+    signal: Signal,
+    handler: () => void,
+  ): void;
 
   /** Removes the given signal listener that has been registered with
    * Deno.addSignalListener.
@@ -2398,9 +2413,9 @@ declare namespace Deno {
     env?: {
       [key: string]: string;
     };
-    stdout?: "inherit" | "piped" | "null" | number;
-    stderr?: "inherit" | "piped" | "null" | number;
-    stdin?: "inherit" | "piped" | "null" | number;
+    stdout?: 'inherit' | 'piped' | 'null' | number;
+    stderr?: 'inherit' | 'piped' | 'null' | number;
+    stdin?: 'inherit' | 'piped' | 'null' | number;
   }
 
   /** Spawns new subprocess.  RunOptions must contain at a minimum the `opt.cmd`,
@@ -2507,34 +2522,34 @@ declare namespace Deno {
 
   /** The name of a "powerful feature" which needs permission. */
   export type PermissionName =
-    | "run"
-    | "read"
-    | "write"
-    | "net"
-    | "env"
-    | "ffi"
-    | "hrtime";
+    | 'run'
+    | 'read'
+    | 'write'
+    | 'net'
+    | 'env'
+    | 'ffi'
+    | 'hrtime';
 
   /** The current status of the permission. */
-  export type PermissionState = "granted" | "denied" | "prompt";
+  export type PermissionState = 'granted' | 'denied' | 'prompt';
 
   export interface RunPermissionDescriptor {
-    name: "run";
+    name: 'run';
     command?: string | URL;
   }
 
   export interface ReadPermissionDescriptor {
-    name: "read";
+    name: 'read';
     path?: string | URL;
   }
 
   export interface WritePermissionDescriptor {
-    name: "write";
+    name: 'write';
     path?: string | URL;
   }
 
   export interface NetPermissionDescriptor {
-    name: "net";
+    name: 'net';
     /** Optional host string of the form `"<hostname>[:<port>]"`. Examples:
      *
      *      "github.com"
@@ -2544,17 +2559,17 @@ declare namespace Deno {
   }
 
   export interface EnvPermissionDescriptor {
-    name: "env";
+    name: 'env';
     variable?: string;
   }
 
   export interface FfiPermissionDescriptor {
-    name: "ffi";
+    name: 'ffi';
     path?: string | URL;
   }
 
   export interface HrtimePermissionDescriptor {
-    name: "hrtime";
+    name: 'hrtime';
   }
 
   /** Permission descriptors which define a permission and can be queried,
@@ -2569,7 +2584,7 @@ declare namespace Deno {
     | HrtimePermissionDescriptor;
 
   export interface PermissionStatusEventMap {
-    "change": Event;
+    'change': Event;
   }
 
   export class PermissionStatus extends EventTarget {
@@ -2647,9 +2662,9 @@ declare namespace Deno {
     /** The LLVM target triple */
     target: string;
     /** Instruction set architecture */
-    arch: "x86_64" | "aarch64";
+    arch: 'x86_64' | 'aarch64';
     /** Operating system */
-    os: "darwin" | "linux" | "windows";
+    os: 'darwin' | 'linux' | 'windows';
     /** Computer vendor */
     vendor: string;
     /** Optional environment */
@@ -2691,7 +2706,7 @@ declare namespace Deno {
   export const mainModule: string;
 
   export type SymlinkOptions = {
-    type: "file" | "dir";
+    type: 'file' | 'dir';
   };
 
   /**
@@ -2924,14 +2939,14 @@ declare namespace Deno {
   /** The type of the resource record.
    * Only the listed types are supported currently. */
   export type RecordType =
-    | "A"
-    | "AAAA"
-    | "ANAME"
-    | "CNAME"
-    | "MX"
-    | "PTR"
-    | "SRV"
-    | "TXT";
+    | 'A'
+    | 'AAAA'
+    | 'ANAME'
+    | 'CNAME'
+    | 'MX'
+    | 'PTR'
+    | 'SRV'
+    | 'TXT';
 
   export interface ResolveDnsOptions {
     /** The name server to be used for lookups.
@@ -2961,25 +2976,25 @@ declare namespace Deno {
 
   export function resolveDns(
     query: string,
-    recordType: "A" | "AAAA" | "ANAME" | "CNAME" | "PTR",
+    recordType: 'A' | 'AAAA' | 'ANAME' | 'CNAME' | 'PTR',
     options?: ResolveDnsOptions,
   ): Promise<string[]>;
 
   export function resolveDns(
     query: string,
-    recordType: "MX",
+    recordType: 'MX',
     options?: ResolveDnsOptions,
   ): Promise<MXRecord[]>;
 
   export function resolveDns(
     query: string,
-    recordType: "SRV",
+    recordType: 'SRV',
     options?: ResolveDnsOptions,
   ): Promise<SRVRecord[]>;
 
   export function resolveDns(
     query: string,
-    recordType: "TXT",
+    recordType: 'TXT',
     options?: ResolveDnsOptions,
   ): Promise<string[][]>;
 
@@ -3563,7 +3578,7 @@ declare interface TextEncoderEncodeIntoResult {
 
 interface TextEncoder {
   /** Returns "utf-8". */
-  readonly encoding: "utf-8";
+  readonly encoding: 'utf-8';
   /** Returns the result of running UTF-8's encoder. */
   encode(input?: string): Uint8Array;
   encodeInto(input: string, dest: Uint8Array): TextEncoderEncodeIntoResult;
@@ -3593,7 +3608,7 @@ declare var TextDecoderStream: {
 
 interface TextEncoderStream {
   /** Returns "utf-8". */
-  readonly encoding: "utf-8";
+  readonly encoding: 'utf-8';
   readonly readable: ReadableStream<Uint8Array>;
   readonly writable: WritableStream<string>;
   readonly [Symbol.toStringTag]: string;
@@ -3659,12 +3674,12 @@ declare var AbortSignal: {
 };
 
 interface FileReaderEventMap {
-  "abort": ProgressEvent<FileReader>;
-  "error": ProgressEvent<FileReader>;
-  "load": ProgressEvent<FileReader>;
-  "loadend": ProgressEvent<FileReader>;
-  "loadstart": ProgressEvent<FileReader>;
-  "progress": ProgressEvent<FileReader>;
+  'abort': ProgressEvent<FileReader>;
+  'error': ProgressEvent<FileReader>;
+  'load': ProgressEvent<FileReader>;
+  'loadend': ProgressEvent<FileReader>;
+  'loadstart': ProgressEvent<FileReader>;
+  'progress': ProgressEvent<FileReader>;
 }
 
 /** Lets web applications asynchronously read the contents of files (or raw data buffers) stored on the user's computer, using File or Blob objects to specify the file or data to read. */
@@ -3673,11 +3688,15 @@ interface FileReader extends EventTarget {
   onabort: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
   onerror: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
   onload: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
-  onloadend: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
+  onloadend:
+    | ((this: FileReader, ev: ProgressEvent<FileReader>) => any)
+    | null;
   onloadstart:
     | ((this: FileReader, ev: ProgressEvent<FileReader>) => any)
     | null;
-  onprogress: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
+  onprogress:
+    | ((this: FileReader, ev: ProgressEvent<FileReader>) => any)
+    | null;
   readonly readyState: number;
   readonly result: string | ArrayBuffer | null;
   abort(): void;
@@ -3722,7 +3741,7 @@ type BlobPart = BufferSource | Blob | string;
 
 interface BlobPropertyBag {
   type?: string;
-  endings?: "transparent" | "native";
+  endings?: 'transparent' | 'native';
 }
 
 /** A file-like object of immutable, raw data. Blobs represent data that isn't necessarily in a JavaScript-native format. The File interface is based on Blob, inheriting blob functionality and expanding it to support files on the user's system. */
@@ -3829,7 +3848,7 @@ interface UnderlyingByteSource {
   cancel?: ReadableStreamErrorCallback;
   pull?: ReadableByteStreamControllerCallback;
   start?: ReadableByteStreamControllerCallback;
-  type: "bytes";
+  type: 'bytes';
 }
 
 interface UnderlyingSink<W = any> {
@@ -3924,7 +3943,7 @@ declare var ByteLengthQueuingStrategy: {
 interface ReadableStream<R = any> {
   readonly locked: boolean;
   cancel(reason?: any): Promise<void>;
-  getReader(options: { mode: "byob" }): ReadableStreamBYOBReader;
+  getReader(options: { mode: 'byob' }): ReadableStreamBYOBReader;
   getReader(options?: { mode?: undefined }): ReadableStreamDefaultReader<R>;
   pipeThrough<T>(
     { writable, readable }: {
@@ -4107,8 +4126,8 @@ declare class MessageChannel {
 }
 
 interface MessagePortEventMap {
-  "message": MessageEvent;
-  "messageerror": MessageEvent;
+  'message': MessageEvent;
+  'messageerror': MessageEvent;
 }
 
 /** The MessagePort interface of the Channel Messaging API represents one of the
@@ -4275,7 +4294,11 @@ interface FormData {
   entries(): IterableIterator<[string, FormDataEntryValue]>;
   [Symbol.iterator](): IterableIterator<[string, FormDataEntryValue]>;
   forEach(
-    callback: (value: FormDataEntryValue, key: string, parent: this) => void,
+    callback: (
+      value: FormDataEntryValue,
+      key: string,
+      parent: this,
+    ) => void,
     thisArg?: any,
   ): void;
 }
@@ -4381,25 +4404,25 @@ declare class Headers implements DomIterable<string, string> {
 
 type RequestInfo = Request | string;
 type RequestCache =
-  | "default"
-  | "force-cache"
-  | "no-cache"
-  | "no-store"
-  | "only-if-cached"
-  | "reload";
-type RequestCredentials = "include" | "omit" | "same-origin";
-type RequestMode = "cors" | "navigate" | "no-cors" | "same-origin";
-type RequestRedirect = "error" | "follow" | "manual";
+  | 'default'
+  | 'force-cache'
+  | 'no-cache'
+  | 'no-store'
+  | 'only-if-cached'
+  | 'reload';
+type RequestCredentials = 'include' | 'omit' | 'same-origin';
+type RequestMode = 'cors' | 'navigate' | 'no-cors' | 'same-origin';
+type RequestRedirect = 'error' | 'follow' | 'manual';
 type ReferrerPolicy =
-  | ""
-  | "no-referrer"
-  | "no-referrer-when-downgrade"
-  | "origin"
-  | "origin-when-cross-origin"
-  | "same-origin"
-  | "strict-origin"
-  | "strict-origin-when-cross-origin"
-  | "unsafe-url";
+  | ''
+  | 'no-referrer'
+  | 'no-referrer-when-downgrade'
+  | 'origin'
+  | 'origin-when-cross-origin'
+  | 'same-origin'
+  | 'strict-origin'
+  | 'strict-origin-when-cross-origin'
+  | 'unsafe-url';
 type BodyInit =
   | Blob
   | BufferSource
@@ -4408,24 +4431,24 @@ type BodyInit =
   | ReadableStream<Uint8Array>
   | string;
 type RequestDestination =
-  | ""
-  | "audio"
-  | "audioworklet"
-  | "document"
-  | "embed"
-  | "font"
-  | "image"
-  | "manifest"
-  | "object"
-  | "paintworklet"
-  | "report"
-  | "script"
-  | "sharedworker"
-  | "style"
-  | "track"
-  | "video"
-  | "worker"
-  | "xslt";
+  | ''
+  | 'audio'
+  | 'audioworklet'
+  | 'document'
+  | 'embed'
+  | 'font'
+  | 'image'
+  | 'manifest'
+  | 'object'
+  | 'paintworklet'
+  | 'report'
+  | 'script'
+  | 'sharedworker'
+  | 'style'
+  | 'track'
+  | 'video'
+  | 'worker'
+  | 'xslt';
 
 interface RequestInit {
   /**
@@ -4614,12 +4637,12 @@ interface ResponseInit {
 }
 
 type ResponseType =
-  | "basic"
-  | "cors"
-  | "default"
-  | "error"
-  | "opaque"
-  | "opaqueredirect";
+  | 'basic'
+  | 'cors'
+  | 'default'
+  | 'error'
+  | 'opaque'
+  | 'opaqueredirect';
 
 /** This Fetch API interface represents the response to a request. */
 declare class Response implements Body {
@@ -4757,7 +4780,7 @@ declare interface GPURequestAdapterOptions {
   forceFallbackAdapter?: boolean;
 }
 
-declare type GPUPowerPreference = "low-power" | "high-performance";
+declare type GPUPowerPreference = 'low-power' | 'high-performance';
 
 declare class GPUAdapter {
   readonly name: string;
@@ -4774,28 +4797,28 @@ declare interface GPUDeviceDescriptor extends GPUObjectDescriptorBase {
 }
 
 declare type GPUFeatureName =
-  | "depth-clip-control"
-  | "depth24unorm-stencil8"
-  | "depth32float-stencil8"
-  | "pipeline-statistics-query"
-  | "texture-compression-bc"
-  | "texture-compression-etc2"
-  | "texture-compression-astc"
-  | "timestamp-query"
-  | "indirect-first-instance"
+  | 'depth-clip-control'
+  | 'depth24unorm-stencil8'
+  | 'depth32float-stencil8'
+  | 'pipeline-statistics-query'
+  | 'texture-compression-bc'
+  | 'texture-compression-etc2'
+  | 'texture-compression-astc'
+  | 'timestamp-query'
+  | 'indirect-first-instance'
   // extended from spec
-  | "mappable-primary-buffers"
-  | "sampled-texture-binding-array"
-  | "sampled-texture-array-dynamic-indexing"
-  | "sampled-texture-array-non-uniform-indexing"
-  | "unsized-binding-array"
-  | "multi-draw-indirect"
-  | "multi-draw-indirect-count"
-  | "push-constants"
-  | "address-mode-clamp-to-border"
-  | "texture-adapter-specific-format-features"
-  | "shader-float64"
-  | "vertex-attribute-64bit";
+  | 'mappable-primary-buffers'
+  | 'sampled-texture-binding-array'
+  | 'sampled-texture-array-dynamic-indexing'
+  | 'sampled-texture-array-non-uniform-indexing'
+  | 'unsized-binding-array'
+  | 'multi-draw-indirect'
+  | 'multi-draw-indirect-count'
+  | 'push-constants'
+  | 'address-mode-clamp-to-border'
+  | 'texture-adapter-specific-format-features'
+  | 'shader-float64'
+  | 'vertex-attribute-64bit';
 
 declare class GPUDevice extends EventTarget implements GPUObjectBase {
   label: string | null;
@@ -4905,7 +4928,7 @@ declare interface GPUTextureDescriptor extends GPUObjectDescriptorBase {
   usage: GPUTextureUsageFlags;
 }
 
-declare type GPUTextureDimension = "1d" | "2d" | "3d";
+declare type GPUTextureDimension = '1d' | '2d' | '3d';
 
 declare type GPUTextureUsageFlags = number;
 declare class GPUTextureUsage {
@@ -4931,111 +4954,111 @@ declare interface GPUTextureViewDescriptor extends GPUObjectDescriptorBase {
 }
 
 declare type GPUTextureViewDimension =
-  | "1d"
-  | "2d"
-  | "2d-array"
-  | "cube"
-  | "cube-array"
-  | "3d";
+  | '1d'
+  | '2d'
+  | '2d-array'
+  | 'cube'
+  | 'cube-array'
+  | '3d';
 
-declare type GPUTextureAspect = "all" | "stencil-only" | "depth-only";
+declare type GPUTextureAspect = 'all' | 'stencil-only' | 'depth-only';
 
 declare type GPUTextureFormat =
-  | "r8unorm"
-  | "r8snorm"
-  | "r8uint"
-  | "r8sint"
-  | "r16uint"
-  | "r16sint"
-  | "r16float"
-  | "rg8unorm"
-  | "rg8snorm"
-  | "rg8uint"
-  | "rg8sint"
-  | "r32uint"
-  | "r32sint"
-  | "r32float"
-  | "rg16uint"
-  | "rg16sint"
-  | "rg16float"
-  | "rgba8unorm"
-  | "rgba8unorm-srgb"
-  | "rgba8snorm"
-  | "rgba8uint"
-  | "rgba8sint"
-  | "bgra8unorm"
-  | "bgra8unorm-srgb"
-  | "rgb9e5ufloat"
-  | "rgb10a2unorm"
-  | "rg11b10ufloat"
-  | "rg32uint"
-  | "rg32sint"
-  | "rg32float"
-  | "rgba16uint"
-  | "rgba16sint"
-  | "rgba16float"
-  | "rgba32uint"
-  | "rgba32sint"
-  | "rgba32float"
-  | "stencil8"
-  | "depth16unorm"
-  | "depth24plus"
-  | "depth24plus-stencil8"
-  | "depth32float"
-  | "bc1-rgba-unorm"
-  | "bc1-rgba-unorm-srgb"
-  | "bc2-rgba-unorm"
-  | "bc2-rgba-unorm-srgb"
-  | "bc3-rgba-unorm"
-  | "bc3-rgba-unorm-srgb"
-  | "bc4-r-unorm"
-  | "bc4-r-snorm"
-  | "bc5-rg-unorm"
-  | "bc5-rg-snorm"
-  | "bc6h-rgb-ufloat"
-  | "bc6h-rgb-float"
-  | "bc7-rgba-unorm"
-  | "bc7-rgba-unorm-srgb"
-  | "etc2-rgb8unorm"
-  | "etc2-rgb8unorm-srgb"
-  | "etc2-rgb8a1unorm"
-  | "etc2-rgb8a1unorm-srgb"
-  | "etc2-rgba8unorm"
-  | "etc2-rgba8unorm-srgb"
-  | "eac-r11unorm"
-  | "eac-r11snorm"
-  | "eac-rg11unorm"
-  | "eac-rg11snorm"
-  | "astc-4x4-unorm"
-  | "astc-4x4-unorm-srgb"
-  | "astc-5x4-unorm"
-  | "astc-5x4-unorm-srgb"
-  | "astc-5x5-unorm"
-  | "astc-5x5-unorm-srgb"
-  | "astc-6x5-unorm"
-  | "astc-6x5-unorm-srgb"
-  | "astc-6x6-unorm"
-  | "astc-6x6-unorm-srgb"
-  | "astc-8x5-unorm"
-  | "astc-8x5-unorm-srgb"
-  | "astc-8x6-unorm"
-  | "astc-8x6-unorm-srgb"
-  | "astc-8x8-unorm"
-  | "astc-8x8-unorm-srgb"
-  | "astc-10x5-unorm"
-  | "astc-10x5-unorm-srgb"
-  | "astc-10x6-unorm"
-  | "astc-10x6-unorm-srgb"
-  | "astc-10x8-unorm"
-  | "astc-10x8-unorm-srgb"
-  | "astc-10x10-unorm"
-  | "astc-10x10-unorm-srgb"
-  | "astc-12x10-unorm"
-  | "astc-12x10-unorm-srgb"
-  | "astc-12x12-unorm"
-  | "astc-12x12-unorm-srgb"
-  | "depth24unorm-stencil8"
-  | "depth32float-stencil8";
+  | 'r8unorm'
+  | 'r8snorm'
+  | 'r8uint'
+  | 'r8sint'
+  | 'r16uint'
+  | 'r16sint'
+  | 'r16float'
+  | 'rg8unorm'
+  | 'rg8snorm'
+  | 'rg8uint'
+  | 'rg8sint'
+  | 'r32uint'
+  | 'r32sint'
+  | 'r32float'
+  | 'rg16uint'
+  | 'rg16sint'
+  | 'rg16float'
+  | 'rgba8unorm'
+  | 'rgba8unorm-srgb'
+  | 'rgba8snorm'
+  | 'rgba8uint'
+  | 'rgba8sint'
+  | 'bgra8unorm'
+  | 'bgra8unorm-srgb'
+  | 'rgb9e5ufloat'
+  | 'rgb10a2unorm'
+  | 'rg11b10ufloat'
+  | 'rg32uint'
+  | 'rg32sint'
+  | 'rg32float'
+  | 'rgba16uint'
+  | 'rgba16sint'
+  | 'rgba16float'
+  | 'rgba32uint'
+  | 'rgba32sint'
+  | 'rgba32float'
+  | 'stencil8'
+  | 'depth16unorm'
+  | 'depth24plus'
+  | 'depth24plus-stencil8'
+  | 'depth32float'
+  | 'bc1-rgba-unorm'
+  | 'bc1-rgba-unorm-srgb'
+  | 'bc2-rgba-unorm'
+  | 'bc2-rgba-unorm-srgb'
+  | 'bc3-rgba-unorm'
+  | 'bc3-rgba-unorm-srgb'
+  | 'bc4-r-unorm'
+  | 'bc4-r-snorm'
+  | 'bc5-rg-unorm'
+  | 'bc5-rg-snorm'
+  | 'bc6h-rgb-ufloat'
+  | 'bc6h-rgb-float'
+  | 'bc7-rgba-unorm'
+  | 'bc7-rgba-unorm-srgb'
+  | 'etc2-rgb8unorm'
+  | 'etc2-rgb8unorm-srgb'
+  | 'etc2-rgb8a1unorm'
+  | 'etc2-rgb8a1unorm-srgb'
+  | 'etc2-rgba8unorm'
+  | 'etc2-rgba8unorm-srgb'
+  | 'eac-r11unorm'
+  | 'eac-r11snorm'
+  | 'eac-rg11unorm'
+  | 'eac-rg11snorm'
+  | 'astc-4x4-unorm'
+  | 'astc-4x4-unorm-srgb'
+  | 'astc-5x4-unorm'
+  | 'astc-5x4-unorm-srgb'
+  | 'astc-5x5-unorm'
+  | 'astc-5x5-unorm-srgb'
+  | 'astc-6x5-unorm'
+  | 'astc-6x5-unorm-srgb'
+  | 'astc-6x6-unorm'
+  | 'astc-6x6-unorm-srgb'
+  | 'astc-8x5-unorm'
+  | 'astc-8x5-unorm-srgb'
+  | 'astc-8x6-unorm'
+  | 'astc-8x6-unorm-srgb'
+  | 'astc-8x8-unorm'
+  | 'astc-8x8-unorm-srgb'
+  | 'astc-10x5-unorm'
+  | 'astc-10x5-unorm-srgb'
+  | 'astc-10x6-unorm'
+  | 'astc-10x6-unorm-srgb'
+  | 'astc-10x8-unorm'
+  | 'astc-10x8-unorm-srgb'
+  | 'astc-10x10-unorm'
+  | 'astc-10x10-unorm-srgb'
+  | 'astc-12x10-unorm'
+  | 'astc-12x10-unorm-srgb'
+  | 'astc-12x12-unorm'
+  | 'astc-12x12-unorm-srgb'
+  | 'depth24unorm-stencil8'
+  | 'depth32float-stencil8';
 
 declare class GPUSampler implements GPUObjectBase {
   label: string | null;
@@ -5054,19 +5077,19 @@ declare interface GPUSamplerDescriptor extends GPUObjectDescriptorBase {
   maxAnisotropy?: number;
 }
 
-declare type GPUAddressMode = "clamp-to-edge" | "repeat" | "mirror-repeat";
+declare type GPUAddressMode = 'clamp-to-edge' | 'repeat' | 'mirror-repeat';
 
-declare type GPUFilterMode = "nearest" | "linear";
+declare type GPUFilterMode = 'nearest' | 'linear';
 
 declare type GPUCompareFunction =
-  | "never"
-  | "less"
-  | "equal"
-  | "less-equal"
-  | "greater"
-  | "not-equal"
-  | "greater-equal"
-  | "always";
+  | 'never'
+  | 'less'
+  | 'equal'
+  | 'less-equal'
+  | 'greater'
+  | 'not-equal'
+  | 'greater-equal'
+  | 'always';
 
 declare class GPUBindGroupLayout implements GPUObjectBase {
   label: string | null;
@@ -5099,16 +5122,16 @@ declare interface GPUBufferBindingLayout {
   minBindingSize?: number;
 }
 
-declare type GPUBufferBindingType = "uniform" | "storage" | "read-only-storage";
+declare type GPUBufferBindingType = 'uniform' | 'storage' | 'read-only-storage';
 
 declare interface GPUSamplerBindingLayout {
   type?: GPUSamplerBindingType;
 }
 
 declare type GPUSamplerBindingType =
-  | "filtering"
-  | "non-filtering"
-  | "comparison";
+  | 'filtering'
+  | 'non-filtering'
+  | 'comparison';
 
 declare interface GPUTextureBindingLayout {
   sampleType?: GPUTextureSampleType;
@@ -5117,13 +5140,13 @@ declare interface GPUTextureBindingLayout {
 }
 
 declare type GPUTextureSampleType =
-  | "float"
-  | "unfilterable-float"
-  | "depth"
-  | "sint"
-  | "uint";
+  | 'float'
+  | 'unfilterable-float'
+  | 'depth'
+  | 'sint'
+  | 'uint';
 
-declare type GPUStorageTextureAccess = "write-only";
+declare type GPUStorageTextureAccess = 'write-only';
 
 declare interface GPUStorageTextureBindingLayout {
   access: GPUStorageTextureAccess;
@@ -5164,7 +5187,7 @@ declare interface GPUPipelineLayoutDescriptor extends GPUObjectDescriptorBase {
   bindGroupLayouts: GPUBindGroupLayout[];
 }
 
-declare type GPUCompilationMessageType = "error" | "warning" | "info";
+declare type GPUCompilationMessageType = 'error' | 'warning' | 'info';
 
 declare interface GPUCompilationMessage {
   readonly message: string;
@@ -5228,11 +5251,11 @@ declare interface GPURenderPipelineDescriptor
 }
 
 declare type GPUPrimitiveTopology =
-  | "point-list"
-  | "line-list"
-  | "line-strip"
-  | "triangle-list"
-  | "triangle-strip";
+  | 'point-list'
+  | 'line-list'
+  | 'line-strip'
+  | 'triangle-list'
+  | 'triangle-strip';
 
 declare interface GPUPrimitiveState {
   topology?: GPUPrimitiveTopology;
@@ -5242,9 +5265,9 @@ declare interface GPUPrimitiveState {
   unclippedDepth?: boolean;
 }
 
-declare type GPUFrontFace = "ccw" | "cw";
+declare type GPUFrontFace = 'ccw' | 'cw';
 
-declare type GPUCullMode = "none" | "front" | "back";
+declare type GPUCullMode = 'none' | 'front' | 'back';
 
 declare interface GPUMultisampleState {
   count?: number;
@@ -5284,26 +5307,26 @@ declare interface GPUBlendComponent {
 }
 
 declare type GPUBlendFactor =
-  | "zero"
-  | "one"
-  | "src"
-  | "one-minus-src"
-  | "src-alpha"
-  | "one-minus-src-alpha"
-  | "dst"
-  | "one-minus-dst"
-  | "dst-alpha"
-  | "one-minus-dst-alpha"
-  | "src-alpha-saturated"
-  | "constant"
-  | "one-minus-constant";
+  | 'zero'
+  | 'one'
+  | 'src'
+  | 'one-minus-src'
+  | 'src-alpha'
+  | 'one-minus-src-alpha'
+  | 'dst'
+  | 'one-minus-dst'
+  | 'dst-alpha'
+  | 'one-minus-dst-alpha'
+  | 'src-alpha-saturated'
+  | 'constant'
+  | 'one-minus-constant';
 
 declare type GPUBlendOperation =
-  | "add"
-  | "subtract"
-  | "reverse-subtract"
-  | "min"
-  | "max";
+  | 'add'
+  | 'subtract'
+  | 'reverse-subtract'
+  | 'min'
+  | 'max';
 
 declare interface GPUDepthStencilState {
   format: GPUTextureFormat;
@@ -5330,49 +5353,49 @@ declare interface GPUStencilFaceState {
 }
 
 declare type GPUStencilOperation =
-  | "keep"
-  | "zero"
-  | "replace"
-  | "invert"
-  | "increment-clamp"
-  | "decrement-clamp"
-  | "increment-wrap"
-  | "decrement-wrap";
+  | 'keep'
+  | 'zero'
+  | 'replace'
+  | 'invert'
+  | 'increment-clamp'
+  | 'decrement-clamp'
+  | 'increment-wrap'
+  | 'decrement-wrap';
 
-declare type GPUIndexFormat = "uint16" | "uint32";
+declare type GPUIndexFormat = 'uint16' | 'uint32';
 
 declare type GPUVertexFormat =
-  | "uint8x2"
-  | "uint8x4"
-  | "sint8x2"
-  | "sint8x4"
-  | "unorm8x2"
-  | "unorm8x4"
-  | "snorm8x2"
-  | "snorm8x4"
-  | "uint16x2"
-  | "uint16x4"
-  | "sint16x2"
-  | "sint16x4"
-  | "unorm16x2"
-  | "unorm16x4"
-  | "snorm16x2"
-  | "snorm16x4"
-  | "float16x2"
-  | "float16x4"
-  | "float32"
-  | "float32x2"
-  | "float32x3"
-  | "float32x4"
-  | "uint32"
-  | "uint32x2"
-  | "uint32x3"
-  | "uint32x4"
-  | "sint32"
-  | "sint32x2"
-  | "sint32x3"
-  | "sint32x4";
-declare type GPUVertexStepMode = "vertex" | "instance";
+  | 'uint8x2'
+  | 'uint8x4'
+  | 'sint8x2'
+  | 'sint8x4'
+  | 'unorm8x2'
+  | 'unorm8x4'
+  | 'snorm8x2'
+  | 'snorm8x4'
+  | 'uint16x2'
+  | 'uint16x4'
+  | 'sint16x2'
+  | 'sint16x4'
+  | 'unorm16x2'
+  | 'unorm16x4'
+  | 'snorm16x2'
+  | 'snorm16x4'
+  | 'float16x2'
+  | 'float16x4'
+  | 'float32'
+  | 'float32x2'
+  | 'float32x3'
+  | 'float32x4'
+  | 'uint32'
+  | 'uint32x2'
+  | 'uint32x3'
+  | 'uint32x4'
+  | 'sint32'
+  | 'sint32x2'
+  | 'sint32x3'
+  | 'sint32x4';
+declare type GPUVertexStepMode = 'vertex' | 'instance';
 
 declare interface GPUVertexState extends GPUProgrammableStage {
   buffers?: (GPUVertexBufferLayout | null)[];
@@ -5678,9 +5701,9 @@ declare interface GPURenderPassDepthStencilAttachment {
   stencilReadOnly?: boolean;
 }
 
-declare type GPULoadOp = "load";
+declare type GPULoadOp = 'load';
 
-declare type GPUStoreOp = "store" | "discard";
+declare type GPUStoreOp = 'store' | 'discard';
 
 declare class GPURenderBundle implements GPUObjectBase {
   label: string | null;
@@ -5787,23 +5810,23 @@ declare interface GPUQuerySetDescriptor extends GPUObjectDescriptorBase {
   pipelineStatistics?: GPUPipelineStatisticName[];
 }
 
-declare type GPUQueryType = "occlusion" | "pipeline-statistics" | "timestamp";
+declare type GPUQueryType = 'occlusion' | 'pipeline-statistics' | 'timestamp';
 
 declare type GPUPipelineStatisticName =
-  | "vertex-shader-invocations"
-  | "clipper-invocations"
-  | "clipper-primitives-out"
-  | "fragment-shader-invocations"
-  | "compute-shader-invocations";
+  | 'vertex-shader-invocations'
+  | 'clipper-invocations'
+  | 'clipper-primitives-out'
+  | 'fragment-shader-invocations'
+  | 'compute-shader-invocations';
 
-declare type GPUDeviceLostReason = "destroyed";
+declare type GPUDeviceLostReason = 'destroyed';
 
 declare interface GPUDeviceLostInfo {
   readonly reason: GPUDeviceLostReason | undefined;
   readonly message: string;
 }
 
-declare type GPUErrorFilter = "out-of-memory" | "validation";
+declare type GPUErrorFilter = 'out-of-memory' | 'validation';
 
 declare class GPUOutOfMemoryError {
   constructor();
@@ -5968,7 +5991,7 @@ declare class WebSocket extends EventTarget {
   ): void;
 }
 
-type BinaryType = "arraybuffer" | "blob";
+type BinaryType = 'arraybuffer' | 'blob';
 
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
@@ -6032,17 +6055,17 @@ interface KeyAlgorithm {
 
 type AlgorithmIdentifier = string | Algorithm;
 type HashAlgorithmIdentifier = AlgorithmIdentifier;
-type KeyType = "private" | "public" | "secret";
+type KeyType = 'private' | 'public' | 'secret';
 type KeyUsage =
-  | "decrypt"
-  | "deriveBits"
-  | "deriveKey"
-  | "encrypt"
-  | "sign"
-  | "unwrapKey"
-  | "verify"
-  | "wrapKey";
-type KeyFormat = "jwk" | "pkcs8" | "raw" | "spki";
+  | 'decrypt'
+  | 'deriveBits'
+  | 'deriveKey'
+  | 'encrypt'
+  | 'sign'
+  | 'unwrapKey'
+  | 'verify'
+  | 'wrapKey';
+type KeyFormat = 'jwk' | 'pkcs8' | 'raw' | 'spki';
 type NamedCurve = string;
 
 interface RsaOtherPrimesInfo {
@@ -6219,7 +6242,7 @@ interface SubtleCrypto {
     keyUsages: KeyUsage[],
   ): Promise<CryptoKeyPair | CryptoKey>;
   importKey(
-    format: "jwk",
+    format: 'jwk',
     keyData: JsonWebKey,
     algorithm:
       | AlgorithmIdentifier
@@ -6230,7 +6253,7 @@ interface SubtleCrypto {
     keyUsages: KeyUsage[],
   ): Promise<CryptoKey>;
   importKey(
-    format: Exclude<KeyFormat, "jwk">,
+    format: Exclude<KeyFormat, 'jwk'>,
     keyData: BufferSource,
     algorithm:
       | AlgorithmIdentifier
@@ -6240,9 +6263,9 @@ interface SubtleCrypto {
     extractable: boolean,
     keyUsages: KeyUsage[],
   ): Promise<CryptoKey>;
-  exportKey(format: "jwk", key: CryptoKey): Promise<JsonWebKey>;
+  exportKey(format: 'jwk', key: CryptoKey): Promise<JsonWebKey>;
   exportKey(
-    format: Exclude<KeyFormat, "jwk">,
+    format: Exclude<KeyFormat, 'jwk'>,
     key: CryptoKey,
   ): Promise<ArrayBuffer>;
   sign(
@@ -6364,8 +6387,8 @@ declare var SubtleCrypto: {
 /// <reference lib="esnext" />
 
 interface BroadcastChannelEventMap {
-  "message": MessageEvent;
-  "messageerror": MessageEvent;
+  'message': MessageEvent;
+  'messageerror': MessageEvent;
 }
 
 interface BroadcastChannel extends EventTarget {
@@ -6387,7 +6410,10 @@ interface BroadcastChannel extends EventTarget {
   postMessage(message: any): void;
   addEventListener<K extends keyof BroadcastChannelEventMap>(
     type: K,
-    listener: (this: BroadcastChannel, ev: BroadcastChannelEventMap[K]) => any,
+    listener: (
+      this: BroadcastChannel,
+      ev: BroadcastChannelEventMap[K],
+    ) => any,
     options?: boolean | AddEventListenerOptions,
   ): void;
   addEventListener(
@@ -6397,7 +6423,10 @@ interface BroadcastChannel extends EventTarget {
   ): void;
   removeEventListener<K extends keyof BroadcastChannelEventMap>(
     type: K,
-    listener: (this: BroadcastChannel, ev: BroadcastChannelEventMap[K]) => any,
+    listener: (
+      this: BroadcastChannel,
+      ev: BroadcastChannelEventMap[K],
+    ) => any,
     options?: boolean | EventListenerOptions,
   ): void;
   removeEventListener(
@@ -6419,13 +6448,13 @@ declare var BroadcastChannel: {
 
 declare namespace Deno {
   export interface NetAddr {
-    transport: "tcp" | "udp";
+    transport: 'tcp' | 'udp';
     hostname: string;
     port: number;
   }
 
   export interface UnixAddr {
-    transport: "unix" | "unixpacket";
+    transport: 'unix' | 'unixpacket';
     path: string;
   }
 
@@ -6503,7 +6532,7 @@ declare namespace Deno {
    *
    * Requires `allow-net` permission. */
   export function listen(
-    options: ListenOptions & { transport?: "tcp" },
+    options: ListenOptions & { transport?: 'tcp' },
   ): Listener;
 
   export interface ListenTlsOptions extends ListenOptions {
@@ -6513,7 +6542,7 @@ declare namespace Deno {
     /** Server public key file. Requires `--allow-read`.*/
     keyFile: string;
 
-    transport?: "tcp";
+    transport?: 'tcp';
   }
 
   /** Listen announces on the local transport address over TLS (transport layer
@@ -6532,7 +6561,7 @@ declare namespace Deno {
     /** A literal IP address or host name that can be resolved to an IP address.
      * If not specified, defaults to `127.0.0.1`. */
     hostname?: string;
-    transport?: "tcp";
+    transport?: 'tcp';
   }
 
   /**
@@ -6836,9 +6865,9 @@ declare namespace WebAssembly {
     module: Module;
   }
 
-  export type ImportExportKind = "function" | "global" | "memory" | "table";
-  export type TableKind = "anyfunc";
-  export type ValueType = "f32" | "f64" | "i32" | "i64";
+  export type ImportExportKind = 'function' | 'global' | 'memory' | 'table';
+  export type TableKind = 'anyfunc';
+  export type ValueType = 'f32' | 'f64' | 'i32' | 'i64';
   export type ExportValue = Function | Global | Memory | Table;
   export type Exports = Record<string, ExportValue>;
   export type ImportValue = ExportValue | number;
@@ -7032,16 +7061,16 @@ declare class ErrorEvent extends Event {
 }
 
 interface AbstractWorkerEventMap {
-  "error": ErrorEvent;
+  'error': ErrorEvent;
 }
 
 interface WorkerEventMap extends AbstractWorkerEventMap {
-  "message": MessageEvent;
-  "messageerror": MessageEvent;
+  'message': MessageEvent;
+  'messageerror': MessageEvent;
 }
 
 interface WorkerOptions {
-  type?: "classic" | "module";
+  type?: 'classic' | 'module';
   name?: string;
 }
 
@@ -7165,7 +7194,7 @@ declare class PerformanceEntry {
  * performance timeline. */
 declare class PerformanceMark extends PerformanceEntry {
   readonly detail: any;
-  readonly entryType: "mark";
+  readonly entryType: 'mark';
   constructor(name: string, options?: PerformanceMarkOptions);
 }
 
@@ -7175,7 +7204,7 @@ declare class PerformanceMark extends PerformanceEntry {
  * between two marks to the performance timeline. */
 declare class PerformanceMeasure extends PerformanceEntry {
   readonly detail: any;
-  readonly entryType: "measure";
+  readonly entryType: 'measure';
 }
 
 declare interface CustomEventInit<T = any> extends EventInit {

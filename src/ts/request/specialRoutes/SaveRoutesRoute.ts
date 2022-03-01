@@ -1,7 +1,7 @@
-import Route from "../Route.ts";
-import { RequestMethod } from "../RequestMethod.ts";
-import RouteManager from "../RouteManager.ts";
-import { readConfigFile, writeConfigFile } from "../../config/ConfigManager.ts";
+import Route from '../Route.ts';
+import { RequestMethod } from '../RequestMethod.ts';
+import RouteManager from '../RouteManager.ts';
+import { readConfigFile, writeConfigFile } from '../../config/ConfigManager.ts';
 
 /**
  * handles saving the passed request json into our config file, and then refreshes the config
@@ -12,9 +12,9 @@ export default class SaveRoutesRoute extends Route {
     private routeManager: RouteManager,
   ) {
     super(
-      "Save Routes",
-      "/mock-ui-save-routes",
-      <RequestMethod> "POST",
+      'Save Routes',
+      '/mock-ui-save-routes',
+      <RequestMethod> 'POST',
       new Headers(),
       null,
       200,
@@ -26,7 +26,7 @@ export default class SaveRoutesRoute extends Route {
     try {
       // our json is passed in as bytes, so we need to read them into a buffer and parse the buffer into a JSON string
       const requestBody: ReadableStream | null = request.body;
-      let requestJson = "";
+      let requestJson = '';
       if (requestBody) {
         requestJson = await request.text();
       }
@@ -42,7 +42,7 @@ export default class SaveRoutesRoute extends Route {
       this.routeManager.setupRoutes(config);
       return new Response('{"success": true}', { status: 200 });
     } catch (e) {
-      console.error("Failed to save routes!");
+      console.error('Failed to save routes!');
       console.trace(e);
       return new Response('{"error": true}', { status: 500 });
     }

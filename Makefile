@@ -1,9 +1,11 @@
 FLAGS = --allow-read --allow-write --allow-net --unstable
 
 test:
+	deno fmt
 	deno test
 
 run:
+	deno fmt
 	deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts
 	deno run ${FLAGS} ./src/ts/MockServer.ts --load-ui
 
@@ -22,3 +24,7 @@ run-server-for-browser-tests:
 	rm -f config-test.json
 	deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts --test
 	deno run ${FLAGS} ./src/ts/MockServer.ts --load-ui --config ./config-test.json
+
+check:
+	deno fmt
+	deno lint

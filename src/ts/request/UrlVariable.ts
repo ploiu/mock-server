@@ -6,8 +6,8 @@ export default class UrlVariable {
   }
 
   static fromString(str: string): UrlVariable {
-    const optional = str.endsWith("?");
-    const name = str.replace(/\?$/, "");
+    const optional = str.endsWith('?');
+    const name = str.replace(/\?$/, '');
     return new UrlVariable(name, optional);
   }
 }

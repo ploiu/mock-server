@@ -1,10 +1,10 @@
 //deno-lint-ignore-file no-explicit-any
 
-import { ensureFileSync } from "../deps.ts";
-import Config from "./Config.ts";
-import Route from "../request/Route.ts";
+import { ensureFileSync } from '../deps.ts';
+import Config from './Config.ts';
+import Route from '../request/Route.ts';
 
-const CONFIG_FILE_LOCATION = "./config.json";
+const CONFIG_FILE_LOCATION = './config.json';
 const configVersion = 2.0;
 
 /**
@@ -18,7 +18,7 @@ export function readConfigFile(
   try {
     Deno.readTextFileSync(location);
   } catch (e) {
-    if (e.message.includes("No such file or directory")) {
+    if (e.message.includes('No such file or directory')) {
       setupConfigFile(location);
     } else {
       // we don't know what this is, so tell the user
@@ -45,6 +45,7 @@ function convertConfigToLatest(
   parsed: any,
   location = CONFIG_FILE_LOCATION,
 ): any {
+  //deno-lint-ignore prefer-const
   let converted;
   converted = convertV1ToV2(parsed);
   // write back to the config file
@@ -57,8 +58,8 @@ function convertConfigToLatest(
  * @param parsed
  */
 function convertV1ToV2(parsed: any): any {
-  if (parsed.configVersion === "1.0") {
-    parsed.configVersion = "2.0";
+  if (parsed.configVersion === '1.0') {
+    parsed.configVersion = '2.0';
     parsed.routes.forEach((route: any) => route.isEnabled = true);
   }
   return parsed;
@@ -72,14 +73,14 @@ function setupConfigFile(location: string = CONFIG_FILE_LOCATION) {
   ensureFileSync(location);
   // create default config object
   const config = new Config();
-  config.configVersion = "1.0";
+  config.configVersion = '1.0';
   // create an example route to show what can be done
   const route = Route.fromObject({
-    title: "Example Route",
-    url: "/HelloWorld/:name?:age",
-    method: "GET",
+    title: 'Example Route',
+    url: '/HelloWorld/:name?:age',
+    method: 'GET',
     responseHeaders: {},
-    response: "Hello, {{name}}! You are {{age}} years old",
+    response: 'Hello, {{name}}! You are {{age}} years old',
     responseStatus: 200,
     isEnabled: true,
   });

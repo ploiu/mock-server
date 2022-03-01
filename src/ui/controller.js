@@ -1,12 +1,12 @@
 // so vue has an issue in chrome where using a DateTimeFormat in data throws an exception when trying to call .format. This only happens in chrome, not edge or firefox
-globalThis.dateFormat = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-})
+globalThis.dateFormat = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+});
 
 const ui = {
   data() {
@@ -16,18 +16,18 @@ const ui = {
       /** @type {Route}; the current route the user is editing*/
       selectedRoute: null,
       requestMethods: [
-        "GET",
-        "PUT",
-        "POST",
-        "DELETE",
-        "HEAD",
-        "CONNECT",
-        "OPTIONS",
-        "TRACE",
-        "PATCH",
+        'GET',
+        'PUT',
+        'POST',
+        'DELETE',
+        'HEAD',
+        'CONNECT',
+        'OPTIONS',
+        'TRACE',
+        'PATCH',
       ],
       // the visible view for the UI
-      currentView: "editRoute",
+      currentView: 'editRoute',
       // informational message
       message: null,
       messageType: null,
@@ -38,7 +38,7 @@ const ui = {
     /** splits a header map into a list of single headers so that they can be edited on the UI*/
     groupHeaders(headers = {}) {
       const grouped = [];
-      for (let [key, value] of Object.entries(headers)) {
+      for (const [key, value] of Object.entries(headers)) {
         grouped.push({
           name: key,
           value: value,
@@ -53,14 +53,14 @@ const ui = {
     /** condenses a list of headers down into a single object to send back to the server */
     condenseHeaders(headers = []) {
       const condensed = {};
-      for (let grouped of headers) {
+      for (const grouped of headers) {
         condensed[grouped.name] = grouped.value;
       }
       return condensed;
     },
     /** creates a new route object, adds it to our route list, and sets it as the selected route */
     addNew() {
-      const route = {isEnabled: true};
+      const route = { isEnabled: true };
       this.routes.push(route);
       this.selectedRoute = route;
     },
@@ -82,7 +82,8 @@ const ui = {
       this.selectedRoute.responseHeaders.push(header);
     },
     removeHeader(header) {
-      this.selectedRoute.responseHeaders = this.selectedRoute.responseHeaders
+      this.selectedRoute.responseHeaders = this.selectedRoute
+        .responseHeaders
         .filter((it) => it !== header);
     },
     /** saves our routes to our config file and refreshes the routes */
@@ -90,19 +91,21 @@ const ui = {
       // clone the routes TODO find a better way
       const routes = JSON.parse(JSON.stringify(this.routes));
       // condense the headers of each route
-      for (let route of routes) {
-        route.responseHeaders = this.condenseHeaders(route.responseHeaders);
+      for (const route of routes) {
+        route.responseHeaders = this.condenseHeaders(
+          route.responseHeaders,
+        );
       }
-      const saveResult = await (await fetch("/mock-ui-save-routes", {
-        method: "POST",
+      const saveResult = await (await fetch('/mock-ui-save-routes', {
+        method: 'POST',
         body: JSON.stringify(routes),
       })).json();
       if (saveResult.success) {
-        this.showMessage("Successfully saved routes", "success");
+        this.showMessage('Successfully saved routes', 'success');
       } else {
         this.showMessage(
-          "Failed to save routes, check server logs for details.",
-          "error",
+          'Failed to save routes, check server logs for details.',
+          'error',
         );
       }
     },
@@ -115,7 +118,7 @@ const ui = {
       this.message = message;
       this.messageType = messageType;
       // show the message for a bit and then hide it
-      window.setTimeout(() => {
+      setTimeout(() => {
         this.message = null;
         this.messageType = null;
       }, 3_000);
@@ -130,7 +133,7 @@ const ui = {
      */
     addLog(log) {
       log.timestamp = globalThis.dateFormat.format(log.timestamp);
-      console.log("adding log");
+      console.log('adding log');
       this.logs.push(log);
     },
     /** removes all logs from our list */
@@ -141,7 +144,7 @@ const ui = {
      * Scrolls our log panel to the bottom of its contents
      */
     scrollLogPanel() {
-      const logPanel = document.querySelector("#logArea");
+      const logPanel = document.querySelector('#logArea');
       logPanel?.scrollTo(0, logPanel.scrollHeight);
     },
     /**
@@ -150,23 +153,25 @@ const ui = {
      */
     async fetchLogs() {
       try {
-        return await (await fetch("/mock-server-logs")).json();
+        return await (await fetch('/mock-server-logs')).json();
       } catch {
-        return []
+        return [];
       }
     },
   },
   async mounted() {
-    const routes = await (await fetch("/mock-server-routes")).json();
+    const routes = await (await fetch('/mock-server-routes')).json();
     if (routes) {
-      for (let route of routes) {
-        route.responseHeaders = this.groupHeaders(route.responseHeaders);
+      for (const route of routes) {
+        route.responseHeaders = this.groupHeaders(
+          route.responseHeaders,
+        );
       }
       this.routes = routes;
     }
     // set up an event source to retrieve logs
-    window.setInterval(async () => {
-      if (this.currentView === "viewLogs") {
+    setInterval(async () => {
+      if (this.currentView === 'viewLogs') {
         const data = await this.fetchLogs();
         if (data.length > 0) {
           for (const log of data) {
@@ -180,4 +185,4 @@ const ui = {
     }, 1000);
   },
 };
-Vue.createApp(ui).mount("#main");
+Vue.createApp(ui).mount('#main');
