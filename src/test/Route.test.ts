@@ -1,8 +1,4 @@
-import {
-  assert,
-  assertEquals,
-  assertNotEquals,
-} from "https://deno.land/std@0.127.0/testing/asserts.ts";
+import { assert, assertEquals, assertNotEquals } from "./deps.ts";
 import Route from "../ts/request/Route.ts";
 
 Deno.test("fromObject differentiates between response as object and response as string", () => {

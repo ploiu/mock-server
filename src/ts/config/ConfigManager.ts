@@ -1,7 +1,6 @@
 //deno-lint-ignore-file no-explicit-any
 
-// allow typescript syntax checkers to know that Deno does in fact exist
-import { ensureFileSync } from "https://deno.land/std@0.127.0/fs/mod.ts";
+import { ensureFileSync } from "../deps.ts";
 import Config from "./Config.ts";
 import Route from "../request/Route.ts";
 

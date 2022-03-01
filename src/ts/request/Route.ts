@@ -1,7 +1,7 @@
 //deno-lint-ignore-file no-explicit-any
 import { RequestMethod } from "./RequestMethod.ts";
 import UrlVariable from "./UrlVariable.ts";
-import { red } from "https://deno.land/std@0.127.0/fmt/colors.ts";
+import { red } from "../deps.ts";
 import { LogManager } from "../LogManager.ts";
 
 /**
