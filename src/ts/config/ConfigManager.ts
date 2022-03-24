@@ -91,7 +91,6 @@ function setupConfigFile(location: string = CONFIG_FILE_LOCATION) {
     location,
     textContents,
   );
-  // TODO error if nothing was written?
 }
 
 export function writeConfigFile(

@@ -114,6 +114,141 @@ declare namespace Deno {
    * See: https://no-color.org/ */
   export const noColor: boolean;
 
+  export type PermissionOptions = 'inherit' | 'none' | PermissionOptionsObject;
+
+  export interface PermissionOptionsObject {
+    /** Specifies if the `net` permission should be requested or revoked.
+     * If set to `"inherit"`, the current `env` permission will be inherited.
+     * If set to `true`, the global `net` permission will be requested.
+     * If set to `false`, the global `net` permission will be revoked.
+     *
+     * Defaults to `false`.
+     */
+    env?: 'inherit' | boolean | string[];
+
+    /** Specifies if the `hrtime` permission should be requested or revoked.
+     * If set to `"inherit"`, the current `hrtime` permission will be inherited.
+     * If set to `true`, the global `hrtime` permission will be requested.
+     * If set to `false`, the global `hrtime` permission will be revoked.
+     *
+     * Defaults to `false`.
+     */
+    hrtime?: 'inherit' | boolean;
+
+    /** Specifies if the `net` permission should be requested or revoked.
+     * if set to `"inherit"`, the current `net` permission will be inherited.
+     * if set to `true`, the global `net` permission will be requested.
+     * if set to `false`, the global `net` permission will be revoked.
+     * if set to `string[]`, the `net` permission will be requested with the
+     * specified host strings with the format `"<host>[:<port>]`.
+     *
+     * Defaults to `false`.
+     *
+     * Examples:
+     *
+     * ```ts
+     * import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+     *
+     * Deno.test({
+     *   name: "inherit",
+     *   permissions: {
+     *     net: "inherit",
+     *   },
+     *   async fn() {
+     *     const status = await Deno.permissions.query({ name: "net" })
+     *     assertEquals(status.state, "granted");
+     *   },
+     * });
+     * ```
+     *
+     * ```ts
+     * import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+     *
+     * Deno.test({
+     *   name: "true",
+     *   permissions: {
+     *     net: true,
+     *   },
+     *   async fn() {
+     *     const status = await Deno.permissions.query({ name: "net" });
+     *     assertEquals(status.state, "granted");
+     *   },
+     * });
+     * ```
+     *
+     * ```ts
+     * import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+     *
+     * Deno.test({
+     *   name: "false",
+     *   permissions: {
+     *     net: false,
+     *   },
+     *   async fn() {
+     *     const status = await Deno.permissions.query({ name: "net" });
+     *     assertEquals(status.state, "denied");
+     *   },
+     * });
+     * ```
+     *
+     * ```ts
+     * import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+     *
+     * Deno.test({
+     *   name: "localhost:8080",
+     *   permissions: {
+     *     net: ["localhost:8080"],
+     *   },
+     *   async fn() {
+     *     const status = await Deno.permissions.query({ name: "net", host: "localhost:8080" });
+     *     assertEquals(status.state, "granted");
+     *   },
+     * });
+     * ```
+     */
+    net?: 'inherit' | boolean | string[];
+
+    /** Specifies if the `ffi` permission should be requested or revoked.
+     * If set to `"inherit"`, the current `ffi` permission will be inherited.
+     * If set to `true`, the global `ffi` permission will be requested.
+     * If set to `false`, the global `ffi` permission will be revoked.
+     *
+     * Defaults to `false`.
+     */
+    ffi?: 'inherit' | boolean | Array<string | URL>;
+
+    /** Specifies if the `read` permission should be requested or revoked.
+     * If set to `"inherit"`, the current `read` permission will be inherited.
+     * If set to `true`, the global `read` permission will be requested.
+     * If set to `false`, the global `read` permission will be revoked.
+     * If set to `Array<string | URL>`, the `read` permission will be requested with the
+     * specified file paths.
+     *
+     * Defaults to `false`.
+     */
+    read?: 'inherit' | boolean | Array<string | URL>;
+
+    /** Specifies if the `run` permission should be requested or revoked.
+     * If set to `"inherit"`, the current `run` permission will be inherited.
+     * If set to `true`, the global `run` permission will be requested.
+     * If set to `false`, the global `run` permission will be revoked.
+     *
+     * Defaults to `false`.
+     */
+    run?: 'inherit' | boolean | Array<string | URL>;
+
+    /** Specifies if the `write` permission should be requested or revoked.
+     * If set to `"inherit"`, the current `write` permission will be inherited.
+     * If set to `true`, the global `write` permission will be requested.
+     * If set to `false`, the global `write` permission will be revoked.
+     * If set to `Array<string | URL>`, the `write` permission will be requested with the
+     * specified file paths.
+     *
+     * Defaults to `false`.
+     */
+    write?: 'inherit' | boolean | Array<string | URL>;
+  }
+
   export interface TestContext {
     /** Run a sub step of the parent test or step. Returns a promise
      * that resolves to a boolean signifying if the step completed successfully.
@@ -174,138 +309,7 @@ declare namespace Deno {
      *
      * Defaults to "inherit".
      */
-    permissions?: 'inherit' | 'none' | {
-      /** Specifies if the `net` permission should be requested or revoked.
-       * If set to `"inherit"`, the current `env` permission will be inherited.
-       * If set to `true`, the global `net` permission will be requested.
-       * If set to `false`, the global `net` permission will be revoked.
-       *
-       * Defaults to "inherit".
-       */
-      env?: 'inherit' | boolean | string[];
-
-      /** Specifies if the `hrtime` permission should be requested or revoked.
-       * If set to `"inherit"`, the current `hrtime` permission will be inherited.
-       * If set to `true`, the global `hrtime` permission will be requested.
-       * If set to `false`, the global `hrtime` permission will be revoked.
-       *
-       * Defaults to "inherit".
-       */
-      hrtime?: 'inherit' | boolean;
-
-      /** Specifies if the `net` permission should be requested or revoked.
-       * if set to `"inherit"`, the current `net` permission will be inherited.
-       * if set to `true`, the global `net` permission will be requested.
-       * if set to `false`, the global `net` permission will be revoked.
-       * if set to `string[]`, the `net` permission will be requested with the
-       * specified host strings with the format `"<host>[:<port>]`.
-       *
-       * Defaults to "inherit".
-       *
-       * Examples:
-       *
-       * ```ts
-       * import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
-       *
-       * Deno.test({
-       *   name: "inherit",
-       *   permissions: {
-       *     net: "inherit",
-       *   },
-       *   async fn() {
-       *     const status = await Deno.permissions.query({ name: "net" })
-       *     assertEquals(status.state, "granted");
-       *   },
-       * });
-       * ```
-       *
-       * ```ts
-       * import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
-       *
-       * Deno.test({
-       *   name: "true",
-       *   permissions: {
-       *     net: true,
-       *   },
-       *   async fn() {
-       *     const status = await Deno.permissions.query({ name: "net" });
-       *     assertEquals(status.state, "granted");
-       *   },
-       * });
-       * ```
-       *
-       * ```ts
-       * import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
-       *
-       * Deno.test({
-       *   name: "false",
-       *   permissions: {
-       *     net: false,
-       *   },
-       *   async fn() {
-       *     const status = await Deno.permissions.query({ name: "net" });
-       *     assertEquals(status.state, "denied");
-       *   },
-       * });
-       * ```
-       *
-       * ```ts
-       * import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
-       *
-       * Deno.test({
-       *   name: "localhost:8080",
-       *   permissions: {
-       *     net: ["localhost:8080"],
-       *   },
-       *   async fn() {
-       *     const status = await Deno.permissions.query({ name: "net", host: "localhost:8080" });
-       *     assertEquals(status.state, "granted");
-       *   },
-       * });
-       * ```
-       */
-      net?: 'inherit' | boolean | string[];
-
-      /** Specifies if the `ffi` permission should be requested or revoked.
-       * If set to `"inherit"`, the current `ffi` permission will be inherited.
-       * If set to `true`, the global `ffi` permission will be requested.
-       * If set to `false`, the global `ffi` permission will be revoked.
-       *
-       * Defaults to "inherit".
-       */
-      ffi?: 'inherit' | boolean | Array<string | URL>;
-
-      /** Specifies if the `read` permission should be requested or revoked.
-       * If set to `"inherit"`, the current `read` permission will be inherited.
-       * If set to `true`, the global `read` permission will be requested.
-       * If set to `false`, the global `read` permission will be revoked.
-       * If set to `Array<string | URL>`, the `read` permission will be requested with the
-       * specified file paths.
-       *
-       * Defaults to "inherit".
-       */
-      read?: 'inherit' | boolean | Array<string | URL>;
-
-      /** Specifies if the `run` permission should be requested or revoked.
-       * If set to `"inherit"`, the current `run` permission will be inherited.
-       * If set to `true`, the global `run` permission will be requested.
-       * If set to `false`, the global `run` permission will be revoked.
-       *
-       * Defaults to "inherit".
-       */
-      run?: 'inherit' | boolean | Array<string | URL>;
-
-      /** Specifies if the `write` permission should be requested or revoked.
-       * If set to `"inherit"`, the current `write` permission will be inherited.
-       * If set to `true`, the global `write` permission will be requested.
-       * If set to `false`, the global `write` permission will be revoked.
-       * If set to `Array<string | URL>`, the `write` permission will be requested with the
-       * specified file paths.
-       *
-       * Defaults to "inherit".
-       */
-      write?: 'inherit' | boolean | Array<string | URL>;
-    };
+    permissions?: PermissionOptions;
   }
 
   /** Register a test which will be run when `deno test` is used on the command
@@ -453,6 +457,7 @@ declare namespace Deno {
     options: Omit<TestDefinition, 'fn' | 'name'>,
     fn: (t: TestContext) => void | Promise<void>,
   ): void;
+
   /** Exit the Deno process with optional exit code. If no exit code is supplied
    * then Deno will exit with return code of 0.
    *
@@ -896,10 +901,7 @@ declare namespace Deno {
    * Deno.close(file.rid);
    * ```
    */
-  export function read(
-    rid: number,
-    buffer: Uint8Array,
-  ): Promise<number | null>;
+  export function read(rid: number, buffer: Uint8Array): Promise<number | null>;
 
   /** Synchronously write to the resource ID (`rid`) the contents of the array
    * buffer (`data`).
@@ -1642,10 +1644,7 @@ declare namespace Deno {
    * directory and the `recursive` option isn't set to `true`.
    *
    * Requires `allow-write` permission. */
-  export function removeSync(
-    path: string | URL,
-    options?: RemoveOptions,
-  ): void;
+  export function removeSync(path: string | URL, options?: RemoveOptions): void;
 
   /** Removes the named file or directory.
    *
@@ -2261,21 +2260,15 @@ declare namespace Deno {
     readonly stdin: T['stdin'] extends 'piped' ? Writer & Closer & {
       writable: WritableStream<Uint8Array>;
     }
-      : 
-        | (Writer & Closer & { writable: WritableStream<Uint8Array> })
-        | null;
+      : (Writer & Closer & { writable: WritableStream<Uint8Array> }) | null;
     readonly stdout: T['stdout'] extends 'piped' ? Reader & Closer & {
       readable: ReadableStream<Uint8Array>;
     }
-      : 
-        | (Reader & Closer & { readable: ReadableStream<Uint8Array> })
-        | null;
+      : (Reader & Closer & { readable: ReadableStream<Uint8Array> }) | null;
     readonly stderr: T['stderr'] extends 'piped' ? Reader & Closer & {
       readable: ReadableStream<Uint8Array>;
     }
-      : 
-        | (Reader & Closer & { readable: ReadableStream<Uint8Array> })
-        | null;
+      : (Reader & Closer & { readable: ReadableStream<Uint8Array> }) | null;
     /** Wait for the process to exit and return its exit status.
      *
      * Calling this function multiple times will return the same status.
@@ -2370,10 +2363,7 @@ declare namespace Deno {
    *
    * NOTE: This functionality is not yet implemented on Windows.
    */
-  export function addSignalListener(
-    signal: Signal,
-    handler: () => void,
-  ): void;
+  export function addSignalListener(signal: Signal, handler: () => void): void;
 
   /** Removes the given signal listener that has been registered with
    * Deno.addSignalListener.
@@ -3671,6 +3661,7 @@ declare var AbortSignal: {
   prototype: AbortSignal;
   new (): AbortSignal;
   abort(reason?: any): AbortSignal;
+  timeout(milliseconds: number): AbortSignal;
 };
 
 interface FileReaderEventMap {
@@ -3688,15 +3679,11 @@ interface FileReader extends EventTarget {
   onabort: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
   onerror: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
   onload: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
-  onloadend:
-    | ((this: FileReader, ev: ProgressEvent<FileReader>) => any)
-    | null;
+  onloadend: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
   onloadstart:
     | ((this: FileReader, ev: ProgressEvent<FileReader>) => any)
     | null;
-  onprogress:
-    | ((this: FileReader, ev: ProgressEvent<FileReader>) => any)
-    | null;
+  onprogress: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
   readonly readyState: number;
   readonly result: string | ArrayBuffer | null;
   abort(): void;
@@ -4294,11 +4281,7 @@ interface FormData {
   entries(): IterableIterator<[string, FormDataEntryValue]>;
   [Symbol.iterator](): IterableIterator<[string, FormDataEntryValue]>;
   forEach(
-    callback: (
-      value: FormDataEntryValue,
-      key: string,
-      parent: this,
-    ) => void,
+    callback: (value: FormDataEntryValue, key: string, parent: this) => void,
     thisArg?: any,
   ): void;
 }
@@ -6120,7 +6103,7 @@ interface EcKeyGenParams extends Algorithm {
   namedCurve: NamedCurve;
 }
 
-interface EcImportParams extends Algorithm {
+interface EcKeyImportParams extends Algorithm {
   namedCurve: NamedCurve;
 }
 
@@ -6248,7 +6231,7 @@ interface SubtleCrypto {
       | AlgorithmIdentifier
       | HmacImportParams
       | RsaHashedImportParams
-      | EcImportParams,
+      | EcKeyImportParams,
     extractable: boolean,
     keyUsages: KeyUsage[],
   ): Promise<CryptoKey>;
@@ -6259,7 +6242,7 @@ interface SubtleCrypto {
       | AlgorithmIdentifier
       | HmacImportParams
       | RsaHashedImportParams
-      | EcImportParams,
+      | EcKeyImportParams,
     extractable: boolean,
     keyUsages: KeyUsage[],
   ): Promise<CryptoKey>;
@@ -6347,7 +6330,7 @@ interface SubtleCrypto {
       | AlgorithmIdentifier
       | HmacImportParams
       | RsaHashedImportParams
-      | EcImportParams,
+      | EcKeyImportParams,
     extractable: boolean,
     keyUsages: KeyUsage[],
   ): Promise<CryptoKey>;
@@ -6410,10 +6393,7 @@ interface BroadcastChannel extends EventTarget {
   postMessage(message: any): void;
   addEventListener<K extends keyof BroadcastChannelEventMap>(
     type: K,
-    listener: (
-      this: BroadcastChannel,
-      ev: BroadcastChannelEventMap[K],
-    ) => any,
+    listener: (this: BroadcastChannel, ev: BroadcastChannelEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions,
   ): void;
   addEventListener(
@@ -6423,10 +6403,7 @@ interface BroadcastChannel extends EventTarget {
   ): void;
   removeEventListener<K extends keyof BroadcastChannelEventMap>(
     type: K,
-    listener: (
-      this: BroadcastChannel,
-      ev: BroadcastChannelEventMap[K],
-    ) => any,
+    listener: (this: BroadcastChannel, ev: BroadcastChannelEventMap[K]) => any,
     options?: boolean | EventListenerOptions,
   ): void;
   removeEventListener(
@@ -6536,11 +6513,21 @@ declare namespace Deno {
   ): Listener;
 
   export interface ListenTlsOptions extends ListenOptions {
+    /** Server private key in PEM format */
+    key?: string;
+    /** Cert chain in PEM format */
+    cert?: string;
     /** Path to a file containing a PEM formatted CA certificate. Requires
-     * `--allow-read`. */
-    certFile: string;
-    /** Server public key file. Requires `--allow-read`.*/
-    keyFile: string;
+     * `--allow-read`.
+     *
+     * @deprecated This option is deprecated and will be removed in Deno 2.0.
+     */
+    certFile?: string;
+    /** Server private key file. Requires `--allow-read`.
+     *
+     * @deprecated This option is deprecated and will be removed in Deno 2.0.
+     */
+    keyFile?: string;
 
     transport?: 'tcp';
   }
@@ -6576,7 +6563,25 @@ declare namespace Deno {
    * ```
    *
    * Requires `allow-net` permission for "tcp". */
-  export function connect(options: ConnectOptions): Promise<Conn>;
+  export function connect(options: ConnectOptions): Promise<TcpConn>;
+
+  export interface TcpConn extends Conn {
+    /**
+     * **UNSTABLE**: new API, see https://github.com/denoland/deno/issues/13617.
+     *
+     * Enable/disable the use of Nagle's algorithm. Defaults to true.
+     */
+    setNoDelay(nodelay?: boolean): void;
+    /**
+     * **UNSTABLE**: new API, see https://github.com/denoland/deno/issues/13617.
+     *
+     * Enable/disable keep-alive functionality.
+     */
+    setKeepAlive(keepalive?: boolean): void;
+  }
+
+  // deno-lint-ignore no-empty-interface
+  export interface UnixConn extends Conn {}
 
   export interface ConnectTlsOptions {
     /** The port to connect to. */

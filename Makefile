@@ -28,3 +28,6 @@ run-server-for-browser-tests:
 check:
 	deno fmt
 	deno lint
+
+types:
+	deno types > ./src/ts/Deno.d.ts

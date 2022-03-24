@@ -14,7 +14,7 @@ export default class SaveRoutesRoute extends Route {
     super(
       'Save Routes',
       '/mock-ui-save-routes',
-      <RequestMethod> 'POST',
+      RequestMethod.POST,
       new Headers(),
       null,
       200,

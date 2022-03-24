@@ -16,7 +16,7 @@ export default class FetchRoutesRoute extends Route {
     super(
       'Fetch Routes',
       '/mock-server-routes',
-      <RequestMethod> 'GET',
+      RequestMethod.GET,
       new Headers(),
       null,
       200,

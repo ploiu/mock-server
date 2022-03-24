@@ -42,7 +42,6 @@ export class LogManager {
     this.sseLogs.push(
       new LogEntry(url, method, body, headers, +new Date(), message),
     );
-    // TODO log
     const color = this.getColorForMethod(
       <RequestMethod> method?.toUpperCase(),
     );

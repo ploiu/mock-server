@@ -17,7 +17,7 @@ export default class UpdateConfigRoute extends Route {
     super(
       'Custom Update Config Route',
       '/refreshConfig?:location?',
-      <RequestMethod> 'POST',
+      RequestMethod.POST,
       new Headers(),
       'Refreshed Config\n',
       200,

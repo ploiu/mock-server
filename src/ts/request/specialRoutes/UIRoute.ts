@@ -7,7 +7,7 @@ export default class UIRoute extends Route {
     super(
       'UI',
       '/mock-server-ui',
-      <RequestMethod> 'GET',
+      RequestMethod.GET,
       new Headers(),
       null,
       200,

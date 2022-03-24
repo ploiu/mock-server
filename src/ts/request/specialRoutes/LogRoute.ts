@@ -11,7 +11,7 @@ export default class LogRoute extends Route {
     super(
       'Log Route',
       '/mock-server-logs',
-      <RequestMethod> 'GET',
+      RequestMethod.GET,
       new Headers(),
       null,
       200,
