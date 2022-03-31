@@ -453,6 +453,27 @@ Deno.test('parseVariablesFromUrl should parse non-named query variables allowed 
   );
 });
 
+Deno.test('parseVariablesFromUrl should not include http: or https: as a path var', () => {
+  const route = Route.fromObject({
+    title: 'test',
+    method: 'GET',
+    url: '/test/:name/hi/:age',
+    responseHeaders: {},
+    response: 'hi',
+    responseStatus: 200,
+    isEnabled: true,
+  });
+
+  assertEquals(
+    route.parseVariablesFromUrl('https://localhost:8000/test/ploiu/hi/23'),
+    {
+      name: 'ploiu',
+      age: '23',
+    },
+    'path parameters should be included',
+  );
+});
+
 Deno.test('execute should template out the response body from url parameters', async () => {
   const route = Route.fromObject({
     title: 'test',

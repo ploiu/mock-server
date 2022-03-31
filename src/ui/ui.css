@@ -348,6 +348,9 @@ button.error.outline:active {
   height: 100%;
   width: 100%;
 }
+#route-log-view {
+  height: 95%;
+}
 #route-log-view .log-panel {
   padding: 2em;
   background-color: #111;

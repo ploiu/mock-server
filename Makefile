@@ -1,4 +1,4 @@
-FLAGS = --allow-read --allow-write --allow-net --unstable
+FLAGS = --allow-read --allow-write --allow-net
 
 test:
 	deno fmt

@@ -2,7 +2,7 @@
 import { RequestMethod } from './RequestMethod.ts';
 import UrlVariable from './UrlVariable.ts';
 import { red } from '../deps.ts';
-import { LogManager } from '../LogManager.ts';
+import LogManager from '../LogManager.ts';
 
 /**
  * Object that matches against a request and generates a mock response
@@ -298,6 +298,7 @@ export default class Route {
    */
   private parsePathVars(request: string): any {
     const result: any = {};
+    request = request.replace(/^https?:\/\//, '');
     // first build a list of where each of our path variables are
     const splitRequest = request.split('?')[0].split('/');
     const splitUrl = this.url.split('?:')[0].split('/');

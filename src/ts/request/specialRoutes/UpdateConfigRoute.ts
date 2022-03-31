@@ -2,7 +2,7 @@ import Route from '../Route.ts';
 import RouteManager from '../RouteManager.ts';
 import { RequestMethod } from '../RequestMethod.ts';
 import { readConfigFile } from '../../config/ConfigManager.ts';
-import { LogManager } from '../../LogManager.ts';
+import LogManager from '../../LogManager.ts';
 
 /**
  * A special route that refreshes the config file for the mock server
@@ -23,10 +23,6 @@ export default class UpdateConfigRoute extends Route {
       200,
       true,
     );
-  }
-
-  doesUrlMatch(url = ''): boolean {
-    return super.doesUrlMatch(url);
   }
 
   //deno-lint-ignore require-await

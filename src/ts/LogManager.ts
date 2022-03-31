@@ -18,7 +18,7 @@ import { RequestMethod } from './request/RequestMethod.ts';
  * A class that logs to the console when certain routes are hit, and stores those logs for the
  * `LogRoutes` route to consume every time it needs to poll for log updates
  */
-export class LogManager {
+export default class LogManager {
   private static sseLogs: LogEntry[] = [];
   // determines if we can read logs. This lock is in place because we clear the list when read
   private static canReadLogs = true;
@@ -96,7 +96,7 @@ export class LogManager {
 /**
  * Represents a log entry to be transformed into a console log on the server side and an event entry to be sent to the client side
  */
-export class LogEntry {
+class LogEntry {
   public headers: any = {};
 
   constructor(

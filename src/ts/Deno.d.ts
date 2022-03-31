@@ -117,10 +117,10 @@ declare namespace Deno {
   export type PermissionOptions = 'inherit' | 'none' | PermissionOptionsObject;
 
   export interface PermissionOptionsObject {
-    /** Specifies if the `net` permission should be requested or revoked.
+    /** Specifies if the `env` permission should be requested or revoked.
      * If set to `"inherit"`, the current `env` permission will be inherited.
-     * If set to `true`, the global `net` permission will be requested.
-     * If set to `false`, the global `net` permission will be revoked.
+     * If set to `true`, the global `env` permission will be requested.
+     * If set to `false`, the global `env` permission will be revoked.
      *
      * Defaults to `false`.
      */
@@ -2398,7 +2398,7 @@ declare namespace Deno {
   export interface RunOptions {
     /** Arguments to pass. Note, the first element needs to be a path to the
      * binary */
-    cmd: string[] | [URL, ...string[]];
+    cmd: readonly string[] | [URL, ...string[]];
     cwd?: string;
     env?: {
       [key: string]: string;
@@ -4682,7 +4682,17 @@ declare class Response implements Body {
  * ```
  */
 declare function fetch(
-  input: Request | URL | string,
+  input: Request | string,
+  init?: RequestInit,
+): Promise<Response>;
+// TODO(kt3k): Remove the following overloaded declaration for 2.0.
+/** @deprecated URL is deprecated as the first argument. Use string or Request object instead.
+ *
+ * Fetch a resource from the network. It returns a `Promise` that resolves to the
+ * `Response` to that `Request`, whether it is successful or not.
+ */
+declare function fetch(
+  input: URL,
   init?: RequestInit,
 ): Promise<Response>;
 
