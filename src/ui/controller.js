@@ -178,7 +178,7 @@ const ui = {
             this.addLog(log);
           }
           this.$nextTick(() => {
-            this.scrollLogPan4el();
+            this.scrollLogPanel();
           });
         }
       }
