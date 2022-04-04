@@ -112,7 +112,7 @@
                 </div>
                 <accordion-fan>
                     <accordion-element v-if="!log.message" data-request-headers data-title="Request Headers">
-                        <div v-for="(value, key) in log.headers">
+                        <div v-for="(value, key) in log.headers" style="word-wrap: anywhere">
                             <span class="text-primary">{{key}}</span><span>: </span><span class="text-secondary">{{value}}</span>
                         </div>
                     </accordion-element>
