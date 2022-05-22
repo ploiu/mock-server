@@ -250,6 +250,19 @@ declare namespace Deno {
   }
 
   export interface TestContext {
+    /**
+     * The current test name.
+     */
+    name: string;
+    /**
+     * File Uri of the current test code.
+     */
+    origin: string;
+    /**
+     * Parent test context.
+     */
+    parent?: TestContext;
+
     /** Run a sub step of the parent test or step. Returns a promise
      * that resolves to a boolean signifying if the step completed successfully.
      * The returned promise never rejects unless the arguments are invalid.
@@ -270,6 +283,9 @@ declare namespace Deno {
 
   export interface TestStepDefinition {
     fn: (t: TestContext) => void | Promise<void>;
+    /**
+     * The current test name.
+     */
     name: string;
     ignore?: boolean;
     /** Check that the number of async completed ops after the test step is the same
@@ -287,6 +303,9 @@ declare namespace Deno {
 
   export interface TestDefinition {
     fn: (t: TestContext) => void | Promise<void>;
+    /**
+     * The current test name.
+     */
     name: string;
     ignore?: boolean;
     /** If at least one test has `only` set to true, only run tests that have
@@ -2472,6 +2491,8 @@ declare namespace Deno {
     getters?: boolean;
     /** Show an object's non-enumerable properties. Defaults to false. */
     showHidden?: boolean;
+    /** The maximum length of a string before it is truncated with an ellipsis */
+    strAbbreviateSize?: number;
   }
 
   /** Converts the input into a string that has the same format as printed by
@@ -2932,9 +2953,13 @@ declare namespace Deno {
     | 'A'
     | 'AAAA'
     | 'ANAME'
+    | 'CAA'
     | 'CNAME'
     | 'MX'
+    | 'NAPTR'
+    | 'NS'
     | 'PTR'
+    | 'SOA'
     | 'SRV'
     | 'TXT';
 
@@ -2950,10 +2975,38 @@ declare namespace Deno {
     };
   }
 
+  /** If `resolveDns` is called with "CAA" record type specified, it will return an array of this interface. */
+  export interface CAARecord {
+    critical: boolean;
+    tag: string;
+    value: string;
+  }
+
   /** If `resolveDns` is called with "MX" record type specified, it will return an array of this interface. */
   export interface MXRecord {
     preference: number;
     exchange: string;
+  }
+
+  /** If `resolveDns` is called with "NAPTR" record type specified, it will return an array of this interface. */
+  export interface NAPTRRecord {
+    order: number;
+    preference: number;
+    flags: string;
+    services: string;
+    regexp: string;
+    replacement: string;
+  }
+
+  /** If `resolveDns` is called with "SOA" record type specified, it will return an array of this interface. */
+  export interface SOARecord {
+    mname: string;
+    rname: string;
+    serial: number;
+    refresh: number;
+    retry: number;
+    expire: number;
+    minimum: number;
   }
 
   /** If `resolveDns` is called with "SRV" record type specified, it will return an array of this interface. */
@@ -2966,15 +3019,33 @@ declare namespace Deno {
 
   export function resolveDns(
     query: string,
-    recordType: 'A' | 'AAAA' | 'ANAME' | 'CNAME' | 'PTR',
+    recordType: 'A' | 'AAAA' | 'ANAME' | 'CNAME' | 'NS' | 'PTR',
     options?: ResolveDnsOptions,
   ): Promise<string[]>;
+
+  export function resolveDns(
+    query: string,
+    recordType: 'CAA',
+    options?: ResolveDnsOptions,
+  ): Promise<CAARecord[]>;
 
   export function resolveDns(
     query: string,
     recordType: 'MX',
     options?: ResolveDnsOptions,
   ): Promise<MXRecord[]>;
+
+  export function resolveDns(
+    query: string,
+    recordType: 'NAPTR',
+    options?: ResolveDnsOptions,
+  ): Promise<NAPTRRecord[]>;
+
+  export function resolveDns(
+    query: string,
+    recordType: 'SOA',
+    options?: ResolveDnsOptions,
+  ): Promise<SOARecord[]>;
 
   export function resolveDns(
     query: string,
@@ -3009,7 +3080,15 @@ declare namespace Deno {
     query: string,
     recordType: RecordType,
     options?: ResolveDnsOptions,
-  ): Promise<string[] | MXRecord[] | SRVRecord[] | string[][]>;
+  ): Promise<
+    | string[]
+    | CAARecord[]
+    | MXRecord[]
+    | NAPTRRecord[]
+    | SOARecord[]
+    | SRVRecord[]
+    | string[][]
+  >;
 }
 
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
@@ -3984,6 +4063,7 @@ interface WritableStreamErrorCallback {
 interface WritableStream<W = any> {
   readonly locked: boolean;
   abort(reason?: any): Promise<void>;
+  close(): Promise<void>;
   getWriter(): WritableStreamDefaultWriter<W>;
 }
 
@@ -4244,6 +4324,25 @@ declare class DecompressionStream {
   readonly readable: ReadableStream<Uint8Array>;
   readonly writable: WritableStream<Uint8Array>;
 }
+
+/** Dispatch an uncaught exception. Similar to a synchronous version of:
+ * ```ts
+ * setTimeout(() => { throw error; }, 0);
+ * ```
+ * The error can not be caught with a `try/catch` block. An error event will
+ * be dispatched to the global scope. You can prevent the error from being
+ * reported to the console with `Event.prototype.preventDefault()`:
+ * ```ts
+ * addEventListener("error", (event) => {
+ *   event.preventDefault();
+ * });
+ * reportError(new Error("foo")); // Will not be reported.
+ * ```
+ * In Deno, this error will terminate the process if not intercepted like above.
+ */
+declare function reportError(
+  error: any,
+): void;
 
 // Copyright 2018-2022 the Deno authors. All rights reserved. MIT license.
 
@@ -4630,6 +4729,7 @@ type ResponseType =
 /** This Fetch API interface represents the response to a request. */
 declare class Response implements Body {
   constructor(body?: BodyInit | null, init?: ResponseInit);
+  static json(data: unknown, init?: ResponseInit): Response;
   static error(): Response;
   static redirect(url: string, status?: number): Response;
 
@@ -4692,7 +4792,7 @@ declare function fetch(
  * `Response` to that `Request`, whether it is successful or not.
  */
 declare function fetch(
-  input: URL,
+  input: URL | Request | string,
   init?: RequestInit,
 ): Promise<Response>;
 
@@ -7125,6 +7225,8 @@ declare class Worker extends EventTarget {
 declare type PerformanceEntryList = PerformanceEntry[];
 
 declare class Performance {
+  /** Returns a timestamp representing the start of the performance measurement. */
+  readonly timeOrigin: number;
   constructor();
 
   /** Removes the stored timestamp with the associated name. */
@@ -7164,6 +7266,9 @@ declare class Performance {
    * ```
    */
   now(): number;
+
+  /** Returns a JSON representation of the performance object. */
+  toJSON(): any;
 }
 
 declare var performance: Performance;
@@ -7249,10 +7354,15 @@ interface ErrorConstructor {
 /// <reference lib="deno.webstorage" />
 /// <reference lib="esnext" />
 
+interface WindowEventMap {
+  'error': ErrorEvent;
+}
+
 declare class Window extends EventTarget {
   new(): Window;
   readonly window: Window & typeof globalThis;
   readonly self: Window & typeof globalThis;
+  onerror: ((this: Window, ev: ErrorEvent) => any) | null;
   onload: ((this: Window, ev: Event) => any) | null;
   onunload: ((this: Window, ev: Event) => any) | null;
   close: () => void;
@@ -7267,10 +7377,38 @@ declare class Window extends EventTarget {
   location: Location;
   localStorage: Storage;
   sessionStorage: Storage;
+
+  addEventListener<K extends keyof WindowEventMap>(
+    type: K,
+    listener: (
+      this: Window,
+      ev: WindowEventMap[K],
+    ) => any,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  removeEventListener<K extends keyof WindowEventMap>(
+    type: K,
+    listener: (
+      this: Window,
+      ev: WindowEventMap[K],
+    ) => any,
+    options?: boolean | EventListenerOptions,
+  ): void;
+  removeEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | EventListenerOptions,
+  ): void;
 }
 
 declare var window: Window & typeof globalThis;
 declare var self: Window & typeof globalThis;
+declare var onerror: ((this: Window, ev: ErrorEvent) => any) | null;
 declare var onload: ((this: Window, ev: Event) => any) | null;
 declare var onunload: ((this: Window, ev: Event) => any) | null;
 declare var localStorage: Storage;
@@ -7280,6 +7418,7 @@ declare class Navigator {
   constructor();
   readonly gpu: GPU;
   readonly hardwareConcurrency: number;
+  readonly userAgent: string;
 }
 
 declare var navigator: Navigator;
@@ -7319,10 +7458,17 @@ declare function prompt(message?: string, defaultValue?: string): string | null;
  * dispatchEvent(new Event('unload'));
  * ```
  */
+declare function addEventListener<
+  K extends keyof WindowEventMap,
+>(
+  type: K,
+  listener: (this: Window, ev: WindowEventMap[K]) => any,
+  options?: boolean | AddEventListenerOptions,
+): void;
 declare function addEventListener(
   type: string,
-  callback: EventListenerOrEventListenerObject | null,
-  options?: boolean | AddEventListenerOptions | undefined,
+  listener: EventListenerOrEventListenerObject,
+  options?: boolean | AddEventListenerOptions,
 ): void;
 
 /** Remove a previously registered event listener from the global scope
@@ -7333,10 +7479,17 @@ declare function addEventListener(
  * removeEventListener('load', listener);
  * ```
  */
+declare function removeEventListener<
+  K extends keyof WindowEventMap,
+>(
+  type: K,
+  listener: (this: Window, ev: WindowEventMap[K]) => any,
+  options?: boolean | EventListenerOptions,
+): void;
 declare function removeEventListener(
   type: string,
-  callback: EventListenerOrEventListenerObject | null,
-  options?: boolean | EventListenerOptions | undefined,
+  listener: EventListenerOrEventListenerObject,
+  options?: boolean | EventListenerOptions,
 ): void;
 
 // TODO(nayeemrmn): Move this to `extensions/web` where its implementation is.
