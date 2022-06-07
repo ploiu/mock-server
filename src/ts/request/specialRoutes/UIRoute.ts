@@ -1,6 +1,7 @@
 import Route from '../Route.ts';
 import { RequestMethod } from '../RequestMethod.ts';
 import { serveFile } from '../../deps.ts';
+import { RouteTypes } from '../RouteTypes.ts';
 
 export default class UIRoute extends Route {
   constructor() {
@@ -12,6 +13,7 @@ export default class UIRoute extends Route {
       null,
       200,
       true,
+      RouteTypes.DEFAULT,
     );
   }
 

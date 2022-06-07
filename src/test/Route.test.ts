@@ -1,27 +1,31 @@
 import { assert, assertEquals, assertNotEquals } from './deps.ts';
-import Route from '../ts/request/Route.ts';
+import { RouteTypes } from '../ts/request/RouteTypes.ts';
+import { RequestMethod } from '../ts/request/RequestMethod.ts';
+import RouteFactory from '../ts/request/RouteFactory.ts';
 
 Deno.test('fromObject differentiates between response as object and response as string', () => {
-  const routeStringResponse = Route.fromObject({
+  const routeStringResponse = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     // adding a query variable after an optional variable to make sure that works
     url: '/test/:name/:age??:a',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
-  const routeObjectResponse = Route.fromObject({
+  const routeObjectResponse = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     // adding a query variable after an optional variable to make sure that works
     url: '/test/:name/:age??:a',
     responseHeaders: {},
     response: { value: 'hi' },
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   assertEquals(routeStringResponse.response, 'hi');
@@ -29,15 +33,16 @@ Deno.test('fromObject differentiates between response as object and response as 
 });
 
 Deno.test('properly parses path variables', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     // adding a query variable after an optional variable to make sure that works
     url: '/test/:name/:age??:a',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.hasPathVariable('name', false),
@@ -50,15 +55,16 @@ Deno.test('properly parses path variables', () => {
 });
 
 Deno.test('properly parses query variables', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     // adding a query variable after an optional variable to make sure that works
     url: '/test/?:name&:age?',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.hasQueryVariable('name', false),
@@ -71,14 +77,15 @@ Deno.test('properly parses query variables', () => {
 });
 
 Deno.test('doesUrlMatch matches simple url', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(route.doesUrlMatch('/test'), 'url should match /test');
   // make sure other routes starting with /test don't match
@@ -90,14 +97,15 @@ Deno.test('doesUrlMatch matches simple url', () => {
 });
 
 Deno.test('doesUrlMatch matches urls with non-alphanumeric characters', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:email/:code',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.doesUrlMatch('/test/test@example.com/123456'),
@@ -106,14 +114,15 @@ Deno.test('doesUrlMatch matches urls with non-alphanumeric characters', () => {
 });
 
 Deno.test('doesUrlMatch matches simple url with multiple path sections', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/a/b/c',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(route.doesUrlMatch('/test/a/b/c'), 'url should match /test/a/b/c');
   // ensure other routes that don't match aren't counted
@@ -125,14 +134,15 @@ Deno.test('doesUrlMatch matches simple url with multiple path sections', () => {
 });
 
 Deno.test('doesUrlMatch matches url with path variables', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:name/:age',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.doesUrlMatch('/test/ploiu/23'),
@@ -146,14 +156,15 @@ Deno.test('doesUrlMatch matches url with path variables', () => {
 });
 
 Deno.test('doesUrlMatch matches url with optional path variables', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:name?/:age',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.doesUrlMatch('/test/ploiu/23'),
@@ -171,14 +182,15 @@ Deno.test('doesUrlMatch matches url with optional path variables', () => {
 });
 
 Deno.test('doesUrlMatch matches url with query variables', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test?:name&:age',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.doesUrlMatch('/test?name=ploiu&age=23'),
@@ -192,14 +204,15 @@ Deno.test('doesUrlMatch matches url with query variables', () => {
 });
 
 Deno.test('doesUrlMatch ensures query variable names are included', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test?:name&:age',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assertNotEquals(
     route.doesUrlMatch('/test?abc=ploiu&efg=23'),
@@ -214,14 +227,15 @@ Deno.test('doesUrlMatch ensures query variable names are included', () => {
 });
 
 Deno.test('doesUrlMatch matches url with optional query variables', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test?:name?&:age',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.doesUrlMatch('/test?name=ploiu&age=23'),
@@ -234,14 +248,15 @@ Deno.test('doesUrlMatch matches url with optional query variables', () => {
 });
 
 Deno.test('doesUrlMatch matches url with mandatory and optional path and query parameters', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:name/:age??:favoriteColor&:favoriteFood?',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.doesUrlMatch(
@@ -256,14 +271,15 @@ Deno.test('doesUrlMatch matches url with mandatory and optional path and query p
 });
 
 Deno.test('doesUrlMatch matches url with mandatory and optional path and query parameters (mandatory path param followed by query param)', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:name/:age?:favoriteColor&:favoriteFood?',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.doesUrlMatch(
@@ -278,14 +294,15 @@ Deno.test('doesUrlMatch matches url with mandatory and optional path and query p
 });
 
 Deno.test('doesUrlMatch matches any query params if the url specifies ?:*', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test?:*',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.doesUrlMatch('/test?a=b&c=3&d=5'),
@@ -295,14 +312,15 @@ Deno.test('doesUrlMatch matches any query params if the url specifies ?:*', () =
 });
 
 Deno.test('doesUrlMatch still requires explicitly-named query params if ?:* or &:* is passed', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test?:name&:*',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assert(
     route.doesUrlMatch('/test?name=test&a=3'),
@@ -316,27 +334,29 @@ Deno.test('doesUrlMatch still requires explicitly-named query params if ?:* or &
 });
 
 Deno.test('parseVariablesFromUrl should return an empty js object if there are no variables to parse', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/a/b/c',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   assertEquals(route.parseVariablesFromUrl('/test/a/b/c'), {});
 });
 
 Deno.test('parseVariablesFromUrl should return an object with path variables in it', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:name/:age',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   assertEquals(route.parseVariablesFromUrl('/test/ploiu/23'), {
@@ -346,14 +366,15 @@ Deno.test('parseVariablesFromUrl should return an object with path variables in 
 });
 
 Deno.test('parseVariablesFromUrl should return an object with path variables in it for variables not directly sequential', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:name/hi/:age',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   assertEquals(route.parseVariablesFromUrl('/test/ploiu/hi/23'), {
@@ -363,14 +384,15 @@ Deno.test('parseVariablesFromUrl should return an object with path variables in 
 });
 
 Deno.test('parseVariablesFromUrl should set non-included path variables as null', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:name?/:age/:favoriteFood?',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   assertEquals(route.parseVariablesFromUrl('/test/ploiu/23'), {
@@ -381,14 +403,15 @@ Deno.test('parseVariablesFromUrl should set non-included path variables as null'
 });
 
 Deno.test('parseVariablesFromUrl should set non-included path variables for variables not directly sequential as null', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:name?/hi/:age/:favoriteFood?',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   assertEquals(route.parseVariablesFromUrl('/test/hi/23'), {
@@ -399,14 +422,15 @@ Deno.test('parseVariablesFromUrl should set non-included path variables for vari
 });
 
 Deno.test('parseVariablesFromUrl should include query parameters', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test?:name&:age',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   assertEquals(route.parseVariablesFromUrl('/test?name=ploiu&age=23'), {
@@ -416,14 +440,15 @@ Deno.test('parseVariablesFromUrl should include query parameters', () => {
 });
 
 Deno.test('parseVariablesFromUrl should set non-included query variables as null', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test?:name?&:age&:favoriteFood?',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   assertEquals(route.parseVariablesFromUrl('/test?age=23'), {
@@ -434,17 +459,18 @@ Deno.test('parseVariablesFromUrl should set non-included query variables as null
 });
 
 Deno.test('parseVariablesFromUrl should parse non-named query variables allowed with ?:* and &:*', async () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test?:*',
     responseHeaders: {},
     response: '{{a}}, {{b}}, {{c}}, {{d:test}}',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   const result = await (await route.execute(
-    <Request> { url: '/test?a=1&b=2&c=3', method: 'GET' },
+    <Request> { url: '/test?a=1&b=2&c=3', method: RequestMethod.GET },
   )).text();
   assertEquals(
     '1, 2, 3, test',
@@ -454,14 +480,15 @@ Deno.test('parseVariablesFromUrl should parse non-named query variables allowed 
 });
 
 Deno.test('parseVariablesFromUrl should not include http: or https: as a path var', () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
-    method: 'GET',
+    method: RequestMethod.GET,
     url: '/test/:name/hi/:age',
     responseHeaders: {},
     response: 'hi',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   assertEquals(
@@ -475,20 +502,21 @@ Deno.test('parseVariablesFromUrl should not include http: or https: as a path va
 });
 
 Deno.test('execute should template out the response body from url parameters', async () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
     url: '/test/:name/:age/:favoriteColor?:favoriteFood',
     responseHeaders: {},
     response:
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor}} {{favoriteFood}}`,
-    method: 'GET',
+    method: RequestMethod.GET,
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   const res = await route.execute(
     <Request> {
       url: '/test/ploiu/23/green?favoriteFood=pasta',
-      method: 'GET',
+      method: RequestMethod.GET,
     },
   );
   assertEquals(
@@ -498,21 +526,22 @@ Deno.test('execute should template out the response body from url parameters', a
 });
 
 Deno.test('execute should use default variables if an optional variable is not included', async () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
     url: '/test/:name/:age/:favoriteColor?:favoriteFood',
     responseHeaders: {},
     response:
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor:green}} {{favoriteFood}}. My favorite color is {{favoriteColor:blue}}`,
-    method: 'GET',
+    method: RequestMethod.GET,
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   const res = await route.execute(
     <Request> {
       url: '/test/ploiu/23?favoriteFood=pasta',
-      method: 'GET',
+      method: RequestMethod.GET,
     },
   );
   assertEquals(
@@ -523,21 +552,22 @@ Deno.test('execute should use default variables if an optional variable is not i
 });
 
 Deno.test('execute should fill in default variable fields if the variable is included', async () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
     url: '/test/:name/:age?:favoriteColor?&:favoriteFood',
     responseHeaders: {},
     response:
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor:green}} {{favoriteFood}}. My favorite color is {{favoriteColor:blue}}`,
-    method: 'GET',
+    method: RequestMethod.GET,
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
 
   const res = await route.execute(
     <Request> {
       url: '/test/ploiu/23?favoriteFood=pasta&favoriteColor=orange',
-      method: 'GET',
+      method: RequestMethod.GET,
     },
   );
   assertEquals(
@@ -548,27 +578,28 @@ Deno.test('execute should fill in default variable fields if the variable is inc
 });
 
 Deno.test('execute should set the proper response status code', async () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
     url: '/test/:name/:age/:favoriteColor?:favoriteFood',
     responseHeaders: {},
     response:
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor}} {{favoriteFood}}`,
-    method: 'GET',
+    method: RequestMethod.GET,
     responseStatus: 418,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   const res = await route.execute(
     <Request> {
       url: '/test/ploiu/23/green?favoriteFood=pasta',
-      method: 'GET',
+      method: RequestMethod.GET,
     },
   );
   assertEquals(res.status, 418, 'Response status codes should match');
 });
 
 Deno.test('execute should set the proper response headers', async () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
     url: '/test/:name/:age/:favoriteColor?:favoriteFood',
     responseHeaders: {
@@ -576,14 +607,15 @@ Deno.test('execute should set the proper response headers', async () => {
     },
     response:
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor}} {{favoriteFood}}`,
-    method: 'GET',
+    method: RequestMethod.GET,
     responseStatus: 418,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   const res = await route.execute(
     <Request> {
       url: '/test/ploiu/23/green?favoriteFood=pasta',
-      method: 'GET',
+      method: RequestMethod.GET,
     },
   );
   assertEquals(
@@ -594,21 +626,22 @@ Deno.test('execute should set the proper response headers', async () => {
 });
 
 Deno.test('execute should properly handle `null` for response body', async () => {
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'test',
     url: '/test/',
     responseHeaders: {
       'Content-Type': 'text/plain',
     },
     response: null,
-    method: 'GET',
+    method: RequestMethod.GET,
     responseStatus: 418,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   const res = await route.execute(
     <Request> {
       url: '/test/',
-      method: 'GET',
+      method: RequestMethod.GET,
     },
   );
   assertEquals(res.body, null, 'response body should be null');

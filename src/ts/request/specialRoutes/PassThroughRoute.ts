@@ -1,5 +1,6 @@
 import Route from '../Route.ts';
 import { RequestMethod } from '../RequestMethod.ts';
+import { RouteTypes } from '../RouteTypes.ts';
 
 export class PassThroughRoute extends Route {
   constructor(
@@ -23,6 +24,7 @@ export class PassThroughRoute extends Route {
       null,
       200,
       isEnabled,
+      RouteTypes.PASSTHROUGH,
     );
   }
 
@@ -33,20 +35,6 @@ export class PassThroughRoute extends Route {
         url.href.replace(url.origin, this.redirectUrl),
         request,
       ),
-    );
-  }
-
-  static fromObject(
-    // @ts-ignore deno-fmt-ignore this is object destructuring, and I can't specify types
-    // deno-lint-ignore no-unused-vars
-    {title, url, method, responseHeaders, response, responseStatus, isEnabled, redirectUrl},
-  ): PassThroughRoute {
-    return new PassThroughRoute(
-      title,
-      url,
-      method,
-      isEnabled,
-      redirectUrl,
     );
   }
 }

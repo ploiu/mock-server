@@ -1,8 +1,9 @@
 import { assertEquals, fail, Server } from './deps.ts';
-import { PassThroughRoute } from '../ts/request/specialRoutes/PassThroughRoute.ts';
 import { RequestMethod } from '../ts/request/RequestMethod.ts';
+import { RouteTypes } from '../ts/request/RouteTypes.ts';
+import RouteFactory from '../ts/request/RouteFactory.ts';
 
-Deno.test('should make a call to the redirect url when invokec', async () => {
+Deno.test('should make a call to the redirect url when invoked', async () => {
   const handler = async (request: Request) => {
     assertEquals(
       request.url,
@@ -23,7 +24,7 @@ Deno.test('should make a call to the redirect url when invokec', async () => {
     return new Response('test body', { status: 200 });
   };
   const server = new Server({ port: 8081, handler });
-  const route = PassThroughRoute.fromObject({
+  const route = RouteFactory.create({
     title: 'test route',
     url: '/test',
     method: RequestMethod.POST,
@@ -32,6 +33,7 @@ Deno.test('should make a call to the redirect url when invokec', async () => {
     responseStatus: 404, // make sure we don't get 404, because we should get what the handler gives back
     isEnabled: true,
     redirectUrl: 'http://localhost:8081',
+    routeType: RouteTypes.PASSTHROUGH,
   });
   const listener = server.listenAndServe();
   const headers = new Headers();
@@ -64,7 +66,7 @@ Deno.test('should pass along any path and query variables', async () => {
     return new Response('tests passed');
   };
   const server = new Server({ port: 8081, handler });
-  const route = PassThroughRoute.fromObject({
+  const route = RouteFactory.create({
     title: 'test route',
     // this isn't restful or realistic, but it fits the test so oh well
     url: '/:searchType?:name&:age',
@@ -74,6 +76,7 @@ Deno.test('should pass along any path and query variables', async () => {
     responseStatus: 200,
     isEnabled: true,
     redirectUrl: 'http://localhost:8081',
+    routeType: RouteTypes.PASSTHROUGH,
   });
   const listener = server.listenAndServe();
   route.execute(

@@ -2,6 +2,7 @@ import Route from '../Route.ts';
 import { RequestMethod } from '../RequestMethod.ts';
 
 import LogManager from '../../LogManager.ts';
+import { RouteTypes } from '../RouteTypes.ts';
 
 /**
  * Sends the latest route logs to the caller
@@ -16,6 +17,7 @@ export default class LogRoute extends Route {
       null,
       200,
       true,
+      RouteTypes.DEFAULT,
     );
   }
 

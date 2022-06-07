@@ -1,6 +1,7 @@
 import Route from '../Route.ts';
 import RouteManager from '../RouteManager.ts';
 import { RequestMethod } from '../RequestMethod.ts';
+import { RouteTypes } from '../RouteTypes.ts';
 
 export default class FetchRoutesRoute extends Route {
   /** Routes not provided by the user */
@@ -21,6 +22,7 @@ export default class FetchRoutesRoute extends Route {
       null,
       200,
       true,
+      RouteTypes.DEFAULT,
     );
     this.responseHeaders.append('Content-Type', 'application/json');
   }

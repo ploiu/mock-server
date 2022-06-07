@@ -3,6 +3,7 @@ import { RequestMethod } from './RequestMethod.ts';
 import UrlVariable from './UrlVariable.ts';
 import { red } from '../deps.ts';
 import LogManager from '../LogManager.ts';
+import { RouteTypes } from './RouteTypes.ts';
 
 /**
  * Object that matches against a request and generates a mock response
@@ -28,6 +29,8 @@ export default class Route {
     public responseStatus: number,
     // whether the route is "turned on"
     public isEnabled: boolean,
+    // used on the UI side to determine which fields to display
+    public routeType: RouteTypes,
   ) {
     this.parseUrlVariables();
     // remove trailing `/` from the path
@@ -37,26 +40,6 @@ export default class Route {
     // make sure all the required fields exist TODO
   }
 
-  static fromObject(
-    // @ts-ignore deno-fmt-ignore this is object destructuring, and I can't specify types
-    {title, url, method, responseHeaders, response, responseStatus, isEnabled,},
-  ): Route {
-    return new Route(
-      title,
-      url,
-      method,
-      responseHeaders,
-      // return response if it's a string
-      (typeof response === 'string')
-        ? response
-        : response !== null && response !== undefined
-        ? JSON.stringify(response)
-        : null,
-      Number(responseStatus),
-      isEnabled,
-    );
-  }
-
   /**
    * creates a `Header` object from the raw input object. Conversion is done
    * by simple key/value pairs
@@ -64,6 +47,9 @@ export default class Route {
    * @private
    */
   private createResponseHeaders(): Headers {
+    if (this.responseHeaders instanceof Headers) {
+      return this.responseHeaders;
+    }
     const headers = new Headers();
     for (const [key, value] of Object.entries(this.responseHeaders)) {
       headers.append(key, String(value));

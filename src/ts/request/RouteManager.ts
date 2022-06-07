@@ -1,6 +1,7 @@
 //deno-lint-ignore-file no-explicit-any
 import Route from './Route.ts';
 import Config from '../config/Config.ts';
+import RouteFactory from './RouteFactory.ts';
 
 /**
  * Central location for matching requests to routes and executing the responses for those routes
@@ -14,7 +15,7 @@ export default class RouteManager {
    */
   public setupRoutes(config: Config) {
     // @ts-ignore there's no type to cast it to aside from Object, and typescript doesn't like that either
-    this.routes = config.routes.map((it: any) => Route.fromObject(it));
+    this.routes = config.routes.map((it: any) => RouteFactory.create(it));
   }
 
   /**
