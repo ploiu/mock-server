@@ -273,6 +273,7 @@ export default class Route {
       anythingQueryRegex,
       '([?&][^=/?&]+=[^&]+)*',
     );
+    console.log(compiledUrlString);
     return new RegExp(`^${compiledUrlString}\$`, 'i');
   }
 

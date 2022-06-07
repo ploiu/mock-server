@@ -49,11 +49,14 @@
            </div>
             <!--row with route name-->
             <div id="route-name">
-                <h5>Route Name & Status</h5>
-                <div class="input-group grid one-x-two">
+                <h5>Route Name, Status, and Type</h5>
+                <div class="input-group grid one-x-three">
                     <input v-model="selectedRoute.title" class="col-1" id="route-name-input">
                     <input type="number" v-model="selectedRoute.responseStatus" placeholder="status code" class="col-2"
                            id="route-status-code-input">
+                    <select v-model="selectedRoute.routeType" id="route-type-select" class="col-3">
+                        <option v-for="type in routeTypes" :value="type">{{type}}</option>
+                    </select>
                 </div>
             </div>
             <!--row with request method and url-->
@@ -67,7 +70,7 @@
                 </div>
             </div>
             <!--row with response headers-->
-            <div id="response-headers">
+            <div id="response-headers" v-if="selectedRoute.routeType !== 'pass-through'">
                 <h5>Response Headers</h5>
                 <table>
                     <thead>
@@ -93,9 +96,14 @@
                 <button class="secondary" @click="addHeader()" id="add-header-button">Add Header</button>
             </div>
             <!--row with response body-->
-            <div id="response-body">
+            <div id="response-body" v-if="selectedRoute.routeType !== 'pass-through'">
                 <h5>Response Body</h5>
                 <textarea v-model="selectedRoute.response" class="full-width" id="response-body-input"></textarea>
+            </div>
+            <!--row with redirect url-->
+            <div id="redirect-url" v-if="selectedRoute.routeType === 'pass-through'">
+                <h5>Redirect URL</h5>
+                <input type="url" id="redirect-url-input" v-model="selectedRoute.redirectUrl">
             </div>
         </div>
     </div>
@@ -125,7 +133,7 @@
     </div>
     <div id="messageBar" class="info-message" :class="messageType, {visible: message !== null}">{{message}}</div>
 </div>
-<script src="https://unpkg.com/vue@3.2.26/dist/vue.global.prod.js"></script>
+<script src="https://unpkg.com/vue@3.2.26/dist/vue.global.js"></script>
 <!--intellij might say this file doesn't exist, but it gets generated before startup-->
 <script src="ui.js" type="module"></script>
 </body>

@@ -96,6 +96,29 @@ Deno.test('doesUrlMatch matches simple url', () => {
   );
 });
 
+Deno.test('doesUrlMatch matches query params with . in the name and value', () => {
+  const route = RouteFactory.create({
+    title: 'test',
+    method: RequestMethod.GET,
+    url: '/test?:first.last&:last.first',
+    routeType: RouteTypes.DEFAULT,
+    responseHeaders: new Headers(),
+    response: 'test',
+    responseStatus: 200,
+    isEnabled: true,
+  });
+  assert(
+    route.doesUrlMatch('/test?first.last=5&last.first=6'),
+    'route does not match query params with dot in the name',
+  );
+  assert(
+    route.doesUrlMatch(
+      '/test?first.last=5.5&last.first=6.6',
+    ),
+    'route does not match query params with dot in the value',
+  );
+});
+
 Deno.test('doesUrlMatch matches urls with non-alphanumeric characters', () => {
   const route = RouteFactory.create({
     title: 'test',

@@ -1,6 +1,7 @@
 import Route from '../Route.ts';
 import { RequestMethod } from '../RequestMethod.ts';
 import { RouteTypes } from '../RouteTypes.ts';
+import LogManager from '../../LogManager.ts';
 
 export class PassThroughRoute extends Route {
   constructor(
@@ -28,13 +29,47 @@ export class PassThroughRoute extends Route {
     );
   }
 
-  execute(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    return fetch(
-      new Request(
-        url.href.replace(url.origin, this.redirectUrl),
-        request,
-      ),
-    );
+  async execute(request: Request): Promise<Response> {
+    const body = await request.text();
+    try {
+      const url = new URL(request.url);
+      // deno-lint-ignore no-explicit-any
+      const newRequest: RequestInit = {
+        ...request,
+        method: request.method,
+        headers: request.headers,
+        // @ts-ignore
+        body: (() => {
+          if (
+            request.method !== RequestMethod.GET &&
+            request.method !== RequestMethod.HEAD
+          ) {
+            return body;
+          }
+          return null;
+        }),
+      };
+      if (
+        request.method !== RequestMethod.GET &&
+        request.method !== RequestMethod.HEAD
+      ) {
+        newRequest.body = body;
+      } else {
+        delete newRequest.body;
+      }
+      return fetch(
+        new Request(
+          url.href.replace(url.origin, this.redirectUrl),
+          newRequest,
+        ),
+      );
+    } finally {
+      LogManager.newEntry(
+        Route.getPath(request.url),
+        request.method.toUpperCase(),
+        body,
+        request.headers,
+      );
+    }
   }
 }

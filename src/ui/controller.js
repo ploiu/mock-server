@@ -15,6 +15,7 @@ const ui = {
       routes: [],
       /** @type {Route}; the current route the user is editing*/
       selectedRoute: null,
+      routeTypes: ['default', 'pass-through'],
       requestMethods: [
         'GET',
         'PUT',

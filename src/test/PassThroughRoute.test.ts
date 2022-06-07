@@ -7,7 +7,7 @@ Deno.test('should make a call to the redirect url when invoked', async () => {
   const handler = async (request: Request) => {
     assertEquals(
       request.url,
-      'http://localhost:8081/test',
+      'http://localhost:8001/test',
     );
     assertEquals(
       await request.text(),
@@ -23,7 +23,7 @@ Deno.test('should make a call to the redirect url when invoked', async () => {
     );
     return new Response('test body', { status: 200 });
   };
-  const server = new Server({ port: 8081, handler });
+  const server = new Server({ port: 8001, handler });
   const route = RouteFactory.create({
     title: 'test route',
     url: '/test',
@@ -32,7 +32,7 @@ Deno.test('should make a call to the redirect url when invoked', async () => {
     response: null,
     responseStatus: 404, // make sure we don't get 404, because we should get what the handler gives back
     isEnabled: true,
-    redirectUrl: 'http://localhost:8081',
+    redirectUrl: 'http://localhost:8001',
     routeType: RouteTypes.PASSTHROUGH,
   });
   const listener = server.listenAndServe();
