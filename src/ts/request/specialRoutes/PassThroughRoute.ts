@@ -37,25 +37,11 @@ export class PassThroughRoute extends Route {
         ...request,
         method: request.method,
         headers: request.headers,
-        // @ts-ignore typescript is stupid and doesn't know a string works here too
-        body: (() => {
-          if (
-            request.method !== RequestMethod.GET &&
+        body: request.method !== RequestMethod.GET &&
             request.method !== RequestMethod.HEAD
-          ) {
-            return body;
-          }
-          return null;
-        }),
+          ? body
+          : null,
       };
-      if (
-        request.method !== RequestMethod.GET &&
-        request.method !== RequestMethod.HEAD
-      ) {
-        newRequest.body = body;
-      } else {
-        delete newRequest.body;
-      }
       return fetch(
         new Request(
           url.href.replace(url.origin, this.redirectUrl),
