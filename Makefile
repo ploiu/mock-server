@@ -2,7 +2,7 @@ FLAGS = --allow-read --allow-write --allow-net
 
 test:
 	deno fmt
-	deno test
+	deno test --allow-net
 
 run:
 	deno fmt
