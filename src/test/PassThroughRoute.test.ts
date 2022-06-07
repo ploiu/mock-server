@@ -7,22 +7,18 @@ Deno.test('should make a call to the redirect url when invokec', async () => {
     assertEquals(
       request.url,
       'http://localhost:8081/test',
-      'urls do not match',
     );
     assertEquals(
       await request.text(),
       '{"test": 1}',
-      'request body does not match',
     );
     assertEquals(
       request.method,
       RequestMethod.POST,
-      'request methods do not match',
     );
     assertEquals(
       request.headers.get('Content-Type'),
       'application/json',
-      'request headers do not match',
     );
     return new Response('test body', { status: 200 });
   };
@@ -41,21 +37,56 @@ Deno.test('should make a call to the redirect url when invokec', async () => {
   const headers = new Headers();
   headers.set('Content-Type', 'application/json');
   route.execute(
-    new Request('https://localhost:8000', {
+    new Request('https://localhost:8000/test', {
       method: RequestMethod.POST,
       headers,
       body: '{"test": 1}',
     }),
   ).then(async (response) => {
     await server.close();
-    assertEquals(response.status, 200, 'response status does not match');
+    assertEquals(response.status, 200);
     assertEquals(
       await response.text(),
       'test body',
-      'response body does not match',
     );
   }).catch(async (exception) => {
+    if (!server.closed) {
+      await server.close();
+    }
+    fail('route execution failed\n' + exception);
+  });
+  await listener;
+});
+
+Deno.test('should pass along any path and query variables', async () => {
+  const handler = (request: Request) => {
+    assertEquals(request.url, 'http://localhost:8081/users?name=ploiu&age=24');
+    return new Response('tests passed');
+  };
+  const server = new Server({ port: 8081, handler });
+  const route = PassThroughRoute.fromObject({
+    title: 'test route',
+    // this isn't restful or realistic, but it fits the test so oh well
+    url: '/:searchType?:name&:age',
+    method: RequestMethod.GET,
+    responseHeaders: new Headers(),
+    response: null,
+    responseStatus: 200,
+    isEnabled: true,
+    redirectUrl: 'http://localhost:8081',
+  });
+  const listener = server.listenAndServe();
+  route.execute(
+    new Request('http://localhost:8000/users?name=ploiu&age=24', {
+      method: RequestMethod.GET,
+    }),
+  ).then(async (response) => {
     await server.close();
+    assertEquals(await response.text(), 'tests passed');
+  }).catch(async (exception) => {
+    if (!server.closed) {
+      await server.close();
+    }
     fail('route execution failed\n' + exception);
   });
   await listener;

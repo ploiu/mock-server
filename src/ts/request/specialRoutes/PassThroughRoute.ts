@@ -9,12 +9,6 @@ export class PassThroughRoute extends Route {
     public url: string,
     // the request method the route gets bound on
     public method: RequestMethod,
-    // the headers used in the response for this route
-    public responseHeaders: Headers,
-    // the response body
-    public response: string | null,
-    // the http status code
-    public responseStatus: number,
     // whether the route is "turned on"
     public isEnabled: boolean,
     // the url to redirect to, our `url` property will be appended to this as the path to hit
@@ -24,17 +18,19 @@ export class PassThroughRoute extends Route {
       title,
       url,
       method,
-      responseHeaders,
-      response,
-      responseStatus,
+      // these 3 don't matter
+      new Headers(),
+      null,
+      200,
       isEnabled,
     );
   }
 
   execute(request: Request): Promise<Response> {
+    const url = new URL(request.url);
     return fetch(
       new Request(
-        `${this.redirectUrl}/${this.url}`.replaceAll(/\/{2,}/g, '/'),
+        url.href.replace(url.origin, this.redirectUrl),
         request,
       ),
     );
@@ -42,20 +38,13 @@ export class PassThroughRoute extends Route {
 
   static fromObject(
     // @ts-ignore deno-fmt-ignore this is object destructuring, and I can't specify types
+    // deno-lint-ignore no-unused-vars
     {title, url, method, responseHeaders, response, responseStatus, isEnabled, redirectUrl},
   ): PassThroughRoute {
     return new PassThroughRoute(
       title,
       url,
       method,
-      responseHeaders,
-      // return response if it's a string
-      (typeof response === 'string')
-        ? response
-        : response !== null && response !== undefined
-        ? JSON.stringify(response)
-        : null,
-      Number(responseStatus),
       isEnabled,
       redirectUrl,
     );
