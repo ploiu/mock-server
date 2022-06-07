@@ -139,7 +139,7 @@ body, html {
     }
   }
 
-  #response-headers {
+  #response-headers, #redirect-url {
     grid-row-start: 4;
     grid-row-end: 5;
     grid-column-start: 1;
@@ -187,8 +187,7 @@ textarea {
     }
 
     &:not(:first-child) {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
+      border-radius: 0;
     }
 
     &:last-child {
@@ -255,6 +254,10 @@ button {
     grid-template-columns: auto auto;
   }
 
+  &.one-x-three {
+    grid-template-columns: auto auto auto;
+  }
+
   .col-1 {
     grid-column-start: 1;
     grid-column-end: 2;
@@ -264,6 +267,17 @@ button {
     grid-column-start: 2;
     grid-column-end: 3;
   }
+
+  .col-3 {
+    grid-column-start: 3;
+    grid-column-end: 4;
+  }
+}
+
+#redirect-url-input {
+  // this doesn't really matter since all these styles will be replaced soon~ish
+  width: available;
+  width: -moz-available;
 }
 
 // the little popup bar

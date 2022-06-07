@@ -2,10 +2,13 @@
 
 import { ensureFileSync } from '../deps.ts';
 import Config from './Config.ts';
-import Route from '../request/Route.ts';
+import { RouteTypes } from '../request/RouteTypes.ts';
+import { RequestMethod } from '../request/RequestMethod.ts';
+import { ConfigRouteV2 } from './ConfigRoutes.ts';
+import RouteFactory from '../request/RouteFactory.ts';
 
 const CONFIG_FILE_LOCATION = './config.json';
-const configVersion = 2.0;
+const configVersion = 3.0;
 
 /**
  * reads and parses our config file, creating it if it does not exist
@@ -45,11 +48,11 @@ function convertConfigToLatest(
   parsed: any,
   location = CONFIG_FILE_LOCATION,
 ): any {
-  //deno-lint-ignore prefer-const
-  let converted;
+  let converted: Config;
   converted = convertV1ToV2(parsed);
+  converted = convertV2ToV3(converted);
   // write back to the config file
-  writeConfigFile(<Config> converted, location);
+  writeConfigFile(converted, location);
   return converted;
 }
 
@@ -57,10 +60,21 @@ function convertConfigToLatest(
  * converts a v1 config to a v2 config
  * @param parsed
  */
-function convertV1ToV2(parsed: any): any {
+function convertV1ToV2(parsed: Config): Config {
   if (parsed.configVersion === '1.0') {
     parsed.configVersion = '2.0';
-    parsed.routes.forEach((route: any) => route.isEnabled = true);
+    parsed.routes.forEach((route: ConfigRouteV2) => route.isEnabled = true);
+  }
+  return parsed;
+}
+
+function convertV2ToV3(parsed: Config): Config {
+  console.log('converting to v3...');
+  if (parsed.configVersion === '2.0') {
+    parsed.configVersion = '3.0';
+    parsed.routes.forEach((route) => {
+      route.routeType = RouteTypes.DEFAULT;
+    });
   }
   return parsed;
 }
@@ -73,16 +87,17 @@ function setupConfigFile(location: string = CONFIG_FILE_LOCATION) {
   ensureFileSync(location);
   // create default config object
   const config = new Config();
-  config.configVersion = '1.0';
+  config.configVersion = '3.0';
   // create an example route to show what can be done
-  const route = Route.fromObject({
+  const route = RouteFactory.create({
     title: 'Example Route',
     url: '/HelloWorld/:name?:age',
-    method: 'GET',
+    method: RequestMethod.GET,
     responseHeaders: {},
     response: 'Hello, {{name}}! You are {{age}} years old',
     responseStatus: 200,
     isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
   });
   config.routes.push(route);
   const textContents = JSON.stringify(config, null, 2);

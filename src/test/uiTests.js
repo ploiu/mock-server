@@ -661,5 +661,40 @@
       );
     },
   );
+
+  await Ploiu.testAsync(
+    'should hide body and header sections when route type is pass-through',
+    async () => {
+      await Ploiu.clickAndWait(
+        document.querySelector('#edit-route-view-button'),
+      );
+      await Ploiu.clickAndWait(document.querySelector('#add-new-button'));
+      await Ploiu.type(
+        'pass-through title',
+        document.querySelector('#route-name-input'),
+      );
+      await Ploiu.type(
+        '200',
+        document.querySelector('#route-status-code-input'),
+      );
+      await Ploiu.select(1, document.querySelector('#route-type-select'));
+      await Ploiu.select(
+        0,
+        document.querySelector('#route-request-method-input'),
+      );
+      await Ploiu.type('/', document.querySelector('#route-request-url'));
+      await Ploiu.type(
+        'https://www.example.com',
+        document.querySelector('#redirect-url-input'),
+      );
+      await Ploiu.clickAndWait(document.querySelector('#save-button'));
+      // now time to test the route
+      const response = await fetch('http://localhost:8000/');
+      Ploiu.assertEquals(200, response.status, 'response status mismatch');
+      const text = await response.text();
+      // not going to verify the entire website contents
+      Ploiu.assert(text.toLowerCase().startsWith('<!doctype html>'));
+    },
+  );
   Ploiu.showResults();
 })();

@@ -2,6 +2,8 @@ import Route from '../Route.ts';
 import { RequestMethod } from '../RequestMethod.ts';
 import RouteManager from '../RouteManager.ts';
 import { readConfigFile, writeConfigFile } from '../../config/ConfigManager.ts';
+import { RouteTypes } from '../RouteTypes.ts';
+import RouteFactory from '../RouteFactory.ts';
 
 /**
  * handles saving the passed request json into our config file, and then refreshes the config
@@ -19,6 +21,7 @@ export default class SaveRoutesRoute extends Route {
       null,
       200,
       true,
+      RouteTypes.DEFAULT,
     );
   }
 
@@ -36,7 +39,7 @@ export default class SaveRoutesRoute extends Route {
       const rawRoutes = JSON.parse(requestJson);
       // routes must first be converted to an actual Route object
       for (const route of rawRoutes) {
-        config.routes.push(Route.fromObject(route));
+        config.routes.push(RouteFactory.create(route));
       }
       writeConfigFile(config, this.configLocation);
       this.routeManager.setupRoutes(config);

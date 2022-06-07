@@ -15,6 +15,7 @@ const ui = {
       routes: [],
       /** @type {Route}; the current route the user is editing*/
       selectedRoute: null,
+      routeTypes: ['default', 'pass-through'],
       requestMethods: [
         'GET',
         'PUT',
@@ -60,7 +61,7 @@ const ui = {
     },
     /** creates a new route object, adds it to our route list, and sets it as the selected route */
     addNew() {
-      const route = { isEnabled: true };
+      const route = { isEnabled: true, routeType: 'default' };
       this.routes.push(route);
       this.selectedRoute = route;
     },

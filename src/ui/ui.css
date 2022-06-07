@@ -112,7 +112,8 @@ html {
   grid-column-start: 2;
   grid-column-end: 3;
 }
-#route-editor #response-headers {
+#route-editor #response-headers,
+#route-editor #redirect-url {
   grid-row-start: 4;
   grid-row-end: 5;
   grid-column-start: 1;
@@ -158,8 +159,7 @@ textarea {
 }
 .input-group > select:not(:first-child),
 .input-group input:not(:first-child) {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  border-radius: 0;
 }
 .input-group > select:last-child,
 .input-group input:last-child {
@@ -276,6 +276,9 @@ button.error.outline:active {
   grid-template-rows: auto;
   grid-template-columns: auto auto;
 }
+.grid.one-x-three {
+  grid-template-columns: auto auto auto;
+}
 .grid .col-1 {
   grid-column-start: 1;
   grid-column-end: 2;
@@ -283,6 +286,14 @@ button.error.outline:active {
 .grid .col-2 {
   grid-column-start: 2;
   grid-column-end: 3;
+}
+.grid .col-3 {
+  grid-column-start: 3;
+  grid-column-end: 4;
+}
+#redirect-url-input {
+  width: available;
+  width: -moz-available;
 }
 .info-message {
   position: absolute;

@@ -3,6 +3,7 @@ import RouteManager from '../RouteManager.ts';
 import { RequestMethod } from '../RequestMethod.ts';
 import { readConfigFile } from '../../config/ConfigManager.ts';
 import LogManager from '../../LogManager.ts';
+import { RouteTypes } from '../RouteTypes.ts';
 
 /**
  * A special route that refreshes the config file for the mock server
@@ -22,6 +23,7 @@ export default class UpdateConfigRoute extends Route {
       'Refreshed Config\n',
       200,
       true,
+      RouteTypes.DEFAULT,
     );
   }
 
