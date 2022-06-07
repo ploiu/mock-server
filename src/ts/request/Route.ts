@@ -213,7 +213,7 @@ export default class Route {
     // matches a variable name after a /, and makes sure to not count a query variable as a flag for the var to be optional
     const pathVarRegex = /(?<=\/:)[a-zA-Z_\-0-9]+(\?(?!:))?/g;
     // matches a query parameter variable name
-    const queryVarRegex = /(?<=[?&]:)[a-zA-Z_\-0-9]+\??/g;
+    const queryVarRegex = /(?<=[?&]:)[a-zA-Z_\-0-9.]+\??/g;
     // match and pull out our path variables
     const matchedPathVars = this.url.match(pathVarRegex);
     if (matchedPathVars) {
@@ -243,8 +243,8 @@ export default class Route {
       /(?<=\/):(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=(\?:|\/|\\))))/g;
     const optionalPathRegex = /\/:[a-zA-Z_\-0-9]+\?(?!:)/g;
     const nonOptionalQueryRegex =
-      /(\\?)?[?&]:(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=&)))/g;
-    const optionalQueryRegex = /(\\?)?[?&]:[a-zA-Z_\-0-9]+(?=\?)\?/g;
+      /(\\?)?[?&]:(([a-zA-Z_\-0-9.]+$)|([a-zA-Z_\-0-9.]+(?=&)))/g;
+    const optionalQueryRegex = /(\\?)?[?&]:[a-zA-Z_\-0-9.]+(?=\?)\?/g;
     const anythingQueryRegex = /(\\?)?[?&]:\*/g;
     // first replace any query string question marks since `?` is a special regex char
     compiledUrlString = compiledUrlString.replace(/\?:/g, '\\?:');
@@ -273,7 +273,6 @@ export default class Route {
       anythingQueryRegex,
       '([?&][^=/?&]+=[^&]+)*',
     );
-    console.log(compiledUrlString);
     return new RegExp(`^${compiledUrlString}\$`, 'i');
   }
 

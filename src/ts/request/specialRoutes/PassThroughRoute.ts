@@ -33,12 +33,11 @@ export class PassThroughRoute extends Route {
     const body = await request.text();
     try {
       const url = new URL(request.url);
-      // deno-lint-ignore no-explicit-any
       const newRequest: RequestInit = {
         ...request,
         method: request.method,
         headers: request.headers,
-        // @ts-ignore
+        // @ts-ignore typescript is stupid and doesn't know a string works here too
         body: (() => {
           if (
             request.method !== RequestMethod.GET &&
