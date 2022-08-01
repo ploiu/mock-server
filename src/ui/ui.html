@@ -111,7 +111,7 @@
     <div id="route-log-view" class="view" v-if="currentView === 'viewLogs'">
         <button class="error" id="clear-logs-button" @click="clearLogs()">Clear Logs</button>
         <div id="logArea" class="log-panel">
-            <accordion-element v-for="(log, i) in logs" class="log" :class="log.method?.toLowerCase()">
+            <accordion-element v-for="(log, i) in logs" :key="i" class="log" :class="log.method?.toLowerCase()">
                 <div class="ploiu-accordion-title">
                     <span class="timestamp">{{log.timestamp}}</span>
                     <span class="method" v-if="log.method" :class="log.method.toLowerCase()">{{log.method}}</span>
