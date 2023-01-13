@@ -197,7 +197,8 @@ export default class Route {
       const remainingVars = bodyCopy.match(/{{[a-zA-Z\-_0-9]+:.*?}}/g);
       if (remainingVars) {
         for (const remainingVar of remainingVars) {
-          const defaultVal = remainingVar.match(/(?<=:)[^}]+(?=}})/) ?? [];
+          const defaultVal = remainingVar.match(/(?<=:)[^}]+(?=}})/) ??
+            [] as string[];
           bodyCopy = bodyCopy.replace(remainingVar, defaultVal[0]);
         }
       }

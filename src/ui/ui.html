@@ -32,9 +32,9 @@
                     </li>
                     <button class="error col-2" @click="removeRoute(route)">Delete</button>
                 </div>
+                <!--button to add new route-->
+                <button class="secondary outline" @click="addNew()" id="add-new-button">Add New</button>
             </ul>
-            <!--button to add new route-->
-            <button class="secondary outline" @click="addNew()" id="add-new-button">Add New</button>
         </div>
         <!--panel to edit routes-->
         <div id="route-editor" v-if="selectedRoute !== null">
