@@ -48,7 +48,7 @@ html {
   margin-right: 2em;
   grid-column-start: 1;
   grid-column-end: 2;
-  max-height: 75%;
+  max-height: 85vh;
 }
 #route-panel .route-list {
   list-style-type: none;
