@@ -356,6 +356,31 @@ Deno.test('doesUrlMatch still requires explicitly-named query params if ?:* or &
   );
 });
 
+Deno.test('doesUrlMatch matches trailing / in url path', () => {
+  const urls = {
+    '/test': '/test/',
+    '/test/:a': '/test/test/',
+    '/test?:a': '/test/?a=test',
+  };
+  for (const [pattern, url] of Object.entries(urls)) {
+    const route = RouteFactory.create({
+      title: 'test',
+      method: RequestMethod.GET,
+      url: pattern,
+      responseHeaders: {},
+      response: 'test',
+      responseStatus: 200,
+      isEnabled: true,
+      routeType: RouteTypes.DEFAULT,
+    });
+    assert(
+      route.doesUrlMatch(url),
+      'url should allow trailing path slash, regex is ' +
+        route.compiledUrlRegex,
+    );
+  }
+});
+
 Deno.test('parseVariablesFromUrl should return an empty js object if there are no variables to parse', () => {
   const route = RouteFactory.create({
     title: 'test',

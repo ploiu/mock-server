@@ -11,7 +11,7 @@ import { RouteTypes } from './RouteTypes.ts';
 export default class Route {
   private pathVariables: UrlVariable[] = [];
   private queryVariables: UrlVariable[] = [];
-  private compiledUrlRegex: RegExp;
+  public compiledUrlRegex: RegExp;
   private hasImpliedQueryParams: boolean;
 
   constructor(
@@ -248,7 +248,11 @@ export default class Route {
     const optionalQueryRegex = /(\\?)?[?&]:[a-zA-Z_\-0-9.]+(?=\?)\?/g;
     const anythingQueryRegex = /(\\?)?[?&]:\*/g;
     // first replace any query string question marks since `?` is a special regex char
-    compiledUrlString = compiledUrlString.replace(/\?:/g, '\\?:');
+    compiledUrlString = compiledUrlString.replace(/\?:/g, '/?\\?:');
+    // for trailing slash
+    if (!compiledUrlString.includes('?')) {
+      compiledUrlString += '/?';
+    }
     // for non-optional path param
     compiledUrlString = compiledUrlString.replaceAll(
       nonOptionalPathRegex,
