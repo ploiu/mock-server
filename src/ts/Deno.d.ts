@@ -668,6 +668,25 @@ declare namespace Deno {
       name: string,
       fn: (t: TestContext) => void | Promise<void>,
     ): Promise<boolean>;
+
+    /** Run a sub step of the parent test or step. Returns a promise
+     * that resolves to a boolean signifying if the step completed successfully.
+     *
+     * The returned promise never rejects unless the arguments are invalid.
+     *
+     * If the test was ignored the promise returns `false`.
+     *
+     * ```ts
+     * Deno.test(async function aParentTest(t) {
+     *   console.log("before the step");
+     *   await t.step(function step1(t) {
+     *     console.log("current step:", t.name);
+     *   });
+     *   console.log("after the step");
+     * });
+     * ```
+     */
+    step(fn: (t: TestContext) => void | Promise<void>): Promise<boolean>;
   }
 
   /** @category Testing */
@@ -1231,6 +1250,19 @@ declare namespace Deno {
      */
     delete(key: string): void;
 
+    /** Check whether an environment variable is present or not.
+     *
+     * ```ts
+     * Deno.env.set("SOME_VAR", "Value");
+     * Deno.env.has("SOME_VAR");  // outputs true
+     * ```
+     *
+     * Requires `allow-env` permission.
+     *
+     * @tags allow-env
+     */
+    has(key: string): boolean;
+
     /** Returns a snapshot of the environment variables at invocation as a
      * simple object of keys and values.
      *
@@ -1485,7 +1517,7 @@ declare namespace Deno {
      *
      * It resolves with the updated offset.
      */
-    seek(offset: number, whence: SeekMode): Promise<number>;
+    seek(offset: number | bigint, whence: SeekMode): Promise<number>;
   }
 
   /**
@@ -1786,7 +1818,7 @@ declare namespace Deno {
    */
   export function seek(
     rid: number,
-    offset: number,
+    offset: number | bigint,
     whence: SeekMode,
   ): Promise<number>;
 
@@ -2150,7 +2182,7 @@ declare namespace Deno {
      * console.log(await file.seek(-2, Deno.SeekMode.End)); // "9" (e.g. 11-2)
      * ```
      */
-    seek(offset: number, whence: SeekMode): Promise<number>;
+    seek(offset: number | bigint, whence: SeekMode): Promise<number>;
     /** Synchronously seek to the given `offset` under mode given by `whence`.
      * The new position within the resource (bytes from the start) is returned.
      *
@@ -2189,7 +2221,7 @@ declare namespace Deno {
      * file.close();
      * ```
      */
-    seekSync(offset: number, whence: SeekMode): number;
+    seekSync(offset: number | bigint, whence: SeekMode): number;
     /** Resolves to a {@linkcode Deno.FileInfo} for the file.
      *
      * ```ts
@@ -3309,7 +3341,7 @@ declare namespace Deno {
     /** If set to `true`, will append to a file instead of overwriting previous
      * contents.
      *
-     * @∂efault {false} */
+     * @default {false} */
     append?: boolean;
     /** Sets the option to allow creating a new file, if one doesn't already
      * exist at the specified path.
@@ -3319,7 +3351,7 @@ declare namespace Deno {
     /** If set to `true`, no file, directory, or symlink is allowed to exist at
      * the target location. When createNew is set to `true`, `create` is ignored.
      *
-     * @∂efault {false} */
+     * @default {false} */
     createNew?: boolean;
     /** Permissions always applied to file. */
     mode?: number;
@@ -3351,7 +3383,7 @@ declare namespace Deno {
    */
   export function writeFile(
     path: string | URL,
-    data: Uint8Array,
+    data: Uint8Array | ReadableStream<Uint8Array>,
     options?: WriteFileOptions,
   ): Promise<void>;
 
@@ -3394,7 +3426,7 @@ declare namespace Deno {
    */
   export function writeTextFile(
     path: string | URL,
-    data: string,
+    data: string | ReadableStream<string>,
     options?: WriteFileOptions,
   ): Promise<void>;
 
@@ -4247,6 +4279,20 @@ declare namespace Deno {
      */
     query(desc: PermissionDescriptor): Promise<PermissionStatus>;
 
+    /** Returns the current status of a permission.
+     *
+     * Note, if the permission is already granted, `request()` will not prompt
+     * the user again, therefore `querySync()` is only necessary if you are going
+     * to react differently existing permissions without wanting to modify them
+     * or prompt the user to modify them.
+     *
+     * ```ts
+     * const status = Deno.permissions.querySync({ name: "read", path: "/etc" });
+     * console.log(status.state);
+     * ```
+     */
+    querySync(desc: PermissionDescriptor): PermissionStatus;
+
     /** Revokes a permission, and resolves to the state of the permission.
      *
      * ```ts
@@ -4257,6 +4303,17 @@ declare namespace Deno {
      * ```
      */
     revoke(desc: PermissionDescriptor): Promise<PermissionStatus>;
+
+    /** Revokes a permission, and returns the state of the permission.
+     *
+     * ```ts
+     * import { assert } from "https://deno.land/std/testing/asserts.ts";
+     *
+     * const status = Deno.permissions.revokeSync({ name: "run" });
+     * assert(status.state !== "granted")
+     * ```
+     */
+    revokeSync(desc: PermissionDescriptor): PermissionStatus;
 
     /** Requests the permission, and resolves to the state of the permission.
      *
@@ -4273,6 +4330,22 @@ declare namespace Deno {
      * ```
      */
     request(desc: PermissionDescriptor): Promise<PermissionStatus>;
+
+    /** Requests the permission, and returns the state of the permission.
+     *
+     * If the permission is already granted, the user will not be prompted to
+     * grant the permission again.
+     *
+     * ```ts
+     * const status = Deno.permissions.requestSync({ name: "env" });
+     * if (status.state === "granted") {
+     *   console.log("'env' permission is granted.");
+     * } else {
+     *   console.log("'env' permission is denied.");
+     * }
+     * ```
+     */
+    requestSync(desc: PermissionDescriptor): PermissionStatus;
   }
 
   /** Deno's permission management API.
@@ -4304,6 +4377,11 @@ declare namespace Deno {
    * console.log(status.state);
    * ```
    *
+   * ```ts
+   * const status = Deno.permissions.querySync({ name: "read", path: "/etc" });
+   * console.log(status.state);
+   * ```
+   *
    * ### Revoking
    *
    * ```ts
@@ -4313,10 +4391,26 @@ declare namespace Deno {
    * assert(status.state !== "granted")
    * ```
    *
+   * ```ts
+   * import { assert } from "https://deno.land/std/testing/asserts.ts";
+   *
+   * const status = Deno.permissions.revokeSync({ name: "run" });
+   * assert(status.state !== "granted")
+   * ```
+   *
    * ### Requesting
    *
    * ```ts
    * const status = await Deno.permissions.request({ name: "env" });
+   * if (status.state === "granted") {
+   *   console.log("'env' permission is granted.");
+   * } else {
+   *   console.log("'env' permission is denied.");
+   * }
+   * ```
+   *
+   * ```ts
+   * const status = Deno.permissions.requestSync({ name: "env" });
    * if (status.state === "granted") {
    *   console.log("'env' permission is granted.");
    * } else {
@@ -7159,6 +7253,7 @@ declare class GPUSupportedLimits {
   maxTextureDimension3D?: number;
   maxTextureArrayLayers?: number;
   maxBindGroups?: number;
+  maxBindingsPerBindGroup?: number;
   maxDynamicUniformBuffersPerPipelineLayout?: number;
   maxDynamicStorageBuffersPerPipelineLayout?: number;
   maxSampledTexturesPerShaderStage?: number;
@@ -7171,6 +7266,7 @@ declare class GPUSupportedLimits {
   minUniformBufferOffsetAlignment?: number;
   minStorageBufferOffsetAlignment?: number;
   maxVertexBuffers?: number;
+  maxBufferSize?: number;
   maxVertexAttributes?: number;
   maxVertexBufferArrayStride?: number;
   maxInterStageShaderComponents?: number;
@@ -7246,7 +7342,6 @@ declare interface GPUDeviceDescriptor extends GPUObjectDescriptorBase {
 /** @category WebGPU */
 declare type GPUFeatureName =
   | 'depth-clip-control'
-  | 'depth24unorm-stencil8'
   | 'depth32float-stencil8'
   | 'pipeline-statistics-query'
   | 'texture-compression-bc'
@@ -7276,9 +7371,6 @@ declare class GPUDevice extends EventTarget implements GPUObjectBase {
   readonly lost: Promise<GPUDeviceLostInfo>;
   pushErrorScope(filter: GPUErrorFilter): undefined;
   popErrorScope(): Promise<GPUError | null>;
-  onuncapturederror:
-    | ((this: GPUDevice, ev: GPUUncapturedErrorEvent) => any)
-    | null;
 
   readonly features: GPUSupportedFeatures;
   readonly limits: GPUSupportedLimits;
@@ -7326,6 +7418,10 @@ declare class GPUDevice extends EventTarget implements GPUObjectBase {
 declare class GPUBuffer implements GPUObjectBase {
   label: string;
 
+  readonly size: number;
+  readonly usage: GPUBufferUsageFlags;
+  readonly mapState: GPUBufferMapState;
+
   mapAsync(
     mode: GPUMapModeFlags,
     offset?: number,
@@ -7336,6 +7432,9 @@ declare class GPUBuffer implements GPUObjectBase {
 
   destroy(): undefined;
 }
+
+/** @category WebGPU */
+declare type GPUBufferMapState = 'unmapped' | 'pending' | 'mapped';
 
 /** @category WebGPU */
 declare interface GPUBufferDescriptor extends GPUObjectDescriptorBase {
@@ -7376,6 +7475,15 @@ declare class GPUTexture implements GPUObjectBase {
 
   createView(descriptor?: GPUTextureViewDescriptor): GPUTextureView;
   destroy(): undefined;
+
+  readonly width: number;
+  readonly height: number;
+  readonly depthOrArrayLayers: number;
+  readonly mipLevelCount: number;
+  readonly sampleCount: number;
+  readonly dimension: GPUTextureDimension;
+  readonly format: GPUTextureFormat;
+  readonly usage: GPUTextureUsageFlags;
 }
 
 /** @category WebGPU */
@@ -7386,6 +7494,7 @@ declare interface GPUTextureDescriptor extends GPUObjectDescriptorBase {
   dimension?: GPUTextureDimension;
   format: GPUTextureFormat;
   usage: GPUTextureUsageFlags;
+  viewFormats?: GPUTextureFormat[];
 }
 
 /** @category WebGPU */
@@ -7474,7 +7583,6 @@ declare type GPUTextureFormat =
   | 'depth24plus'
   | 'depth24plus-stencil8'
   | 'depth32float'
-  | 'depth24unorm-stencil8'
   | 'depth32float-stencil8'
   | 'bc1-rgba-unorm'
   | 'bc1-rgba-unorm-srgb'
@@ -7952,6 +8060,13 @@ declare interface GPUVertexAttribute {
 }
 
 /** @category WebGPU */
+declare interface GPUImageDataLayout {
+  offset?: number;
+  bytesPerRow?: number;
+  rowsPerImage?: number;
+}
+
+/** @category WebGPU */
 declare class GPUCommandBuffer implements GPUObjectBase {
   label: string;
 }
@@ -8019,13 +8134,6 @@ declare class GPUCommandEncoder implements GPUObjectBase {
 
 /** @category WebGPU */
 declare interface GPUCommandEncoderDescriptor extends GPUObjectDescriptorBase {}
-
-/** @category WebGPU */
-declare interface GPUImageDataLayout {
-  offset?: number;
-  bytesPerRow?: number;
-  rowsPerImage?: number;
-}
 
 /** @category WebGPU */
 declare interface GPUImageCopyBuffer extends GPUImageDataLayout {
@@ -8228,7 +8336,6 @@ declare class GPURenderPassEncoder
 declare interface GPURenderPassDescriptor extends GPUObjectDescriptorBase {
   colorAttachments: (GPURenderPassColorAttachment | null)[];
   depthStencilAttachment?: GPURenderPassDepthStencilAttachment;
-  occlusionQuerySet?: GPUQuerySet;
 }
 
 /** @category WebGPU */
@@ -8366,6 +8473,9 @@ declare class GPUQuerySet implements GPUObjectBase {
   label: string;
 
   destroy(): undefined;
+
+  readonly type: GPUQueryType;
+  readonly count: number;
 }
 
 /** @category WebGPU */
@@ -8401,9 +8511,6 @@ declare class GPUError {
 }
 
 /** @category WebGPU */
-declare type GPUErrorFilter = 'out-of-memory' | 'validation';
-
-/** @category WebGPU */
 declare class GPUOutOfMemoryError extends GPUError {
   constructor(message: string);
 }
@@ -8414,18 +8521,7 @@ declare class GPUValidationError extends GPUError {
 }
 
 /** @category WebGPU */
-declare class GPUUncapturedErrorEvent extends Event {
-  constructor(
-    type: string,
-    gpuUncapturedErrorEventInitDict: GPUUncapturedErrorEventInit,
-  );
-  readonly error: GPUError;
-}
-
-/** @category WebGPU */
-declare interface GPUUncapturedErrorEventInit extends EventInit {
-  error?: GPUError;
-}
+declare type GPUErrorFilter = 'out-of-memory' | 'validation';
 
 /** @category WebGPU */
 declare interface GPUColorDict {
@@ -9127,6 +9223,17 @@ declare namespace Deno {
     readonly rid: number;
 
     [Symbol.asyncIterator](): AsyncIterableIterator<Conn>;
+
+    /**
+     * Make the listener block the event loop from finishing.
+     *
+     * Note: the listener blocks the event loop from finishing by default.
+     * This method is only meaningful after `.unref()` is called.
+     */
+    ref(): void;
+
+    /** Make the listener not block the event loop from finishing. */
+    unref(): void;
   }
 
   /** Specialized listener that accepts TLS connections.

@@ -142,13 +142,6 @@ const ui = {
       this.logs.splice(0, this.logs.length);
     },
     /**
-     * Scrolls our log panel to the bottom of its contents
-     */
-    scrollLogPanel() {
-      const logPanel = document.querySelector('#logArea');
-      logPanel?.scrollTo(0, logPanel.scrollHeight);
-    },
-    /**
      * fetches the latest batch of logged routes and returns them
      * @returns {Promise<any[]>}
      */
@@ -178,9 +171,6 @@ const ui = {
           for (const log of data) {
             this.addLog(log);
           }
-          this.$nextTick(() => {
-            this.scrollLogPanel();
-          });
         }
       }
     }, 1000);
