@@ -220,6 +220,12 @@ declare namespace Deno {
      * @category Errors */
     export class Interrupted extends Error {}
     /**
+     * Raised when the underlying operating system would need to block to
+     * complete but an asynchronous (non-blocking) API is used.
+     *
+     * @category Errors */
+    export class WouldBlock extends Error {}
+    /**
      * Raised when expecting to write to a IO buffer resulted in zero bytes
      * being written.
      *
@@ -326,6 +332,8 @@ declare namespace Deno {
    * ```
    *
    * Requires `allow-sys` permission.
+   *
+   * On Windows there is no API available to retrieve this information and this method returns `[ 0, 0, 0 ]`.
    *
    * @tags allow-sys
    * @category Observability
@@ -439,6 +447,20 @@ declare namespace Deno {
    * @category Runtime Environment
    */
   export function osRelease(): string;
+
+  /**
+   * Returns the Operating System uptime in number of seconds.
+   *
+   * ```ts
+   * console.log(Deno.osUptime());
+   * ```
+   *
+   * Requires `allow-sys` permission.
+   *
+   * @tags allow-sys
+   * @category Runtime Environment
+   */
+  export function osUptime(): number;
 
   /**
    * Options which define the permissions within a test or worker context.
@@ -1466,6 +1488,12 @@ declare namespace Deno {
      * would resolve to `n` < `p.byteLength`. `write()` must not modify the
      * slice data, even temporarily.
      *
+     * This function is one of the lowest
+     * level APIs and most users should not work with this directly, but rather use
+     * [`writeAll()`](https://deno.land/std/streams/write_all.ts?s=writeAll) from
+     * [`std/streams/write_all.ts`](https://deno.land/std/streams/write_all.ts)
+     * instead.
+     *
      * Implementations should not retain a reference to `p`.
      */
     write(p: Uint8Array): Promise<number>;
@@ -1537,7 +1565,7 @@ declare namespace Deno {
      *
      * It returns the updated offset.
      */
-    seekSync(offset: number, whence: SeekMode): number;
+    seekSync(offset: number | bigint, whence: SeekMode): number;
   }
 
   /**
@@ -1810,7 +1838,7 @@ declare namespace Deno {
    * // Seek 2 more bytes from the current position
    * console.log(await Deno.seek(file.rid, 2, Deno.SeekMode.Current)); // "8"
    * // Seek backwards 2 bytes from the end of the file
-   * console.log(await Deno.seek(file.rid, -2, Deno.SeekMode.End)); // "9" (e.g. 11-2)
+   * console.log(await Deno.seek(file.rid, -2, Deno.SeekMode.End)); // "9" (i.e. 11-2)
    * file.close();
    * ```
    *
@@ -1857,7 +1885,7 @@ declare namespace Deno {
    * // Seek 2 more bytes from the current position
    * console.log(Deno.seekSync(file.rid, 2, Deno.SeekMode.Current)); // "8"
    * // Seek backwards 2 bytes from the end of the file
-   * console.log(Deno.seekSync(file.rid, -2, Deno.SeekMode.End)); // "9" (e.g. 11-2)
+   * console.log(Deno.seekSync(file.rid, -2, Deno.SeekMode.End)); // "9" (i.e. 11-2)
    * file.close();
    * ```
    *
@@ -1865,7 +1893,7 @@ declare namespace Deno {
    */
   export function seekSync(
     rid: number,
-    offset: number,
+    offset: number | bigint,
     whence: SeekMode,
   ): number;
 
@@ -1995,7 +2023,6 @@ declare namespace Deno {
      * for await (const chunk of file.readable) {
      *   console.log(decoder.decode(chunk));
      * }
-     * file.close();
      * ```
      */
     readonly readable: ReadableStream<Uint8Array>;
@@ -2179,7 +2206,7 @@ declare namespace Deno {
      * // Seek 2 more bytes from the current position
      * console.log(await file.seek(2, Deno.SeekMode.Current)); // "8"
      * // Seek backwards 2 bytes from the end of the file
-     * console.log(await file.seek(-2, Deno.SeekMode.End)); // "9" (e.g. 11-2)
+     * console.log(await file.seek(-2, Deno.SeekMode.End)); // "9" (i.e. 11-2)
      * ```
      */
     seek(offset: number | bigint, whence: SeekMode): Promise<number>;
@@ -2217,7 +2244,7 @@ declare namespace Deno {
      * // Seek 2 more bytes from the current position
      * console.log(file.seekSync(2, Deno.SeekMode.Current)); // "8"
      * // Seek backwards 2 bytes from the end of the file
-     * console.log(file.seekSync(-2, Deno.SeekMode.End)); // "9" (e.g. 11-2)
+     * console.log(file.seekSync(-2, Deno.SeekMode.End)); // "9" (i.e. 11-2)
      * file.close();
      * ```
      */
@@ -2272,6 +2299,10 @@ declare namespace Deno {
    * ```ts
    * const { columns, rows } = Deno.consoleSize();
    * ```
+   *
+   * This returns the size of the console window as reported by the operating
+   * system. It's not a reflection of how many characters will fit within the
+   * console window, but can be used as part of that calculation.
    *
    * @category I/O
    */
@@ -3056,10 +3087,8 @@ declare namespace Deno {
      * field from `stat` on Mac/BSD and `ftCreationTime` on Windows. This may
      * not be available on all platforms. */
     birthtime: Date | null;
-    /** ID of the device containing the file.
-     *
-     * _Linux/Mac OS only._ */
-    dev: number | null;
+    /** ID of the device containing the file. */
+    dev: number;
     /** Inode number.
      *
      * _Linux/Mac OS only._ */
@@ -3093,6 +3122,22 @@ declare namespace Deno {
      *
      * _Linux/Mac OS only._ */
     blocks: number | null;
+    /**  True if this is info for a block device.
+     *
+     * _Linux/Mac OS only._ */
+    isBlockDevice: boolean | null;
+    /**  True if this is info for a char device.
+     *
+     * _Linux/Mac OS only._ */
+    isCharDevice: boolean | null;
+    /**  True if this is info for a fifo.
+     *
+     * _Linux/Mac OS only._ */
+    isFifo: boolean | null;
+    /**  True if this is info for a socket.
+     *
+     * _Linux/Mac OS only._ */
+    isSocket: boolean | null;
   }
 
   /** Resolves to the absolute normalized path, with symbolic links resolved.
@@ -3459,7 +3504,7 @@ declare namespace Deno {
    *
    * ### Truncate part of the file
    *
-   * ```
+   * ```ts
    * const file = await Deno.makeTempFile();
    * await Deno.writeFile(file, new TextEncoder().encode("Hello World"));
    * await Deno.truncate(file, 7);
@@ -3668,7 +3713,10 @@ declare namespace Deno {
     options?: { recursive: boolean },
   ): FsWatcher;
 
-  /** Options which can be used with {@linkcode Deno.run}.
+  /**
+   * @deprecated Use {@linkcode Deno.Command} instead.
+   *
+   * Options which can be used with {@linkcode Deno.run}.
    *
    * @category Sub Process */
   export interface RunOptions {
@@ -3726,7 +3774,10 @@ declare namespace Deno {
     stdin?: 'inherit' | 'piped' | 'null' | number;
   }
 
-  /** The status resolved from the `.status()` method of a
+  /**
+   * @deprecated Use {@linkcode Deno.Command} instead.
+   *
+   * The status resolved from the `.status()` method of a
    * {@linkcode Deno.Process} instance.
    *
    * If `success` is `true`, then `code` will be `0`, but if `success` is
@@ -3746,6 +3797,8 @@ declare namespace Deno {
     };
 
   /**
+   * * @deprecated Use {@linkcode Deno.Command} instead.
+   *
    * Represents an instance of a sub process that is returned from
    * {@linkcode Deno.run} which can be used to manage the sub-process.
    *
@@ -3902,7 +3955,10 @@ declare namespace Deno {
     handler: () => void,
   ): void;
 
-  /** Spawns new subprocess. RunOptions must contain at a minimum the `opt.cmd`,
+  /**
+   * @deprecated Use {@linkcode Deno.Command} instead.
+   *
+   * Spawns new subprocess. RunOptions must contain at a minimum the `opt.cmd`,
    * an array of program arguments, the first of which is the binary.
    *
    * ```ts
@@ -3952,6 +4008,222 @@ declare namespace Deno {
    */
   export function run<T extends RunOptions = RunOptions>(opt: T): Process<T>;
 
+  /** Create a child process.
+   *
+   * If any stdio options are not set to `"piped"`, accessing the corresponding
+   * field on the `Command` or its `CommandOutput` will throw a `TypeError`.
+   *
+   * If `stdin` is set to `"piped"`, the `stdin` {@linkcode WritableStream}
+   * needs to be closed manually.
+   *
+   * @example Spawn a subprocess and pipe the output to a file
+   *
+   * ```ts
+   * const command = new Deno.Command(Deno.execPath(), {
+   *   args: [
+   *     "eval",
+   *     "console.log('Hello World')",
+   *   ],
+   *   stdin: "piped",
+   *   stdout: "piped",
+   * });
+   * const child = command.spawn();
+   *
+   * // open a file and pipe the subprocess output to it.
+   * child.stdout.pipeTo(
+   *   Deno.openSync("output", { write: true, create: true }).writable,
+   * );
+   *
+   * // manually close stdin
+   * child.stdin.close();
+   * const status = await child.status;
+   * ```
+   *
+   * @example Spawn a subprocess and collect its output
+   *
+   * ```ts
+   * const command = new Deno.Command(Deno.execPath(), {
+   *   args: [
+   *     "eval",
+   *     "console.log('hello'); console.error('world')",
+   *   ],
+   * });
+   * const { code, stdout, stderr } = await command.output();
+   * console.assert(code === 0);
+   * console.assert("hello\n" === new TextDecoder().decode(stdout));
+   * console.assert("world\n" === new TextDecoder().decode(stderr));
+   * ```
+   *
+   * @example Spawn a subprocess and collect its output synchronously
+   *
+   * ```ts
+   * const command = new Deno.Command(Deno.execPath(), {
+   *   args: [
+   *     "eval",
+   *     "console.log('hello'); console.error('world')",
+   *   ],
+   * });
+   * const { code, stdout, stderr } = command.outputSync();
+   * console.assert(code === 0);
+   * console.assert("hello\n" === new TextDecoder().decode(stdout));
+   * console.assert("world\n" === new TextDecoder().decode(stderr));
+   * ```
+   *
+   * @tags allow-run
+   * @category Sub Process
+   */
+  export class Command {
+    constructor(command: string | URL, options?: CommandOptions);
+    /**
+     * Executes the {@linkcode Deno.Command}, waiting for it to finish and
+     * collecting all of its output.
+     * If `spawn()` was called, calling this function will collect the remaining
+     * output.
+     *
+     * Will throw an error if `stdin: "piped"` is set.
+     *
+     * If options `stdout` or `stderr` are not set to `"piped"`, accessing the
+     * corresponding field on {@linkcode Deno.CommandOutput} will throw a `TypeError`.
+     */
+    output(): Promise<CommandOutput>;
+    /**
+     * Synchronously executes the {@linkcode Deno.Command}, waiting for it to
+     * finish and collecting all of its output.
+     *
+     * Will throw an error if `stdin: "piped"` is set.
+     *
+     * If options `stdout` or `stderr` are not set to `"piped"`, accessing the
+     * corresponding field on {@linkcode Deno.CommandOutput} will throw a `TypeError`.
+     */
+    outputSync(): CommandOutput;
+    /**
+     * Spawns a streamable subprocess, allowing to use the other methods.
+     */
+    spawn(): ChildProcess;
+  }
+
+  /**
+   * The interface for handling a child process returned from
+   * {@linkcode Deno.Command.spawn}.
+   *
+   * @category Sub Process
+   */
+  export class ChildProcess {
+    get stdin(): WritableStream<Uint8Array>;
+    get stdout(): ReadableStream<Uint8Array>;
+    get stderr(): ReadableStream<Uint8Array>;
+    readonly pid: number;
+    /** Get the status of the child. */
+    readonly status: Promise<CommandStatus>;
+
+    /** Waits for the child to exit completely, returning all its output and
+     * status. */
+    output(): Promise<CommandOutput>;
+    /** Kills the process with given {@linkcode Deno.Signal}.
+     *
+     * @param [signo="SIGTERM"]
+     */
+    kill(signo?: Signal): void;
+
+    /** Ensure that the status of the child process prevents the Deno process
+     * from exiting. */
+    ref(): void;
+    /** Ensure that the status of the child process does not block the Deno
+     * process from exiting. */
+    unref(): void;
+  }
+
+  /**
+   * Options which can be set when calling {@linkcode Deno.Command}.
+   *
+   * @category Sub Process
+   */
+  export interface CommandOptions {
+    /** Arguments to pass to the process. */
+    args?: string[];
+    /**
+     * The working directory of the process.
+     *
+     * If not specified, the `cwd` of the parent process is used.
+     */
+    cwd?: string | URL;
+    /**
+     * Clear environmental variables from parent process.
+     *
+     * Doesn't guarantee that only `env` variables are present, as the OS may
+     * set environmental variables for processes.
+     *
+     * @default {false}
+     */
+    clearEnv?: boolean;
+    /** Environmental variables to pass to the subprocess. */
+    env?: Record<string, string>;
+    /**
+     * Sets the child process’s user ID. This translates to a setuid call in the
+     * child process. Failure in the set uid call will cause the spawn to fail.
+     */
+    uid?: number;
+    /** Similar to `uid`, but sets the group ID of the child process. */
+    gid?: number;
+    /**
+     * An {@linkcode AbortSignal} that allows closing the process using the
+     * corresponding {@linkcode AbortController} by sending the process a
+     * SIGTERM signal.
+     *
+     * Not supported in {@linkcode Deno.Command.outputSync}.
+     */
+    signal?: AbortSignal;
+
+    /** How `stdin` of the spawned process should be handled.
+     *
+     * Defaults to `"inherit"` for `output` & `outputSync`,
+     * and `"inherit"` for `spawn`. */
+    stdin?: 'piped' | 'inherit' | 'null';
+    /** How `stdout` of the spawned process should be handled.
+     *
+     * Defaults to `"piped"` for `output` & `outputSync`,
+     * and `"inherit"` for `spawn`. */
+    stdout?: 'piped' | 'inherit' | 'null';
+    /** How `stderr` of the spawned process should be handled.
+     *
+     * Defaults to `"piped"` for `output` & `outputSync`,
+     * and `"inherit"` for `spawn`. */
+    stderr?: 'piped' | 'inherit' | 'null';
+
+    /** Skips quoting and escaping of the arguments on windows. This option
+     * is ignored on non-windows platforms.
+     *
+     * @default {false} */
+    windowsRawArguments?: boolean;
+  }
+
+  /**
+   * @category Sub Process
+   */
+  export interface CommandStatus {
+    /** If the child process exits with a 0 status code, `success` will be set
+     * to `true`, otherwise `false`. */
+    success: boolean;
+    /** The exit code of the child process. */
+    code: number;
+    /** The signal associated with the child process. */
+    signal: Signal | null;
+  }
+
+  /**
+   * The interface returned from calling {@linkcode Deno.Command.output} or
+   * {@linkcode Deno.Command.outputSync} which represents the result of spawning the
+   * child process.
+   *
+   * @category Sub Process
+   */
+  export interface CommandOutput extends CommandStatus {
+    /** The buffered output from the child process' `stdout`. */
+    readonly stdout: Uint8Array;
+    /** The buffered output from the child process' `stderr`. */
+    readonly stderr: Uint8Array;
+  }
+
   /** Option which can be specified when performing {@linkcode Deno.inspect}.
    *
    * @category Console and Debugging */
@@ -3968,6 +4240,14 @@ declare namespace Deno {
      *
      * @default {4} */
     depth?: number;
+    /** The maximum length for an inspection to take up a single line.
+     *
+     * @default {80} */
+    breakLength?: number;
+    /** Whether or not to escape sequences.
+     *
+     * @default {true} */
+    escapeSequences?: boolean;
     /** The maximum number of iterable entries to print.
      *
      * @default {100} */
@@ -4442,7 +4722,15 @@ declare namespace Deno {
     arch: 'x86_64' | 'aarch64';
     /** The operating system that the Deno CLI was built for. `"darwin"` is
      * also known as OSX or MacOS. */
-    os: 'darwin' | 'linux' | 'windows';
+    os:
+      | 'darwin'
+      | 'linux'
+      | 'windows'
+      | 'freebsd'
+      | 'netbsd'
+      | 'aix'
+      | 'solaris'
+      | 'illumos';
     /** The computer vendor that the Deno CLI was built for. */
     vendor: string;
     /** Optional environment flags that were set for this build of Deno CLI. */
@@ -4485,7 +4773,7 @@ declare namespace Deno {
    *
    * Then `Deno.args` will contain:
    *
-   * ```
+   * ```ts
    * [ "/etc/passwd" ]
    * ```
    *
@@ -4988,6 +5276,12 @@ declare namespace Deno {
        * @default {53} */
       port?: number;
     };
+    /**
+     * An abort signal to allow cancellation of the DNS resolution operation.
+     * If the signal becomes aborted the resolveDns operation will be stopped
+     * and the promise returned will be rejected with an AbortError.
+     */
+    signal?: AbortSignal;
   }
 
   /** If {@linkcode Deno.resolveDns} is called with `"CAA"` record type
@@ -5544,6 +5838,14 @@ declare class URLSearchParams {
    * ```
    */
   toString(): string;
+
+  /** Contains the number of search parameters
+   *
+   * ```ts
+   * searchParams.size
+   * ```
+   */
+  size: number;
 }
 
 /** The URL interface represents an object providing static methods used for
@@ -5553,6 +5855,7 @@ declare class URLSearchParams {
  */
 declare class URL {
   constructor(url: string | URL, base?: string | URL);
+  static canParse(url: string | URL, base?: string | URL): boolean;
   static createObjectURL(blob: Blob): string;
   static revokeObjectURL(url: string): void;
 
@@ -5591,7 +5894,7 @@ declare type URLPatternInput = string | URLPatternInit;
 /** @category Web APIs */
 declare interface URLPatternComponentResult {
   input: string;
-  groups: Record<string, string>;
+  groups: Record<string, string | undefined>;
 }
 
 /** `URLPatternResult` is the object returned from `URLPattern.exec`.
@@ -5630,7 +5933,7 @@ declare interface URLPatternResult {
  * ```ts
  * // Specify the pattern as structured data.
  * const pattern = new URLPattern({ pathname: "/users/:user" });
- * const match = pattern.exec("/users/joe");
+ * const match = pattern.exec("https://blog.example.com/users/joe");
  * console.log(match.pathname.groups.user); // joe
  * ```
  *
@@ -5643,9 +5946,9 @@ declare interface URLPatternResult {
  *
  * ```ts
  * // Specify a relative string pattern with a base URL.
- * const pattern = new URLPattern("/:article", "https://blog.example.com");
- * console.log(pattern.test("https://blog.example.com/article")); // true
- * console.log(pattern.test("https://blog.example.com/article/123")); // false
+ * const pattern = new URLPattern("/article/:id", "https://blog.example.com");
+ * console.log(pattern.test("https://blog.example.com/article")); // false
+ * console.log(pattern.test("https://blog.example.com/article/123")); // true
  * ```
  *
  * @category Web APIs
@@ -5656,13 +5959,14 @@ declare class URLPattern {
   /**
    * Test if the given input matches the stored pattern.
    *
-   * The input can either be provided as a url string (with an optional base),
-   * or as individual components in the form of an object.
+   * The input can either be provided as an absolute URL string with an optional base,
+   * relative URL string with a required base, or as individual components
+   * in the form of an `URLPatternInit` object.
    *
    * ```ts
    * const pattern = new URLPattern("https://example.com/books/:id");
    *
-   * // Test a url string.
+   * // Test an absolute url string.
    * console.log(pattern.test("https://example.com/books/123")); // true
    *
    * // Test a relative url with a base.
@@ -5677,13 +5981,14 @@ declare class URLPattern {
   /**
    * Match the given input against the stored pattern.
    *
-   * The input can either be provided as a url string (with an optional base),
-   * or as individual components in the form of an object.
+   * The input can either be provided as an absolute URL string with an optional base,
+   * relative URL string with a required base, or as individual components
+   * in the form of an `URLPatternInit` object.
    *
    * ```ts
    * const pattern = new URLPattern("https://example.com/books/:id");
    *
-   * // Match a url string.
+   * // Match an absolute url string.
    * let match = pattern.exec("https://example.com/books/123");
    * console.log(match.pathname.groups.id); // 123
    *
@@ -7231,1331 +7536,6 @@ declare function fetch(
 
 // Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
 
-// deno-lint-ignore-file no-explicit-any no-empty-interface
-
-/// <reference no-default-lib="true" />
-/// <reference lib="esnext" />
-
-/** @category WebGPU */
-interface GPUObjectBase {
-  label: string;
-}
-
-/** @category WebGPU */
-declare interface GPUObjectDescriptorBase {
-  label?: string;
-}
-
-/** @category WebGPU */
-declare class GPUSupportedLimits {
-  maxTextureDimension1D?: number;
-  maxTextureDimension2D?: number;
-  maxTextureDimension3D?: number;
-  maxTextureArrayLayers?: number;
-  maxBindGroups?: number;
-  maxBindingsPerBindGroup?: number;
-  maxDynamicUniformBuffersPerPipelineLayout?: number;
-  maxDynamicStorageBuffersPerPipelineLayout?: number;
-  maxSampledTexturesPerShaderStage?: number;
-  maxSamplersPerShaderStage?: number;
-  maxStorageBuffersPerShaderStage?: number;
-  maxStorageTexturesPerShaderStage?: number;
-  maxUniformBuffersPerShaderStage?: number;
-  maxUniformBufferBindingSize?: number;
-  maxStorageBufferBindingSize?: number;
-  minUniformBufferOffsetAlignment?: number;
-  minStorageBufferOffsetAlignment?: number;
-  maxVertexBuffers?: number;
-  maxBufferSize?: number;
-  maxVertexAttributes?: number;
-  maxVertexBufferArrayStride?: number;
-  maxInterStageShaderComponents?: number;
-  maxComputeWorkgroupStorageSize?: number;
-  maxComputeInvocationsPerWorkgroup?: number;
-  maxComputeWorkgroupSizeX?: number;
-  maxComputeWorkgroupSizeY?: number;
-  maxComputeWorkgroupSizeZ?: number;
-  maxComputeWorkgroupsPerDimension?: number;
-}
-
-/** @category WebGPU */
-declare class GPUSupportedFeatures {
-  forEach(
-    callbackfn: (
-      value: GPUFeatureName,
-      value2: GPUFeatureName,
-      set: Set<GPUFeatureName>,
-    ) => void,
-    thisArg?: any,
-  ): void;
-  has(value: GPUFeatureName): boolean;
-  size: number;
-  [
-    Symbol
-      .iterator
-  ](): IterableIterator<GPUFeatureName>;
-  entries(): IterableIterator<[GPUFeatureName, GPUFeatureName]>;
-  keys(): IterableIterator<GPUFeatureName>;
-  values(): IterableIterator<GPUFeatureName>;
-}
-
-/** @category WebGPU */
-declare class GPUAdapterInfo {
-  readonly vendor: string;
-  readonly architecture: string;
-  readonly device: string;
-  readonly description: string;
-}
-
-/** @category WebGPU */
-declare class GPU {
-  requestAdapter(
-    options?: GPURequestAdapterOptions,
-  ): Promise<GPUAdapter | null>;
-}
-
-/** @category WebGPU */
-declare interface GPURequestAdapterOptions {
-  powerPreference?: GPUPowerPreference;
-  forceFallbackAdapter?: boolean;
-}
-
-/** @category WebGPU */
-declare type GPUPowerPreference = 'low-power' | 'high-performance';
-
-/** @category WebGPU */
-declare class GPUAdapter {
-  readonly features: GPUSupportedFeatures;
-  readonly limits: GPUSupportedLimits;
-  readonly isFallbackAdapter: boolean;
-
-  requestDevice(descriptor?: GPUDeviceDescriptor): Promise<GPUDevice>;
-  requestAdapterInfo(unmaskHints?: string[]): Promise<GPUAdapterInfo>;
-}
-
-/** @category WebGPU */
-declare interface GPUDeviceDescriptor extends GPUObjectDescriptorBase {
-  requiredFeatures?: GPUFeatureName[];
-  requiredLimits?: Record<string, number>;
-}
-
-/** @category WebGPU */
-declare type GPUFeatureName =
-  | 'depth-clip-control'
-  | 'depth32float-stencil8'
-  | 'pipeline-statistics-query'
-  | 'texture-compression-bc'
-  | 'texture-compression-etc2'
-  | 'texture-compression-astc'
-  | 'timestamp-query'
-  | 'indirect-first-instance'
-  | 'shader-f16'
-  // extended from spec
-  | 'mappable-primary-buffers'
-  | 'sampled-texture-binding-array'
-  | 'sampled-texture-array-dynamic-indexing'
-  | 'sampled-texture-array-non-uniform-indexing'
-  | 'unsized-binding-array'
-  | 'multi-draw-indirect'
-  | 'multi-draw-indirect-count'
-  | 'push-constants'
-  | 'address-mode-clamp-to-border'
-  | 'texture-adapter-specific-format-features'
-  | 'shader-float64'
-  | 'vertex-attribute-64bit';
-
-/** @category WebGPU */
-declare class GPUDevice extends EventTarget implements GPUObjectBase {
-  label: string;
-
-  readonly lost: Promise<GPUDeviceLostInfo>;
-  pushErrorScope(filter: GPUErrorFilter): undefined;
-  popErrorScope(): Promise<GPUError | null>;
-
-  readonly features: GPUSupportedFeatures;
-  readonly limits: GPUSupportedLimits;
-  readonly queue: GPUQueue;
-
-  destroy(): undefined;
-
-  createBuffer(descriptor: GPUBufferDescriptor): GPUBuffer;
-  createTexture(descriptor: GPUTextureDescriptor): GPUTexture;
-  createSampler(descriptor?: GPUSamplerDescriptor): GPUSampler;
-
-  createBindGroupLayout(
-    descriptor: GPUBindGroupLayoutDescriptor,
-  ): GPUBindGroupLayout;
-  createPipelineLayout(
-    descriptor: GPUPipelineLayoutDescriptor,
-  ): GPUPipelineLayout;
-  createBindGroup(descriptor: GPUBindGroupDescriptor): GPUBindGroup;
-
-  createShaderModule(descriptor: GPUShaderModuleDescriptor): GPUShaderModule;
-  createComputePipeline(
-    descriptor: GPUComputePipelineDescriptor,
-  ): GPUComputePipeline;
-  createRenderPipeline(
-    descriptor: GPURenderPipelineDescriptor,
-  ): GPURenderPipeline;
-  createComputePipelineAsync(
-    descriptor: GPUComputePipelineDescriptor,
-  ): Promise<GPUComputePipeline>;
-  createRenderPipelineAsync(
-    descriptor: GPURenderPipelineDescriptor,
-  ): Promise<GPURenderPipeline>;
-
-  createCommandEncoder(
-    descriptor?: GPUCommandEncoderDescriptor,
-  ): GPUCommandEncoder;
-  createRenderBundleEncoder(
-    descriptor: GPURenderBundleEncoderDescriptor,
-  ): GPURenderBundleEncoder;
-
-  createQuerySet(descriptor: GPUQuerySetDescriptor): GPUQuerySet;
-}
-
-/** @category WebGPU */
-declare class GPUBuffer implements GPUObjectBase {
-  label: string;
-
-  readonly size: number;
-  readonly usage: GPUBufferUsageFlags;
-  readonly mapState: GPUBufferMapState;
-
-  mapAsync(
-    mode: GPUMapModeFlags,
-    offset?: number,
-    size?: number,
-  ): Promise<undefined>;
-  getMappedRange(offset?: number, size?: number): ArrayBuffer;
-  unmap(): undefined;
-
-  destroy(): undefined;
-}
-
-/** @category WebGPU */
-declare type GPUBufferMapState = 'unmapped' | 'pending' | 'mapped';
-
-/** @category WebGPU */
-declare interface GPUBufferDescriptor extends GPUObjectDescriptorBase {
-  size: number;
-  usage: GPUBufferUsageFlags;
-  mappedAtCreation?: boolean;
-}
-
-/** @category WebGPU */
-declare type GPUBufferUsageFlags = number;
-
-/** @category WebGPU */
-declare class GPUBufferUsage {
-  static MAP_READ: 0x0001;
-  static MAP_WRITE: 0x0002;
-  static COPY_SRC: 0x0004;
-  static COPY_DST: 0x0008;
-  static INDEX: 0x0010;
-  static VERTEX: 0x0020;
-  static UNIFORM: 0x0040;
-  static STORAGE: 0x0080;
-  static INDIRECT: 0x0100;
-  static QUERY_RESOLVE: 0x0200;
-}
-
-/** @category WebGPU */
-declare type GPUMapModeFlags = number;
-
-/** @category WebGPU */
-declare class GPUMapMode {
-  static READ: 0x0001;
-  static WRITE: 0x0002;
-}
-
-/** @category WebGPU */
-declare class GPUTexture implements GPUObjectBase {
-  label: string;
-
-  createView(descriptor?: GPUTextureViewDescriptor): GPUTextureView;
-  destroy(): undefined;
-
-  readonly width: number;
-  readonly height: number;
-  readonly depthOrArrayLayers: number;
-  readonly mipLevelCount: number;
-  readonly sampleCount: number;
-  readonly dimension: GPUTextureDimension;
-  readonly format: GPUTextureFormat;
-  readonly usage: GPUTextureUsageFlags;
-}
-
-/** @category WebGPU */
-declare interface GPUTextureDescriptor extends GPUObjectDescriptorBase {
-  size: GPUExtent3D;
-  mipLevelCount?: number;
-  sampleCount?: number;
-  dimension?: GPUTextureDimension;
-  format: GPUTextureFormat;
-  usage: GPUTextureUsageFlags;
-  viewFormats?: GPUTextureFormat[];
-}
-
-/** @category WebGPU */
-declare type GPUTextureDimension = '1d' | '2d' | '3d';
-
-/** @category WebGPU */
-declare type GPUTextureUsageFlags = number;
-
-/** @category WebGPU */
-declare class GPUTextureUsage {
-  static COPY_SRC: 0x01;
-  static COPY_DST: 0x02;
-  static TEXTURE_BINDING: 0x04;
-  static STORAGE_BINDING: 0x08;
-  static RENDER_ATTACHMENT: 0x10;
-}
-
-/** @category WebGPU */
-declare class GPUTextureView implements GPUObjectBase {
-  label: string;
-}
-
-/** @category WebGPU */
-declare interface GPUTextureViewDescriptor extends GPUObjectDescriptorBase {
-  format?: GPUTextureFormat;
-  dimension?: GPUTextureViewDimension;
-  aspect?: GPUTextureAspect;
-  baseMipLevel?: number;
-  mipLevelCount?: number;
-  baseArrayLayer?: number;
-  arrayLayerCount?: number;
-}
-
-/** @category WebGPU */
-declare type GPUTextureViewDimension =
-  | '1d'
-  | '2d'
-  | '2d-array'
-  | 'cube'
-  | 'cube-array'
-  | '3d';
-
-/** @category WebGPU */
-declare type GPUTextureAspect = 'all' | 'stencil-only' | 'depth-only';
-
-/** @category WebGPU */
-declare type GPUTextureFormat =
-  | 'r8unorm'
-  | 'r8snorm'
-  | 'r8uint'
-  | 'r8sint'
-  | 'r16uint'
-  | 'r16sint'
-  | 'r16float'
-  | 'rg8unorm'
-  | 'rg8snorm'
-  | 'rg8uint'
-  | 'rg8sint'
-  | 'r32uint'
-  | 'r32sint'
-  | 'r32float'
-  | 'rg16uint'
-  | 'rg16sint'
-  | 'rg16float'
-  | 'rgba8unorm'
-  | 'rgba8unorm-srgb'
-  | 'rgba8snorm'
-  | 'rgba8uint'
-  | 'rgba8sint'
-  | 'bgra8unorm'
-  | 'bgra8unorm-srgb'
-  | 'rgb9e5ufloat'
-  | 'rgb10a2unorm'
-  | 'rg11b10ufloat'
-  | 'rg32uint'
-  | 'rg32sint'
-  | 'rg32float'
-  | 'rgba16uint'
-  | 'rgba16sint'
-  | 'rgba16float'
-  | 'rgba32uint'
-  | 'rgba32sint'
-  | 'rgba32float'
-  | 'stencil8'
-  | 'depth16unorm'
-  | 'depth24plus'
-  | 'depth24plus-stencil8'
-  | 'depth32float'
-  | 'depth32float-stencil8'
-  | 'bc1-rgba-unorm'
-  | 'bc1-rgba-unorm-srgb'
-  | 'bc2-rgba-unorm'
-  | 'bc2-rgba-unorm-srgb'
-  | 'bc3-rgba-unorm'
-  | 'bc3-rgba-unorm-srgb'
-  | 'bc4-r-unorm'
-  | 'bc4-r-snorm'
-  | 'bc5-rg-unorm'
-  | 'bc5-rg-snorm'
-  | 'bc6h-rgb-ufloat'
-  | 'bc6h-rgb-float'
-  | 'bc7-rgba-unorm'
-  | 'bc7-rgba-unorm-srgb'
-  | 'etc2-rgb8unorm'
-  | 'etc2-rgb8unorm-srgb'
-  | 'etc2-rgb8a1unorm'
-  | 'etc2-rgb8a1unorm-srgb'
-  | 'etc2-rgba8unorm'
-  | 'etc2-rgba8unorm-srgb'
-  | 'eac-r11unorm'
-  | 'eac-r11snorm'
-  | 'eac-rg11unorm'
-  | 'eac-rg11snorm'
-  | 'astc-4x4-unorm'
-  | 'astc-4x4-unorm-srgb'
-  | 'astc-5x4-unorm'
-  | 'astc-5x4-unorm-srgb'
-  | 'astc-5x5-unorm'
-  | 'astc-5x5-unorm-srgb'
-  | 'astc-6x5-unorm'
-  | 'astc-6x5-unorm-srgb'
-  | 'astc-6x6-unorm'
-  | 'astc-6x6-unorm-srgb'
-  | 'astc-8x5-unorm'
-  | 'astc-8x5-unorm-srgb'
-  | 'astc-8x6-unorm'
-  | 'astc-8x6-unorm-srgb'
-  | 'astc-8x8-unorm'
-  | 'astc-8x8-unorm-srgb'
-  | 'astc-10x5-unorm'
-  | 'astc-10x5-unorm-srgb'
-  | 'astc-10x6-unorm'
-  | 'astc-10x6-unorm-srgb'
-  | 'astc-10x8-unorm'
-  | 'astc-10x8-unorm-srgb'
-  | 'astc-10x10-unorm'
-  | 'astc-10x10-unorm-srgb'
-  | 'astc-12x10-unorm'
-  | 'astc-12x10-unorm-srgb'
-  | 'astc-12x12-unorm'
-  | 'astc-12x12-unorm-srgb';
-
-/** @category WebGPU */
-declare class GPUSampler implements GPUObjectBase {
-  label: string;
-}
-
-/** @category WebGPU */
-declare interface GPUSamplerDescriptor extends GPUObjectDescriptorBase {
-  addressModeU?: GPUAddressMode;
-  addressModeV?: GPUAddressMode;
-  addressModeW?: GPUAddressMode;
-  magFilter?: GPUFilterMode;
-  minFilter?: GPUFilterMode;
-  mipmapFilter?: GPUMipmapFilterMode;
-  lodMinClamp?: number;
-  lodMaxClamp?: number;
-  compare?: GPUCompareFunction;
-  maxAnisotropy?: number;
-}
-
-/** @category WebGPU */
-declare type GPUAddressMode = 'clamp-to-edge' | 'repeat' | 'mirror-repeat';
-
-/** @category WebGPU */
-declare type GPUFilterMode = 'nearest' | 'linear';
-
-/** @category WebGPU */
-declare type GPUMipmapFilterMode = 'nearest' | 'linear';
-
-/** @category WebGPU */
-declare type GPUCompareFunction =
-  | 'never'
-  | 'less'
-  | 'equal'
-  | 'less-equal'
-  | 'greater'
-  | 'not-equal'
-  | 'greater-equal'
-  | 'always';
-
-/** @category WebGPU */
-declare class GPUBindGroupLayout implements GPUObjectBase {
-  label: string;
-}
-
-/** @category WebGPU */
-declare interface GPUBindGroupLayoutDescriptor extends GPUObjectDescriptorBase {
-  entries: GPUBindGroupLayoutEntry[];
-}
-
-/** @category WebGPU */
-declare interface GPUBindGroupLayoutEntry {
-  binding: number;
-  visibility: GPUShaderStageFlags;
-
-  buffer?: GPUBufferBindingLayout;
-  sampler?: GPUSamplerBindingLayout;
-  texture?: GPUTextureBindingLayout;
-  storageTexture?: GPUStorageTextureBindingLayout;
-}
-
-/** @category WebGPU */
-declare type GPUShaderStageFlags = number;
-
-/** @category WebGPU */
-declare class GPUShaderStage {
-  static VERTEX: 0x1;
-  static FRAGMENT: 0x2;
-  static COMPUTE: 0x4;
-}
-
-/** @category WebGPU */
-declare interface GPUBufferBindingLayout {
-  type?: GPUBufferBindingType;
-  hasDynamicOffset?: boolean;
-  minBindingSize?: number;
-}
-
-/** @category WebGPU */
-declare type GPUBufferBindingType = 'uniform' | 'storage' | 'read-only-storage';
-
-/** @category WebGPU */
-declare interface GPUSamplerBindingLayout {
-  type?: GPUSamplerBindingType;
-}
-
-/** @category WebGPU */
-declare type GPUSamplerBindingType =
-  | 'filtering'
-  | 'non-filtering'
-  | 'comparison';
-
-/** @category WebGPU */
-declare interface GPUTextureBindingLayout {
-  sampleType?: GPUTextureSampleType;
-  viewDimension?: GPUTextureViewDimension;
-  multisampled?: boolean;
-}
-
-/** @category WebGPU */
-declare type GPUTextureSampleType =
-  | 'float'
-  | 'unfilterable-float'
-  | 'depth'
-  | 'sint'
-  | 'uint';
-
-/** @category WebGPU */
-declare type GPUStorageTextureAccess = 'write-only';
-
-/** @category WebGPU */
-declare interface GPUStorageTextureBindingLayout {
-  access: GPUStorageTextureAccess;
-  format: GPUTextureFormat;
-  viewDimension?: GPUTextureViewDimension;
-}
-
-/** @category WebGPU */
-declare class GPUBindGroup implements GPUObjectBase {
-  label: string;
-}
-
-/** @category WebGPU */
-declare interface GPUBindGroupDescriptor extends GPUObjectDescriptorBase {
-  layout: GPUBindGroupLayout;
-  entries: GPUBindGroupEntry[];
-}
-
-/** @category WebGPU */
-declare type GPUBindingResource =
-  | GPUSampler
-  | GPUTextureView
-  | GPUBufferBinding;
-
-/** @category WebGPU */
-declare interface GPUBindGroupEntry {
-  binding: number;
-  resource: GPUBindingResource;
-}
-
-/** @category WebGPU */
-declare interface GPUBufferBinding {
-  buffer: GPUBuffer;
-  offset?: number;
-  size?: number;
-}
-
-/** @category WebGPU */
-declare class GPUPipelineLayout implements GPUObjectBase {
-  label: string;
-}
-
-/** @category WebGPU */
-declare interface GPUPipelineLayoutDescriptor extends GPUObjectDescriptorBase {
-  bindGroupLayouts: GPUBindGroupLayout[];
-}
-
-/** @category WebGPU */
-declare type GPUCompilationMessageType = 'error' | 'warning' | 'info';
-
-/** @category WebGPU */
-declare interface GPUCompilationMessage {
-  readonly message: string;
-  readonly type: GPUCompilationMessageType;
-  readonly lineNum: number;
-  readonly linePos: number;
-}
-
-/** @category WebGPU */
-declare interface GPUCompilationInfo {
-  readonly messages: ReadonlyArray<GPUCompilationMessage>;
-}
-
-/** @category WebGPU */
-declare class GPUShaderModule implements GPUObjectBase {
-  label: string;
-
-  compilationInfo(): Promise<GPUCompilationInfo>;
-}
-
-/** @category WebGPU */
-declare interface GPUShaderModuleDescriptor extends GPUObjectDescriptorBase {
-  code: string;
-  sourceMap?: any;
-}
-
-/** @category WebGPU */
-declare type GPUAutoLayoutMode = 'auto';
-
-/** @category WebGPU */
-declare interface GPUPipelineDescriptorBase extends GPUObjectDescriptorBase {
-  layout: GPUPipelineLayout | GPUAutoLayoutMode;
-}
-
-/** @category WebGPU */
-declare interface GPUPipelineBase {
-  getBindGroupLayout(index: number): GPUBindGroupLayout;
-}
-
-/** @category WebGPU */
-declare interface GPUProgrammableStage {
-  module: GPUShaderModule;
-  entryPoint: string;
-}
-
-/** @category WebGPU */
-declare class GPUComputePipeline implements GPUObjectBase, GPUPipelineBase {
-  label: string;
-
-  getBindGroupLayout(index: number): GPUBindGroupLayout;
-}
-
-/** @category WebGPU */
-declare interface GPUComputePipelineDescriptor
-  extends GPUPipelineDescriptorBase {
-  compute: GPUProgrammableStage;
-}
-
-/** @category WebGPU */
-declare class GPURenderPipeline implements GPUObjectBase, GPUPipelineBase {
-  label: string;
-
-  getBindGroupLayout(index: number): GPUBindGroupLayout;
-}
-
-/** @category WebGPU */
-declare interface GPURenderPipelineDescriptor
-  extends GPUPipelineDescriptorBase {
-  vertex: GPUVertexState;
-  primitive?: GPUPrimitiveState;
-  depthStencil?: GPUDepthStencilState;
-  multisample?: GPUMultisampleState;
-  fragment?: GPUFragmentState;
-}
-
-/** @category WebGPU */
-declare interface GPUPrimitiveState {
-  topology?: GPUPrimitiveTopology;
-  stripIndexFormat?: GPUIndexFormat;
-  frontFace?: GPUFrontFace;
-  cullMode?: GPUCullMode;
-  unclippedDepth?: boolean;
-}
-
-/** @category WebGPU */
-declare type GPUPrimitiveTopology =
-  | 'point-list'
-  | 'line-list'
-  | 'line-strip'
-  | 'triangle-list'
-  | 'triangle-strip';
-
-/** @category WebGPU */
-declare type GPUFrontFace = 'ccw' | 'cw';
-
-/** @category WebGPU */
-declare type GPUCullMode = 'none' | 'front' | 'back';
-
-/** @category WebGPU */
-declare interface GPUMultisampleState {
-  count?: number;
-  mask?: number;
-  alphaToCoverageEnabled?: boolean;
-}
-
-/** @category WebGPU */
-declare interface GPUFragmentState extends GPUProgrammableStage {
-  targets: (GPUColorTargetState | null)[];
-}
-
-/** @category WebGPU */
-declare interface GPUColorTargetState {
-  format: GPUTextureFormat;
-
-  blend?: GPUBlendState;
-  writeMask?: GPUColorWriteFlags;
-}
-
-/** @category WebGPU */
-declare interface GPUBlendState {
-  color: GPUBlendComponent;
-  alpha: GPUBlendComponent;
-}
-
-/** @category WebGPU */
-declare type GPUColorWriteFlags = number;
-
-/** @category WebGPU */
-declare class GPUColorWrite {
-  static RED: 0x1;
-  static GREEN: 0x2;
-  static BLUE: 0x4;
-  static ALPHA: 0x8;
-  static ALL: 0xF;
-}
-
-/** @category WebGPU */
-declare interface GPUBlendComponent {
-  operation?: GPUBlendOperation;
-  srcFactor?: GPUBlendFactor;
-  dstFactor?: GPUBlendFactor;
-}
-
-/** @category WebGPU */
-declare type GPUBlendFactor =
-  | 'zero'
-  | 'one'
-  | 'src'
-  | 'one-minus-src'
-  | 'src-alpha'
-  | 'one-minus-src-alpha'
-  | 'dst'
-  | 'one-minus-dst'
-  | 'dst-alpha'
-  | 'one-minus-dst-alpha'
-  | 'src-alpha-saturated'
-  | 'constant'
-  | 'one-minus-constant';
-
-/** @category WebGPU */
-declare type GPUBlendOperation =
-  | 'add'
-  | 'subtract'
-  | 'reverse-subtract'
-  | 'min'
-  | 'max';
-
-/** @category WebGPU */
-declare interface GPUDepthStencilState {
-  format: GPUTextureFormat;
-
-  depthWriteEnabled?: boolean;
-  depthCompare?: GPUCompareFunction;
-
-  stencilFront?: GPUStencilFaceState;
-  stencilBack?: GPUStencilFaceState;
-
-  stencilReadMask?: number;
-  stencilWriteMask?: number;
-
-  depthBias?: number;
-  depthBiasSlopeScale?: number;
-  depthBiasClamp?: number;
-}
-
-/** @category WebGPU */
-declare interface GPUStencilFaceState {
-  compare?: GPUCompareFunction;
-  failOp?: GPUStencilOperation;
-  depthFailOp?: GPUStencilOperation;
-  passOp?: GPUStencilOperation;
-}
-
-/** @category WebGPU */
-declare type GPUStencilOperation =
-  | 'keep'
-  | 'zero'
-  | 'replace'
-  | 'invert'
-  | 'increment-clamp'
-  | 'decrement-clamp'
-  | 'increment-wrap'
-  | 'decrement-wrap';
-
-/** @category WebGPU */
-declare type GPUIndexFormat = 'uint16' | 'uint32';
-
-/** @category WebGPU */
-declare type GPUVertexFormat =
-  | 'uint8x2'
-  | 'uint8x4'
-  | 'sint8x2'
-  | 'sint8x4'
-  | 'unorm8x2'
-  | 'unorm8x4'
-  | 'snorm8x2'
-  | 'snorm8x4'
-  | 'uint16x2'
-  | 'uint16x4'
-  | 'sint16x2'
-  | 'sint16x4'
-  | 'unorm16x2'
-  | 'unorm16x4'
-  | 'snorm16x2'
-  | 'snorm16x4'
-  | 'float16x2'
-  | 'float16x4'
-  | 'float32'
-  | 'float32x2'
-  | 'float32x3'
-  | 'float32x4'
-  | 'uint32'
-  | 'uint32x2'
-  | 'uint32x3'
-  | 'uint32x4'
-  | 'sint32'
-  | 'sint32x2'
-  | 'sint32x3'
-  | 'sint32x4';
-
-/** @category WebGPU */
-declare type GPUVertexStepMode = 'vertex' | 'instance';
-
-/** @category WebGPU */
-declare interface GPUVertexState extends GPUProgrammableStage {
-  buffers?: (GPUVertexBufferLayout | null)[];
-}
-
-/** @category WebGPU */
-declare interface GPUVertexBufferLayout {
-  arrayStride: number;
-  stepMode?: GPUVertexStepMode;
-  attributes: GPUVertexAttribute[];
-}
-
-/** @category WebGPU */
-declare interface GPUVertexAttribute {
-  format: GPUVertexFormat;
-  offset: number;
-
-  shaderLocation: number;
-}
-
-/** @category WebGPU */
-declare interface GPUImageDataLayout {
-  offset?: number;
-  bytesPerRow?: number;
-  rowsPerImage?: number;
-}
-
-/** @category WebGPU */
-declare class GPUCommandBuffer implements GPUObjectBase {
-  label: string;
-}
-
-/** @category WebGPU */
-declare interface GPUCommandBufferDescriptor extends GPUObjectDescriptorBase {}
-
-/** @category WebGPU */
-declare class GPUCommandEncoder implements GPUObjectBase {
-  label: string;
-
-  beginRenderPass(descriptor: GPURenderPassDescriptor): GPURenderPassEncoder;
-  beginComputePass(
-    descriptor?: GPUComputePassDescriptor,
-  ): GPUComputePassEncoder;
-
-  copyBufferToBuffer(
-    source: GPUBuffer,
-    sourceOffset: number,
-    destination: GPUBuffer,
-    destinationOffset: number,
-    size: number,
-  ): undefined;
-
-  copyBufferToTexture(
-    source: GPUImageCopyBuffer,
-    destination: GPUImageCopyTexture,
-    copySize: GPUExtent3D,
-  ): undefined;
-
-  copyTextureToBuffer(
-    source: GPUImageCopyTexture,
-    destination: GPUImageCopyBuffer,
-    copySize: GPUExtent3D,
-  ): undefined;
-
-  copyTextureToTexture(
-    source: GPUImageCopyTexture,
-    destination: GPUImageCopyTexture,
-    copySize: GPUExtent3D,
-  ): undefined;
-
-  clearBuffer(
-    destination: GPUBuffer,
-    destinationOffset?: number,
-    size?: number,
-  ): undefined;
-
-  pushDebugGroup(groupLabel: string): undefined;
-  popDebugGroup(): undefined;
-  insertDebugMarker(markerLabel: string): undefined;
-
-  writeTimestamp(querySet: GPUQuerySet, queryIndex: number): undefined;
-
-  resolveQuerySet(
-    querySet: GPUQuerySet,
-    firstQuery: number,
-    queryCount: number,
-    destination: GPUBuffer,
-    destinationOffset: number,
-  ): undefined;
-
-  finish(descriptor?: GPUCommandBufferDescriptor): GPUCommandBuffer;
-}
-
-/** @category WebGPU */
-declare interface GPUCommandEncoderDescriptor extends GPUObjectDescriptorBase {}
-
-/** @category WebGPU */
-declare interface GPUImageCopyBuffer extends GPUImageDataLayout {
-  buffer: GPUBuffer;
-}
-
-/** @category WebGPU */
-declare interface GPUImageCopyTexture {
-  texture: GPUTexture;
-  mipLevel?: number;
-  origin?: GPUOrigin3D;
-  aspect?: GPUTextureAspect;
-}
-
-/** @category WebGPU */
-interface GPUProgrammablePassEncoder {
-  setBindGroup(
-    index: number,
-    bindGroup: GPUBindGroup,
-    dynamicOffsets?: number[],
-  ): undefined;
-
-  setBindGroup(
-    index: number,
-    bindGroup: GPUBindGroup,
-    dynamicOffsetsData: Uint32Array,
-    dynamicOffsetsDataStart: number,
-    dynamicOffsetsDataLength: number,
-  ): undefined;
-
-  pushDebugGroup(groupLabel: string): undefined;
-  popDebugGroup(): undefined;
-  insertDebugMarker(markerLabel: string): undefined;
-}
-
-/** @category WebGPU */
-declare class GPUComputePassEncoder
-  implements GPUObjectBase, GPUProgrammablePassEncoder {
-  label: string;
-  setBindGroup(
-    index: number,
-    bindGroup: GPUBindGroup,
-    dynamicOffsets?: number[],
-  ): undefined;
-  setBindGroup(
-    index: number,
-    bindGroup: GPUBindGroup,
-    dynamicOffsetsData: Uint32Array,
-    dynamicOffsetsDataStart: number,
-    dynamicOffsetsDataLength: number,
-  ): undefined;
-  pushDebugGroup(groupLabel: string): undefined;
-  popDebugGroup(): undefined;
-  insertDebugMarker(markerLabel: string): undefined;
-  setPipeline(pipeline: GPUComputePipeline): undefined;
-  dispatchWorkgroups(x: number, y?: number, z?: number): undefined;
-  dispatchWorkgroupsIndirect(
-    indirectBuffer: GPUBuffer,
-    indirectOffset: number,
-  ): undefined;
-
-  beginPipelineStatisticsQuery(
-    querySet: GPUQuerySet,
-    queryIndex: number,
-  ): undefined;
-  endPipelineStatisticsQuery(): undefined;
-
-  writeTimestamp(querySet: GPUQuerySet, queryIndex: number): undefined;
-
-  end(): undefined;
-}
-
-/** @category WebGPU */
-declare interface GPUComputePassDescriptor extends GPUObjectDescriptorBase {}
-
-/** @category WebGPU */
-interface GPURenderEncoderBase {
-  setPipeline(pipeline: GPURenderPipeline): undefined;
-
-  setIndexBuffer(
-    buffer: GPUBuffer,
-    indexFormat: GPUIndexFormat,
-    offset?: number,
-    size?: number,
-  ): undefined;
-  setVertexBuffer(
-    slot: number,
-    buffer: GPUBuffer,
-    offset?: number,
-    size?: number,
-  ): undefined;
-
-  draw(
-    vertexCount: number,
-    instanceCount?: number,
-    firstVertex?: number,
-    firstInstance?: number,
-  ): undefined;
-  drawIndexed(
-    indexCount: number,
-    instanceCount?: number,
-    firstIndex?: number,
-    baseVertex?: number,
-    firstInstance?: number,
-  ): undefined;
-
-  drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: number): undefined;
-  drawIndexedIndirect(
-    indirectBuffer: GPUBuffer,
-    indirectOffset: number,
-  ): undefined;
-}
-
-/** @category WebGPU */
-declare class GPURenderPassEncoder
-  implements GPUObjectBase, GPUProgrammablePassEncoder, GPURenderEncoderBase {
-  label: string;
-  setBindGroup(
-    index: number,
-    bindGroup: GPUBindGroup,
-    dynamicOffsets?: number[],
-  ): undefined;
-  setBindGroup(
-    index: number,
-    bindGroup: GPUBindGroup,
-    dynamicOffsetsData: Uint32Array,
-    dynamicOffsetsDataStart: number,
-    dynamicOffsetsDataLength: number,
-  ): undefined;
-  pushDebugGroup(groupLabel: string): undefined;
-  popDebugGroup(): undefined;
-  insertDebugMarker(markerLabel: string): undefined;
-  setPipeline(pipeline: GPURenderPipeline): undefined;
-  setIndexBuffer(
-    buffer: GPUBuffer,
-    indexFormat: GPUIndexFormat,
-    offset?: number,
-    size?: number,
-  ): undefined;
-  setVertexBuffer(
-    slot: number,
-    buffer: GPUBuffer,
-    offset?: number,
-    size?: number,
-  ): undefined;
-  draw(
-    vertexCount: number,
-    instanceCount?: number,
-    firstVertex?: number,
-    firstInstance?: number,
-  ): undefined;
-  drawIndexed(
-    indexCount: number,
-    instanceCount?: number,
-    firstIndex?: number,
-    baseVertex?: number,
-    firstInstance?: number,
-  ): undefined;
-  drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: number): undefined;
-  drawIndexedIndirect(
-    indirectBuffer: GPUBuffer,
-    indirectOffset: number,
-  ): undefined;
-
-  setViewport(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    minDepth: number,
-    maxDepth: number,
-  ): undefined;
-
-  setScissorRect(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-  ): undefined;
-
-  setBlendConstant(color: GPUColor): undefined;
-  setStencilReference(reference: number): undefined;
-
-  beginOcclusionQuery(queryIndex: number): undefined;
-  endOcclusionQuery(): undefined;
-
-  beginPipelineStatisticsQuery(
-    querySet: GPUQuerySet,
-    queryIndex: number,
-  ): undefined;
-  endPipelineStatisticsQuery(): undefined;
-
-  writeTimestamp(querySet: GPUQuerySet, queryIndex: number): undefined;
-
-  executeBundles(bundles: GPURenderBundle[]): undefined;
-  end(): undefined;
-}
-
-/** @category WebGPU */
-declare interface GPURenderPassDescriptor extends GPUObjectDescriptorBase {
-  colorAttachments: (GPURenderPassColorAttachment | null)[];
-  depthStencilAttachment?: GPURenderPassDepthStencilAttachment;
-}
-
-/** @category WebGPU */
-declare interface GPURenderPassColorAttachment {
-  view: GPUTextureView;
-  resolveTarget?: GPUTextureView;
-
-  clearValue?: GPUColor;
-  loadOp: GPULoadOp;
-  storeOp: GPUStoreOp;
-}
-
-/** @category WebGPU */
-declare interface GPURenderPassDepthStencilAttachment {
-  view: GPUTextureView;
-
-  depthClearValue?: number;
-  depthLoadOp?: GPULoadOp;
-  depthStoreOp?: GPUStoreOp;
-  depthReadOnly?: boolean;
-
-  stencilClearValue?: number;
-  stencilLoadOp?: GPULoadOp;
-  stencilStoreOp?: GPUStoreOp;
-  stencilReadOnly?: boolean;
-}
-
-/** @category WebGPU */
-declare type GPULoadOp = 'load' | 'clear';
-
-/** @category WebGPU */
-declare type GPUStoreOp = 'store' | 'discard';
-
-/** @category WebGPU */
-declare class GPURenderBundle implements GPUObjectBase {
-  label: string;
-}
-
-/** @category WebGPU */
-declare interface GPURenderBundleDescriptor extends GPUObjectDescriptorBase {}
-
-/** @category WebGPU */
-declare class GPURenderBundleEncoder
-  implements GPUObjectBase, GPUProgrammablePassEncoder, GPURenderEncoderBase {
-  label: string;
-  draw(
-    vertexCount: number,
-    instanceCount?: number,
-    firstVertex?: number,
-    firstInstance?: number,
-  ): undefined;
-  drawIndexed(
-    indexCount: number,
-    instanceCount?: number,
-    firstIndex?: number,
-    baseVertex?: number,
-    firstInstance?: number,
-  ): undefined;
-  drawIndexedIndirect(
-    indirectBuffer: GPUBuffer,
-    indirectOffset: number,
-  ): undefined;
-  drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: number): undefined;
-  insertDebugMarker(markerLabel: string): undefined;
-  popDebugGroup(): undefined;
-  pushDebugGroup(groupLabel: string): undefined;
-  setBindGroup(
-    index: number,
-    bindGroup: GPUBindGroup,
-    dynamicOffsets?: number[],
-  ): undefined;
-  setBindGroup(
-    index: number,
-    bindGroup: GPUBindGroup,
-    dynamicOffsetsData: Uint32Array,
-    dynamicOffsetsDataStart: number,
-    dynamicOffsetsDataLength: number,
-  ): undefined;
-  setIndexBuffer(
-    buffer: GPUBuffer,
-    indexFormat: GPUIndexFormat,
-    offset?: number,
-    size?: number,
-  ): undefined;
-  setPipeline(pipeline: GPURenderPipeline): undefined;
-  setVertexBuffer(
-    slot: number,
-    buffer: GPUBuffer,
-    offset?: number,
-    size?: number,
-  ): undefined;
-
-  finish(descriptor?: GPURenderBundleDescriptor): GPURenderBundle;
-}
-
-/** @category WebGPU */
-declare interface GPURenderPassLayout extends GPUObjectDescriptorBase {
-  colorFormats: (GPUTextureFormat | null)[];
-  depthStencilFormat?: GPUTextureFormat;
-  sampleCount?: number;
-}
-
-/** @category WebGPU */
-declare interface GPURenderBundleEncoderDescriptor extends GPURenderPassLayout {
-  depthReadOnly?: boolean;
-  stencilReadOnly?: boolean;
-}
-
-/** @category WebGPU */
-declare class GPUQueue implements GPUObjectBase {
-  label: string;
-
-  submit(commandBuffers: GPUCommandBuffer[]): undefined;
-
-  onSubmittedWorkDone(): Promise<undefined>;
-
-  writeBuffer(
-    buffer: GPUBuffer,
-    bufferOffset: number,
-    data: BufferSource,
-    dataOffset?: number,
-    size?: number,
-  ): undefined;
-
-  writeTexture(
-    destination: GPUImageCopyTexture,
-    data: BufferSource,
-    dataLayout: GPUImageDataLayout,
-    size: GPUExtent3D,
-  ): undefined;
-}
-
-/** @category WebGPU */
-declare class GPUQuerySet implements GPUObjectBase {
-  label: string;
-
-  destroy(): undefined;
-
-  readonly type: GPUQueryType;
-  readonly count: number;
-}
-
-/** @category WebGPU */
-declare interface GPUQuerySetDescriptor extends GPUObjectDescriptorBase {
-  type: GPUQueryType;
-  count: number;
-  pipelineStatistics?: GPUPipelineStatisticName[];
-}
-
-/** @category WebGPU */
-declare type GPUQueryType = 'occlusion' | 'pipeline-statistics' | 'timestamp';
-
-/** @category WebGPU */
-declare type GPUPipelineStatisticName =
-  | 'vertex-shader-invocations'
-  | 'clipper-invocations'
-  | 'clipper-primitives-out'
-  | 'fragment-shader-invocations'
-  | 'compute-shader-invocations';
-
-/** @category WebGPU */
-declare type GPUDeviceLostReason = 'destroyed';
-
-/** @category WebGPU */
-declare interface GPUDeviceLostInfo {
-  readonly reason: GPUDeviceLostReason | undefined;
-  readonly message: string;
-}
-
-/** @category WebGPU */
-declare class GPUError {
-  readonly message: string;
-}
-
-/** @category WebGPU */
-declare class GPUOutOfMemoryError extends GPUError {
-  constructor(message: string);
-}
-
-/** @category WebGPU */
-declare class GPUValidationError extends GPUError {
-  constructor(message: string);
-}
-
-/** @category WebGPU */
-declare type GPUErrorFilter = 'out-of-memory' | 'validation';
-
-/** @category WebGPU */
-declare interface GPUColorDict {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
-}
-
-/** @category WebGPU */
-declare type GPUColor = number[] | GPUColorDict;
-
-/** @category WebGPU */
-declare interface GPUOrigin3DDict {
-  x?: number;
-  y?: number;
-  z?: number;
-}
-
-/** @category WebGPU */
-declare type GPUOrigin3D = number[] | GPUOrigin3DDict;
-
-/** @category WebGPU */
-declare interface GPUExtent3DDict {
-  width: number;
-  height?: number;
-  depthOrArrayLayers?: number;
-}
-
-/** @category WebGPU */
-declare type GPUExtent3D = number[] | GPUExtent3DDict;
-
-// Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
-
 // deno-lint-ignore-file no-explicit-any
 
 /// <reference no-default-lib="true" />
@@ -9523,7 +8503,6 @@ declare namespace Deno {
 /// <reference lib="deno.fetch" />
 /// <reference lib="deno.websocket" />
 /// <reference lib="deno.crypto" />
-/// <reference lib="deno.broadcast_channel" />
 
 /** @category WebAssembly */
 declare namespace WebAssembly {
@@ -9861,7 +8840,7 @@ declare namespace WebAssembly {
   export function validate(bytes: BufferSource): boolean;
 }
 
-/** Sets a timer which executes a function once after the timer expires. Returns
+/** Sets a timer which executes a function once after the delay (in milliseconds) elapses. Returns
  * an id which may be used to cancel the timeout.
  *
  * ```ts
@@ -10273,7 +9252,6 @@ interface CacheQueryOptions {
 /// <reference no-default-lib="true" />
 /// <reference lib="deno.ns" />
 /// <reference lib="deno.shared_globals" />
-/// <reference lib="deno.webgpu" />
 /// <reference lib="deno.webstorage" />
 /// <reference lib="esnext" />
 /// <reference lib="deno.cache" />
@@ -10364,7 +9342,6 @@ declare var caches: CacheStorage;
 /** @category Web APIs */
 declare class Navigator {
   constructor();
-  readonly gpu: GPU;
   readonly hardwareConcurrency: number;
   readonly userAgent: string;
   readonly language: string;

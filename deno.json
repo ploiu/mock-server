@@ -3,28 +3,22 @@
     "strict": true
   },
   "fmt": {
-    "files": {
-      "exclude": [
-        "README.md",
-        "src/ui/AccordionElement.min.js"
-      ]
-    },
-    "options": {
-      "singleQuote": true,
-      "useTabs": false,
-      "indentWidth": 2,
-      "proseWrap": "preserve"
-    }
+    "exclude": [
+      "README.md",
+      "src/ui/AccordionElement.min.js"
+    ],
+    "singleQuote": true,
+    "useTabs": false,
+    "indentWidth": 2,
+    "proseWrap": "preserve"
   },
   "lint": {
-    "files": {
-      "exclude": [
-        "src/ts/Deno.d.ts",
-        "src/test/uiTests.js",
-        "generated",
-        "src/ui/AccordionElement.min.js"
-      ]
-    }
+    "exclude": [
+      "src/ts/Deno.d.ts",
+      "src/test/uiTests.js",
+      "generated",
+      "src/ui/AccordionElement.min.js"
+    ]
   },
   "tasks": {
     "test": "deno fmt; deno test --allow-net",
@@ -32,6 +26,7 @@
     "run": "deno task generate-ui; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui",
     "generate-ui": "deno fmt; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts",
     "install": "deno task generate-ui; deno install --allow-read --allow-write --allow-net --force ./src/ts/MockServer.ts",
+    "install-unsafe": "deno task generate-ui; deno install --unsafely-ignore-certificate-errors --allow-read --allow-write --allow-net --force ./src/ts/MockServer.ts",
     "check": "deno fmt; deno lint",
     "types": "deno types > ./src/ts/Deno.d.ts"
   }
