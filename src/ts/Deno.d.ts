@@ -261,6 +261,29 @@ declare namespace Deno {
      *
      * @category Errors */
     export class NotSupported extends Error {}
+    /**
+     * Raised when too many symbolic links were encountered when resolving the
+     * filename.
+     *
+     * @category Errors */
+    export class FilesystemLoop extends Error {}
+    /**
+     * Raised when trying to open, create or write to a directory.
+     *
+     * @category Errors */
+    export class IsADirectory extends Error {}
+    /**
+     * Raised when performing a socket operation but the remote host is
+     * not reachable.
+     *
+     * @category Errors */
+    export class NetworkUnreachable extends Error {}
+    /**
+     * Raised when trying to perform an operation on a path that is not a
+     * directory, when directory is required.
+     *
+     * @category Errors */
+    export class NotADirectory extends Error {}
   }
 
   /** The current process ID of this instance of the Deno CLI.
@@ -4452,8 +4475,8 @@ declare namespace Deno {
 
   /** The permission descriptor for the `allow-hrtime` permission, which
    * controls if the runtime code has access to high resolution time. High
-   * resolution time is consider sensitive information, because it can be used
-   * by malicious code to gain information about the host that it might
+   * resolution time is considered sensitive information, because it can be used
+   * by malicious code to gain information about the host that it might not
    * otherwise have access to.
    *
    * @category Permissions */
@@ -5645,6 +5668,203 @@ declare namespace Deno {
    * @category Runtime Environment
    */
   export function gid(): number | null;
+
+  /** Information for a HTTP request.
+   *
+   * @category HTTP Server
+   */
+  export interface ServeHandlerInfo {
+    /** The remote address of the connection. */
+    remoteAddr: Deno.NetAddr;
+  }
+
+  /** A handler for HTTP requests. Consumes a request and returns a response.
+   *
+   * If a handler throws, the server calling the handler will assume the impact
+   * of the error is isolated to the individual request. It will catch the error
+   * and if necessary will close the underlying connection.
+   *
+   * @category HTTP Server
+   */
+  export type ServeHandler = (
+    request: Request,
+    info: ServeHandlerInfo,
+  ) => Response | Promise<Response>;
+
+  /** Options which can be set when calling {@linkcode Deno.serve}.
+   *
+   * @category HTTP Server
+   */
+  export interface ServeOptions {
+    /** The port to listen on.
+     *
+     * @default {8000} */
+    port?: number;
+
+    /** A literal IP address or host name that can be resolved to an IP address.
+     *
+     * __Note about `0.0.0.0`__ While listening `0.0.0.0` works on all platforms,
+     * the browsers on Windows don't work with the address `0.0.0.0`.
+     * You should show the message like `server running on localhost:8080` instead of
+     * `server running on 0.0.0.0:8080` if your program supports Windows.
+     *
+     * @default {"0.0.0.0"} */
+    hostname?: string;
+
+    /** An {@linkcode AbortSignal} to close the server and all connections. */
+    signal?: AbortSignal;
+
+    /** Sets `SO_REUSEPORT` on POSIX systems. */
+    reusePort?: boolean;
+
+    /** The handler to invoke when route handlers throw an error. */
+    onError?: (error: unknown) => Response | Promise<Response>;
+
+    /** The callback which is called when the server starts listening. */
+    onListen?: (params: { hostname: string; port: number }) => void;
+  }
+
+  /** Additional options which are used when opening a TLS (HTTPS) server.
+   *
+   * @category HTTP Server
+   */
+  export interface ServeTlsOptions extends ServeOptions {
+    /** Server private key in PEM format */
+    cert: string;
+
+    /** Cert chain in PEM format */
+    key: string;
+  }
+
+  /**
+   * @category HTTP Server
+   */
+  export interface ServeInit {
+    /** The handler to invoke to process each incoming request. */
+    handler: ServeHandler;
+  }
+
+  /** An instance of the server created using `Deno.serve()` API.
+   *
+   * @category HTTP Server
+   */
+  export interface Server {
+    /** A promise that resolves once server finishes - eg. when aborted using
+     * the signal passed to {@linkcode ServeOptions.signal}.
+     */
+    finished: Promise<void>;
+
+    /**
+     * Make the server block the event loop from finishing.
+     *
+     * Note: the server blocks the event loop from finishing by default.
+     * This method is only meaningful after `.unref()` is called.
+     */
+    ref(): void;
+
+    /** Make the server not block the event loop from finishing. */
+    unref(): void;
+  }
+
+  /** Serves HTTP requests with the given handler.
+   *
+   * The below example serves with the port `8000` on hostname `"127.0.0.1"`.
+   *
+   * ```ts
+   * Deno.serve((_req) => new Response("Hello, world"));
+   * ```
+   *
+   * @category HTTP Server
+   */
+  export function serve(handler: ServeHandler): Server;
+  /** Serves HTTP requests with the given option bag and handler.
+   *
+   * You can specify an object with a port and hostname option, which is the
+   * address to listen on. The default is port `8000` on hostname `"127.0.0.1"`.
+   *
+   * You can change the address to listen on using the `hostname` and `port`
+   * options. The below example serves on port `3000` and hostname `"0.0.0.0"`.
+   *
+   * ```ts
+   * Deno.serve(
+   *   { port: 3000, hostname: "0.0.0.0" },
+   *   (_req) => new Response("Hello, world")
+   * );
+   * ```
+   *
+   * You can stop the server with an {@linkcode AbortSignal}. The abort signal
+   * needs to be passed as the `signal` option in the options bag. The server
+   * aborts when the abort signal is aborted. To wait for the server to close,
+   * await the promise returned from the `Deno.serve` API.
+   *
+   * ```ts
+   * const ac = new AbortController();
+   *
+   * const server = Deno.serve(
+   *    { signal: ac.signal },
+   *    (_req) => new Response("Hello, world")
+   * );
+   * server.finished.then(() => console.log("Server closed"));
+   *
+   * console.log("Closing server...");
+   * ac.abort();
+   * ```
+   *
+   * By default `Deno.serve` prints the message
+   * `Listening on http://<hostname>:<port>/` on listening. If you like to
+   * change this behavior, you can specify a custom `onListen` callback.
+   *
+   * ```ts
+   * Deno.serve({
+   *   onListen({ port, hostname }) {
+   *     console.log(`Server started at http://${hostname}:${port}`);
+   *     // ... more info specific to your server ..
+   *   },
+   * }, (_req) => new Response("Hello, world"));
+   * ```
+   *
+   * To enable TLS you must specify the `key` and `cert` options.
+   *
+   * ```ts
+   * const cert = "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n";
+   * const key = "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n";
+   * Deno.serve({ cert, key }, (_req) => new Response("Hello, world"));
+   * ```
+   *
+   * @category HTTP Server
+   */
+  export function serve(
+    options: ServeOptions | ServeTlsOptions,
+    handler: ServeHandler,
+  ): Server;
+  /** Serves HTTP requests with the given option bag.
+   *
+   * You can specify an object with a port and hostname option, which is the
+   * address to listen on. The default is port `8000` on hostname `"127.0.0.1"`.
+   *
+   * ```ts
+   * const ac = new AbortController();
+   *
+   * const server = Deno.serve({
+   *   port: 3000,
+   *   hostname: "0.0.0.0",
+   *   handler: (_req) => new Response("Hello, world"),
+   *   signal: ac.signal,
+   *   onListen({ port, hostname }) {
+   *     console.log(`Server started at http://${hostname}:${port}`);
+   *   },
+   * });
+   * server.finished.then(() => console.log("Server closed"));
+   *
+   * console.log("Closing server...");
+   * ac.abort();
+   * ```
+   *
+   * @category HTTP Server
+   */
+  export function serve(
+    options: ServeInit & (ServeOptions | ServeTlsOptions),
+  ): Server;
 }
 
 // Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
@@ -5688,18 +5908,13 @@ declare interface Console {
 
 // Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
 
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-var
 
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
 
 /** @category Web APIs */
-declare class URLSearchParams {
-  constructor(
-    init?: string[][] | Record<string, string> | string | URLSearchParams,
-  );
-  static toString(): string;
-
+declare interface URLSearchParams {
   /** Appends a specified key/value pair as a new search parameter.
    *
    * ```ts
@@ -5710,15 +5925,16 @@ declare class URLSearchParams {
    */
   append(name: string, value: string): void;
 
-  /** Deletes the given search parameter and its associated value,
+  /** Deletes search parameters that match a name, and optional value,
    * from the list of all search parameters.
    *
    * ```ts
    * let searchParams = new URLSearchParams([['name', 'value']]);
    * searchParams.delete('name');
+   * searchParams.delete('name', 'value');
    * ```
    */
-  delete(name: string): void;
+  delete(name: string, value?: string): void;
 
   /** Returns all the values associated with a given search parameter
    * as an array.
@@ -5737,14 +5953,15 @@ declare class URLSearchParams {
    */
   get(name: string): string | null;
 
-  /** Returns a Boolean that indicates whether a parameter with the
-   * specified name exists.
+  /** Returns a boolean value indicating if a given parameter,
+   * or parameter and value pair, exists.
    *
    * ```ts
    * searchParams.has('name');
+   * searchParams.has('name', 'value');
    * ```
    */
-  has(name: string): boolean;
+  has(name: string, value?: string): boolean;
 
   /** Sets the value associated with a given search parameter to the
    * given value. If there were several matching values, this method
@@ -5848,17 +6065,20 @@ declare class URLSearchParams {
   size: number;
 }
 
+/** @category Web APIs */
+declare var URLSearchParams: {
+  readonly prototype: URLSearchParams;
+  new (
+    init?: Iterable<string[]> | Record<string, string> | string,
+  ): URLSearchParams;
+};
+
 /** The URL interface represents an object providing static methods used for
  * creating object URLs.
  *
  * @category Web APIs
  */
-declare class URL {
-  constructor(url: string | URL, base?: string | URL);
-  static canParse(url: string | URL, base?: string | URL): boolean;
-  static createObjectURL(blob: Blob): string;
-  static revokeObjectURL(url: string): void;
-
+declare interface URL {
   hash: string;
   host: string;
   hostname: string;
@@ -5874,6 +6094,19 @@ declare class URL {
   username: string;
   toJSON(): string;
 }
+
+/** The URL interface represents an object providing static methods used for
+ * creating object URLs.
+ *
+ * @category Web APIs
+ */
+declare var URL: {
+  readonly prototype: URL;
+  new (url: string | URL, base?: string | URL): URL;
+  canParse(url: string | URL, base?: string | URL): boolean;
+  createObjectURL(blob: Blob): string;
+  revokeObjectURL(url: string): void;
+};
 
 /** @category Web APIs */
 declare interface URLPatternInit {
@@ -5953,9 +6186,7 @@ declare interface URLPatternResult {
  *
  * @category Web APIs
  */
-declare class URLPattern {
-  constructor(input: URLPatternInput, baseURL?: string);
-
+declare interface URLPattern {
   /**
    * Test if the given input matches the stored pattern.
    *
@@ -6021,6 +6252,41 @@ declare class URLPattern {
   readonly hash: string;
 }
 
+/**
+ * The URLPattern API provides a web platform primitive for matching URLs based
+ * on a convenient pattern syntax.
+ *
+ * The syntax is based on path-to-regexp. Wildcards, named capture groups,
+ * regular groups, and group modifiers are all supported.
+ *
+ * ```ts
+ * // Specify the pattern as structured data.
+ * const pattern = new URLPattern({ pathname: "/users/:user" });
+ * const match = pattern.exec("https://blog.example.com/users/joe");
+ * console.log(match.pathname.groups.user); // joe
+ * ```
+ *
+ * ```ts
+ * // Specify a fully qualified string pattern.
+ * const pattern = new URLPattern("https://example.com/books/:id");
+ * console.log(pattern.test("https://example.com/books/123")); // true
+ * console.log(pattern.test("https://deno.land/books/123")); // false
+ * ```
+ *
+ * ```ts
+ * // Specify a relative string pattern with a base URL.
+ * const pattern = new URLPattern("/article/:id", "https://blog.example.com");
+ * console.log(pattern.test("https://blog.example.com/article")); // false
+ * console.log(pattern.test("https://blog.example.com/article/123")); // true
+ * ```
+ *
+ * @category Web APIs
+ */
+declare var URLPattern: {
+  readonly prototype: URLPattern;
+  new (input: URLPatternInput, baseURL?: string): URLPattern;
+};
+
 // Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
 
 // deno-lint-ignore-file no-explicit-any no-var
@@ -6028,16 +6294,71 @@ declare class URLPattern {
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
 
-/** @category DOM Events */
-declare class DOMException extends Error {
-  constructor(message?: string, name?: string);
+/** @category Web APIs */
+declare interface DOMException extends Error {
   readonly name: string;
   readonly message: string;
   readonly code: number;
+  readonly INDEX_SIZE_ERR: 1;
+  readonly DOMSTRING_SIZE_ERR: 2;
+  readonly HIERARCHY_REQUEST_ERR: 3;
+  readonly WRONG_DOCUMENT_ERR: 4;
+  readonly INVALID_CHARACTER_ERR: 5;
+  readonly NO_DATA_ALLOWED_ERR: 6;
+  readonly NO_MODIFICATION_ALLOWED_ERR: 7;
+  readonly NOT_FOUND_ERR: 8;
+  readonly NOT_SUPPORTED_ERR: 9;
+  readonly INUSE_ATTRIBUTE_ERR: 10;
+  readonly INVALID_STATE_ERR: 11;
+  readonly SYNTAX_ERR: 12;
+  readonly INVALID_MODIFICATION_ERR: 13;
+  readonly NAMESPACE_ERR: 14;
+  readonly INVALID_ACCESS_ERR: 15;
+  readonly VALIDATION_ERR: 16;
+  readonly TYPE_MISMATCH_ERR: 17;
+  readonly SECURITY_ERR: 18;
+  readonly NETWORK_ERR: 19;
+  readonly ABORT_ERR: 20;
+  readonly URL_MISMATCH_ERR: 21;
+  readonly QUOTA_EXCEEDED_ERR: 22;
+  readonly TIMEOUT_ERR: 23;
+  readonly INVALID_NODE_TYPE_ERR: 24;
+  readonly DATA_CLONE_ERR: 25;
 }
 
+/** @category Web APIs */
+declare var DOMException: {
+  readonly prototype: DOMException;
+  new (message?: string, name?: string): DOMException;
+  readonly INDEX_SIZE_ERR: 1;
+  readonly DOMSTRING_SIZE_ERR: 2;
+  readonly HIERARCHY_REQUEST_ERR: 3;
+  readonly WRONG_DOCUMENT_ERR: 4;
+  readonly INVALID_CHARACTER_ERR: 5;
+  readonly NO_DATA_ALLOWED_ERR: 6;
+  readonly NO_MODIFICATION_ALLOWED_ERR: 7;
+  readonly NOT_FOUND_ERR: 8;
+  readonly NOT_SUPPORTED_ERR: 9;
+  readonly INUSE_ATTRIBUTE_ERR: 10;
+  readonly INVALID_STATE_ERR: 11;
+  readonly SYNTAX_ERR: 12;
+  readonly INVALID_MODIFICATION_ERR: 13;
+  readonly NAMESPACE_ERR: 14;
+  readonly INVALID_ACCESS_ERR: 15;
+  readonly VALIDATION_ERR: 16;
+  readonly TYPE_MISMATCH_ERR: 17;
+  readonly SECURITY_ERR: 18;
+  readonly NETWORK_ERR: 19;
+  readonly ABORT_ERR: 20;
+  readonly URL_MISMATCH_ERR: 21;
+  readonly QUOTA_EXCEEDED_ERR: 22;
+  readonly TIMEOUT_ERR: 23;
+  readonly INVALID_NODE_TYPE_ERR: 24;
+  readonly DATA_CLONE_ERR: 25;
+};
+
 /** @category DOM Events */
-interface EventInit {
+declare interface EventInit {
   bubbles?: boolean;
   cancelable?: boolean;
   composed?: boolean;
@@ -6047,8 +6368,7 @@ interface EventInit {
  *
  * @category DOM Events
  */
-declare class Event {
-  constructor(type: string, eventInitDict?: EventInit);
+declare interface Event {
   /** Returns true or false depending on how event was initialized. True if
    * event goes through its target's ancestors in reverse tree order, and
    * false otherwise. */
@@ -6103,11 +6423,20 @@ declare class Event {
   readonly BUBBLING_PHASE: number;
   readonly CAPTURING_PHASE: number;
   readonly NONE: number;
-  static readonly AT_TARGET: number;
-  static readonly BUBBLING_PHASE: number;
-  static readonly CAPTURING_PHASE: number;
-  static readonly NONE: number;
 }
+
+/** An event which takes place in the DOM.
+ *
+ * @category DOM Events
+ */
+declare var Event: {
+  readonly prototype: Event;
+  new (type: string, eventInitDict?: EventInit): Event;
+  readonly AT_TARGET: number;
+  readonly BUBBLING_PHASE: number;
+  readonly CAPTURING_PHASE: number;
+  readonly NONE: number;
+};
 
 /**
  * EventTarget is a DOM interface implemented by objects that can receive events
@@ -6115,7 +6444,7 @@ declare class Event {
  *
  * @category DOM Events
  */
-declare class EventTarget {
+declare interface EventTarget {
   /** Appends an event listener for events whose type attribute value is type.
    * The callback argument sets the callback that will be invoked when the event
    * is dispatched.
@@ -6157,13 +6486,24 @@ declare class EventTarget {
   ): void;
 }
 
+/**
+ * EventTarget is a DOM interface implemented by objects that can receive events
+ * and may have listeners for them.
+ *
+ * @category DOM Events
+ */
+declare var EventTarget: {
+  readonly prototype: EventTarget;
+  new (): EventTarget;
+};
+
 /** @category DOM Events */
-interface EventListener {
+declare interface EventListener {
   (evt: Event): void | Promise<void>;
 }
 
 /** @category DOM Events */
-interface EventListenerObject {
+declare interface EventListenerObject {
   handleEvent(evt: Event): void | Promise<void>;
 }
 
@@ -6173,19 +6513,19 @@ declare type EventListenerOrEventListenerObject =
   | EventListenerObject;
 
 /** @category DOM Events */
-interface AddEventListenerOptions extends EventListenerOptions {
+declare interface AddEventListenerOptions extends EventListenerOptions {
   once?: boolean;
   passive?: boolean;
   signal?: AbortSignal;
 }
 
 /** @category DOM Events */
-interface EventListenerOptions {
+declare interface EventListenerOptions {
   capture?: boolean;
 }
 
 /** @category DOM Events */
-interface ProgressEventInit extends EventInit {
+declare interface ProgressEventInit extends EventInit {
   lengthComputable?: boolean;
   loaded?: number;
   total?: number;
@@ -6197,13 +6537,24 @@ interface ProgressEventInit extends EventInit {
  *
  * @category DOM Events
  */
-declare class ProgressEvent<T extends EventTarget = EventTarget> extends Event {
-  constructor(type: string, eventInitDict?: ProgressEventInit);
+declare interface ProgressEvent<T extends EventTarget = EventTarget>
+  extends Event {
   readonly lengthComputable: boolean;
   readonly loaded: number;
   readonly target: T | null;
   readonly total: number;
 }
+
+/** Events measuring progress of an underlying process, like an HTTP request
+ * (for an XMLHttpRequest, or the loading of the underlying resource of an
+ * <img>, <audio>, <video>, <style> or <link>).
+ *
+ * @category DOM Events
+ */
+declare var ProgressEvent: {
+  readonly prototype: ProgressEvent;
+  new (type: string, eventInitDict?: ProgressEventInit): ProgressEvent;
+};
 
 /** Decodes a string of data which has been encoded using base-64 encoding.
  *
@@ -6237,7 +6588,7 @@ declare interface TextDecodeOptions {
 }
 
 /** @category Encoding API */
-interface TextDecoder {
+declare interface TextDecoder {
   /** Returns encoding's name, lowercased. */
   readonly encoding: string;
   /** Returns `true` if error mode is "fatal", and `false` otherwise. */
@@ -6251,7 +6602,7 @@ interface TextDecoder {
 
 /** @category Encoding API */
 declare var TextDecoder: {
-  prototype: TextDecoder;
+  readonly prototype: TextDecoder;
   new (label?: string, options?: TextDecoderOptions): TextDecoder;
 };
 
@@ -6262,7 +6613,7 @@ declare interface TextEncoderEncodeIntoResult {
 }
 
 /** @category Encoding API */
-interface TextEncoder {
+declare interface TextEncoder {
   /** Returns "utf-8". */
   readonly encoding: 'utf-8';
   /** Returns the result of running UTF-8's encoder. */
@@ -6272,12 +6623,12 @@ interface TextEncoder {
 
 /** @category Encoding API */
 declare var TextEncoder: {
-  prototype: TextEncoder;
+  readonly prototype: TextEncoder;
   new (): TextEncoder;
 };
 
 /** @category Encoding API */
-interface TextDecoderStream {
+declare interface TextDecoderStream {
   /** Returns encoding's name, lowercased. */
   readonly encoding: string;
   /** Returns `true` if error mode is "fatal", and `false` otherwise. */
@@ -6291,12 +6642,12 @@ interface TextDecoderStream {
 
 /** @category Encoding API */
 declare var TextDecoderStream: {
-  prototype: TextDecoderStream;
+  readonly prototype: TextDecoderStream;
   new (label?: string, options?: TextDecoderOptions): TextDecoderStream;
 };
 
 /** @category Encoding API */
-interface TextEncoderStream {
+declare interface TextEncoderStream {
   /** Returns "utf-8". */
   readonly encoding: 'utf-8';
   readonly readable: ReadableStream<Uint8Array>;
@@ -6306,7 +6657,7 @@ interface TextEncoderStream {
 
 /** @category Encoding API */
 declare var TextEncoderStream: {
-  prototype: TextEncoderStream;
+  readonly prototype: TextEncoderStream;
   new (): TextEncoderStream;
 };
 
@@ -6315,7 +6666,7 @@ declare var TextEncoderStream: {
  *
  * @category Web APIs
  */
-declare class AbortController {
+declare interface AbortController {
   /** Returns the AbortSignal object associated with this object. */
   readonly signal: AbortSignal;
   /** Invoking this method will set this object's AbortSignal's aborted flag and
@@ -6323,8 +6674,18 @@ declare class AbortController {
   abort(reason?: any): void;
 }
 
+/** A controller object that allows you to abort one or more DOM requests as and
+ * when desired.
+ *
+ * @category Web APIs
+ */
+declare var AbortController: {
+  readonly prototype: AbortController;
+  new (): AbortController;
+};
+
 /** @category Web APIs */
-interface AbortSignalEventMap {
+declare interface AbortSignalEventMap {
   abort: Event;
 }
 
@@ -6333,7 +6694,7 @@ interface AbortSignalEventMap {
  *
  * @category Web APIs
  */
-interface AbortSignal extends EventTarget {
+declare interface AbortSignal extends EventTarget {
   /** Returns true if this AbortSignal's AbortController has signaled to abort,
    * and false otherwise. */
   readonly aborted: boolean;
@@ -6367,14 +6728,14 @@ interface AbortSignal extends EventTarget {
 
 /** @category Web APIs */
 declare var AbortSignal: {
-  prototype: AbortSignal;
-  new (): AbortSignal;
+  readonly prototype: AbortSignal;
+  new (): never;
   abort(reason?: any): AbortSignal;
   timeout(milliseconds: number): AbortSignal;
 };
 
 /** @category Web File API */
-interface FileReaderEventMap {
+declare interface FileReaderEventMap {
   'abort': ProgressEvent<FileReader>;
   'error': ProgressEvent<FileReader>;
   'load': ProgressEvent<FileReader>;
@@ -6389,7 +6750,7 @@ interface FileReaderEventMap {
  *
  * @category Web File API
  */
-interface FileReader extends EventTarget {
+declare interface FileReader extends EventTarget {
   readonly error: DOMException | null;
   onabort: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
   onerror: ((this: FileReader, ev: ProgressEvent<FileReader>) => any) | null;
@@ -6433,7 +6794,7 @@ interface FileReader extends EventTarget {
 
 /** @category Web File API */
 declare var FileReader: {
-  prototype: FileReader;
+  readonly prototype: FileReader;
   new (): FileReader;
   readonly DONE: number;
   readonly EMPTY: number;
@@ -6441,10 +6802,10 @@ declare var FileReader: {
 };
 
 /** @category Web File API */
-type BlobPart = BufferSource | Blob | string;
+declare type BlobPart = BufferSource | Blob | string;
 
 /** @category Web File API */
-interface BlobPropertyBag {
+declare interface BlobPropertyBag {
   type?: string;
   endings?: 'transparent' | 'native';
 }
@@ -6456,9 +6817,7 @@ interface BlobPropertyBag {
  *
  * @category Web File API
  */
-declare class Blob {
-  constructor(blobParts?: BlobPart[], options?: BlobPropertyBag);
-
+declare interface Blob {
   readonly size: number;
   readonly type: string;
   arrayBuffer(): Promise<ArrayBuffer>;
@@ -6467,8 +6826,20 @@ declare class Blob {
   text(): Promise<string>;
 }
 
+/** A file-like object of immutable, raw data. Blobs represent data that isn't
+ * necessarily in a JavaScript-native format. The File interface is based on
+ * Blob, inheriting blob functionality and expanding it to support files on the
+ * user's system.
+ *
+ * @category Web File API
+ */
+declare var Blob: {
+  readonly prototype: Blob;
+  new (blobParts?: BlobPart[], options?: BlobPropertyBag): Blob;
+};
+
 /** @category Web File API */
-interface FilePropertyBag extends BlobPropertyBag {
+declare interface FilePropertyBag extends BlobPropertyBag {
   lastModified?: number;
 }
 
@@ -6477,36 +6848,40 @@ interface FilePropertyBag extends BlobPropertyBag {
  *
  * @category Web File API
  */
-declare class File extends Blob {
-  constructor(
-    fileBits: BlobPart[],
-    fileName: string,
-    options?: FilePropertyBag,
-  );
-
+declare interface File extends Blob {
   readonly lastModified: number;
   readonly name: string;
 }
 
+/** Provides information about files and allows JavaScript in a web page to
+ * access their content.
+ *
+ * @category Web File API
+ */
+declare var File: {
+  readonly prototype: File;
+  new (fileBits: BlobPart[], fileName: string, options?: FilePropertyBag): File;
+};
+
 /** @category Streams API */
-interface ReadableStreamDefaultReadDoneResult {
+declare interface ReadableStreamDefaultReadDoneResult {
   done: true;
   value?: undefined;
 }
 
 /** @category Streams API */
-interface ReadableStreamDefaultReadValueResult<T> {
+declare interface ReadableStreamDefaultReadValueResult<T> {
   done: false;
   value: T;
 }
 
 /** @category Streams API */
-type ReadableStreamDefaultReadResult<T> =
+declare type ReadableStreamDefaultReadResult<T> =
   | ReadableStreamDefaultReadValueResult<T>
   | ReadableStreamDefaultReadDoneResult;
 
 /** @category Streams API */
-interface ReadableStreamDefaultReader<R = any> {
+declare interface ReadableStreamDefaultReader<R = any> {
   readonly closed: Promise<void>;
   cancel(reason?: any): Promise<void>;
   read(): Promise<ReadableStreamDefaultReadResult<R>>;
@@ -6515,29 +6890,29 @@ interface ReadableStreamDefaultReader<R = any> {
 
 /** @category Streams API */
 declare var ReadableStreamDefaultReader: {
-  prototype: ReadableStreamDefaultReader;
+  readonly prototype: ReadableStreamDefaultReader;
   new <R>(stream: ReadableStream<R>): ReadableStreamDefaultReader<R>;
 };
 
 /** @category Streams API */
-interface ReadableStreamBYOBReadDoneResult<V extends ArrayBufferView> {
+declare interface ReadableStreamBYOBReadDoneResult<V extends ArrayBufferView> {
   done: true;
   value?: V;
 }
 
 /** @category Streams API */
-interface ReadableStreamBYOBReadValueResult<V extends ArrayBufferView> {
+declare interface ReadableStreamBYOBReadValueResult<V extends ArrayBufferView> {
   done: false;
   value: V;
 }
 
 /** @category Streams API */
-type ReadableStreamBYOBReadResult<V extends ArrayBufferView> =
+declare type ReadableStreamBYOBReadResult<V extends ArrayBufferView> =
   | ReadableStreamBYOBReadDoneResult<V>
   | ReadableStreamBYOBReadValueResult<V>;
 
 /** @category Streams API */
-interface ReadableStreamBYOBReader {
+declare interface ReadableStreamBYOBReader {
   readonly closed: Promise<void>;
   cancel(reason?: any): Promise<void>;
   read<V extends ArrayBufferView>(
@@ -6548,24 +6923,30 @@ interface ReadableStreamBYOBReader {
 
 /** @category Streams API */
 declare var ReadableStreamBYOBReader: {
-  prototype: ReadableStreamBYOBReader;
+  readonly prototype: ReadableStreamBYOBReader;
   new (stream: ReadableStream<Uint8Array>): ReadableStreamBYOBReader;
 };
 
 /** @category Streams API */
-interface ReadableStreamBYOBRequest {
+declare interface ReadableStreamBYOBRequest {
   readonly view: ArrayBufferView | null;
   respond(bytesWritten: number): void;
   respondWithNewView(view: ArrayBufferView): void;
 }
 
 /** @category Streams API */
-interface ReadableByteStreamControllerCallback {
+declare var ReadableStreamBYOBRequest: {
+  readonly prototype: ReadableStreamBYOBRequest;
+  new (): never;
+};
+
+/** @category Streams API */
+declare interface ReadableByteStreamControllerCallback {
   (controller: ReadableByteStreamController): void | PromiseLike<void>;
 }
 
 /** @category Streams API */
-interface UnderlyingByteSource {
+declare interface UnderlyingByteSource {
   autoAllocateChunkSize?: number;
   cancel?: ReadableStreamErrorCallback;
   pull?: ReadableByteStreamControllerCallback;
@@ -6574,7 +6955,7 @@ interface UnderlyingByteSource {
 }
 
 /** @category Streams API */
-interface UnderlyingSink<W = any> {
+declare interface UnderlyingSink<W = any> {
   abort?: WritableStreamErrorCallback;
   close?: WritableStreamDefaultControllerCloseCallback;
   start?: WritableStreamDefaultControllerStartCallback;
@@ -6583,7 +6964,7 @@ interface UnderlyingSink<W = any> {
 }
 
 /** @category Streams API */
-interface UnderlyingSource<R = any> {
+declare interface UnderlyingSource<R = any> {
   cancel?: ReadableStreamErrorCallback;
   pull?: ReadableStreamDefaultControllerCallback<R>;
   start?: ReadableStreamDefaultControllerCallback<R>;
@@ -6591,17 +6972,17 @@ interface UnderlyingSource<R = any> {
 }
 
 /** @category Streams API */
-interface ReadableStreamErrorCallback {
+declare interface ReadableStreamErrorCallback {
   (reason: any): void | PromiseLike<void>;
 }
 
 /** @category Streams API */
-interface ReadableStreamDefaultControllerCallback<R> {
+declare interface ReadableStreamDefaultControllerCallback<R> {
   (controller: ReadableStreamDefaultController<R>): void | PromiseLike<void>;
 }
 
 /** @category Streams API */
-interface ReadableStreamDefaultController<R = any> {
+declare interface ReadableStreamDefaultController<R = any> {
   readonly desiredSize: number | null;
   close(): void;
   enqueue(chunk: R): void;
@@ -6610,12 +6991,12 @@ interface ReadableStreamDefaultController<R = any> {
 
 /** @category Streams API */
 declare var ReadableStreamDefaultController: {
-  prototype: ReadableStreamDefaultController;
-  new (): ReadableStreamDefaultController;
+  readonly prototype: ReadableStreamDefaultController;
+  new (): never;
 };
 
 /** @category Streams API */
-interface ReadableByteStreamController {
+declare interface ReadableByteStreamController {
   readonly byobRequest: ReadableStreamBYOBRequest | null;
   readonly desiredSize: number | null;
   close(): void;
@@ -6625,12 +7006,12 @@ interface ReadableByteStreamController {
 
 /** @category Streams API */
 declare var ReadableByteStreamController: {
-  prototype: ReadableByteStreamController;
-  new (): ReadableByteStreamController;
+  readonly prototype: ReadableByteStreamController;
+  new (): never;
 };
 
 /** @category Streams API */
-interface PipeOptions {
+declare interface PipeOptions {
   preventAbort?: boolean;
   preventCancel?: boolean;
   preventClose?: boolean;
@@ -6638,12 +7019,12 @@ interface PipeOptions {
 }
 
 /** @category Streams API */
-interface QueuingStrategySizeCallback<T = any> {
+declare interface QueuingStrategySizeCallback<T = any> {
   (chunk: T): number;
 }
 
 /** @category Streams API */
-interface QueuingStrategy<T = any> {
+declare interface QueuingStrategy<T = any> {
   highWaterMark?: number;
   size?: QueuingStrategySizeCallback<T>;
 }
@@ -6653,26 +7034,27 @@ interface QueuingStrategy<T = any> {
  *
  * @category Streams API
  */
-interface CountQueuingStrategy extends QueuingStrategy {
+declare interface CountQueuingStrategy extends QueuingStrategy {
   highWaterMark: number;
   size(chunk: any): 1;
 }
 
 /** @category Streams API */
 declare var CountQueuingStrategy: {
-  prototype: CountQueuingStrategy;
+  readonly prototype: CountQueuingStrategy;
   new (options: { highWaterMark: number }): CountQueuingStrategy;
 };
 
 /** @category Streams API */
-interface ByteLengthQueuingStrategy extends QueuingStrategy<ArrayBufferView> {
+declare interface ByteLengthQueuingStrategy
+  extends QueuingStrategy<ArrayBufferView> {
   highWaterMark: number;
   size(chunk: ArrayBufferView): number;
 }
 
 /** @category Streams API */
 declare var ByteLengthQueuingStrategy: {
-  prototype: ByteLengthQueuingStrategy;
+  readonly prototype: ByteLengthQueuingStrategy;
   new (options: { highWaterMark: number }): ByteLengthQueuingStrategy;
 };
 
@@ -6682,7 +7064,7 @@ declare var ByteLengthQueuingStrategy: {
  *
  * @category Streams API
  */
-interface ReadableStream<R = any> {
+declare interface ReadableStream<R = any> {
   readonly locked: boolean;
   cancel(reason?: any): Promise<void>;
   getReader(options: { mode: 'byob' }): ReadableStreamBYOBReader;
@@ -6693,6 +7075,9 @@ interface ReadableStream<R = any> {
   }, options?: PipeOptions): ReadableStream<T>;
   pipeTo(dest: WritableStream<R>, options?: PipeOptions): Promise<void>;
   tee(): [ReadableStream<R>, ReadableStream<R>];
+  values(options?: {
+    preventCancel?: boolean;
+  }): AsyncIterableIterator<R>;
   [Symbol.asyncIterator](options?: {
     preventCancel?: boolean;
   }): AsyncIterableIterator<R>;
@@ -6700,7 +7085,7 @@ interface ReadableStream<R = any> {
 
 /** @category Streams API */
 declare var ReadableStream: {
-  prototype: ReadableStream;
+  readonly prototype: ReadableStream;
   new (
     underlyingSource: UnderlyingByteSource,
     strategy?: { highWaterMark?: number; size?: undefined },
@@ -6709,20 +7094,23 @@ declare var ReadableStream: {
     underlyingSource?: UnderlyingSource<R>,
     strategy?: QueuingStrategy<R>,
   ): ReadableStream<R>;
+  from<R>(
+    asyncIterable: AsyncIterable<R> | Iterable<R | PromiseLike<R>>,
+  ): ReadableStream<R>;
 };
 
 /** @category Streams API */
-interface WritableStreamDefaultControllerCloseCallback {
+declare interface WritableStreamDefaultControllerCloseCallback {
   (): void | PromiseLike<void>;
 }
 
 /** @category Streams API */
-interface WritableStreamDefaultControllerStartCallback {
+declare interface WritableStreamDefaultControllerStartCallback {
   (controller: WritableStreamDefaultController): void | PromiseLike<void>;
 }
 
 /** @category Streams API */
-interface WritableStreamDefaultControllerWriteCallback<W> {
+declare interface WritableStreamDefaultControllerWriteCallback<W> {
   (chunk: W, controller: WritableStreamDefaultController):
     | void
     | PromiseLike<
@@ -6731,7 +7119,7 @@ interface WritableStreamDefaultControllerWriteCallback<W> {
 }
 
 /** @category Streams API */
-interface WritableStreamErrorCallback {
+declare interface WritableStreamErrorCallback {
   (reason: any): void | PromiseLike<void>;
 }
 
@@ -6741,7 +7129,7 @@ interface WritableStreamErrorCallback {
  *
  * @category Streams API
  */
-interface WritableStream<W = any> {
+declare interface WritableStream<W = any> {
   readonly locked: boolean;
   abort(reason?: any): Promise<void>;
   close(): Promise<void>;
@@ -6750,7 +7138,7 @@ interface WritableStream<W = any> {
 
 /** @category Streams API */
 declare var WritableStream: {
-  prototype: WritableStream;
+  readonly prototype: WritableStream;
   new <W = any>(
     underlyingSink?: UnderlyingSink<W>,
     strategy?: QueuingStrategy<W>,
@@ -6764,13 +7152,16 @@ declare var WritableStream: {
  *
  * @category Streams API
  */
-interface WritableStreamDefaultController {
+declare interface WritableStreamDefaultController {
   signal: AbortSignal;
   error(error?: any): void;
 }
 
 /** @category Streams API */
-declare var WritableStreamDefaultController: WritableStreamDefaultController;
+declare var WritableStreamDefaultController: {
+  readonly prototype: WritableStreamDefaultController;
+  new (): never;
+};
 
 /** This Streams API interface is the object returned by
  * WritableStream.getWriter() and once created locks the < writer to the
@@ -6779,7 +7170,7 @@ declare var WritableStreamDefaultController: WritableStreamDefaultController;
  *
  * @category Streams API
  */
-interface WritableStreamDefaultWriter<W = any> {
+declare interface WritableStreamDefaultWriter<W = any> {
   readonly closed: Promise<void>;
   readonly desiredSize: number | null;
   readonly ready: Promise<void>;
@@ -6791,19 +7182,19 @@ interface WritableStreamDefaultWriter<W = any> {
 
 /** @category Streams API */
 declare var WritableStreamDefaultWriter: {
-  prototype: WritableStreamDefaultWriter;
-  new (): WritableStreamDefaultWriter;
+  readonly prototype: WritableStreamDefaultWriter;
+  new <W>(stream: WritableStream<W>): WritableStreamDefaultWriter<W>;
 };
 
 /** @category Streams API */
-interface TransformStream<I = any, O = any> {
+declare interface TransformStream<I = any, O = any> {
   readonly readable: ReadableStream<O>;
   readonly writable: WritableStream<I>;
 }
 
 /** @category Streams API */
 declare var TransformStream: {
-  prototype: TransformStream;
+  readonly prototype: TransformStream;
   new <I = any, O = any>(
     transformer?: Transformer<I, O>,
     writableStrategy?: QueuingStrategy<I>,
@@ -6812,7 +7203,7 @@ declare var TransformStream: {
 };
 
 /** @category Streams API */
-interface TransformStreamDefaultController<O = any> {
+declare interface TransformStreamDefaultController<O = any> {
   readonly desiredSize: number | null;
   enqueue(chunk: O): void;
   error(reason?: any): void;
@@ -6820,10 +7211,13 @@ interface TransformStreamDefaultController<O = any> {
 }
 
 /** @category Streams API */
-declare var TransformStreamDefaultController: TransformStreamDefaultController;
+declare var TransformStreamDefaultController: {
+  readonly prototype: TransformStreamDefaultController;
+  new (): never;
+};
 
 /** @category Streams API */
-interface Transformer<I = any, O = any> {
+declare interface Transformer<I = any, O = any> {
   flush?: TransformStreamDefaultControllerCallback<O>;
   readableType?: undefined;
   start?: TransformStreamDefaultControllerCallback<O>;
@@ -6832,44 +7226,54 @@ interface Transformer<I = any, O = any> {
 }
 
 /** @category Streams API */
-interface TransformStreamDefaultControllerCallback<O> {
+declare interface TransformStreamDefaultControllerCallback<O> {
   (controller: TransformStreamDefaultController<O>): void | PromiseLike<void>;
 }
 
 /** @category Streams API */
-interface TransformStreamDefaultControllerTransformCallback<I, O> {
+declare interface TransformStreamDefaultControllerTransformCallback<I, O> {
   (
     chunk: I,
     controller: TransformStreamDefaultController<O>,
   ): void | PromiseLike<void>;
 }
 
-/** @category Streams API */
-interface MessageEventInit<T = any> extends EventInit {
+/** @category DOM APIs */
+declare interface MessageEventInit<T = any> extends EventInit {
   data?: T;
   origin?: string;
   lastEventId?: string;
 }
 
-/** @category Streams API */
-declare class MessageEvent<T = any> extends Event {
+/** @category DOM APIs */
+declare interface MessageEvent<T = any> extends Event {
   /**
    * Returns the data of the message.
    */
   readonly data: T;
   /**
+   * Returns the origin of the message, for server-sent events.
+   */
+  readonly origin: string;
+  /**
    * Returns the last event ID string, for server-sent events.
    */
   readonly lastEventId: string;
+  readonly source: null;
   /**
    * Returns transferred ports.
    */
   readonly ports: ReadonlyArray<MessagePort>;
-  constructor(type: string, eventInitDict?: MessageEventInit);
 }
 
 /** @category DOM APIs */
-type Transferable = ArrayBuffer | MessagePort;
+declare var MessageEvent: {
+  readonly prototype: MessageEvent;
+  new <T>(type: string, eventInitDict?: MessageEventInit<T>): MessageEvent<T>;
+};
+
+/** @category DOM APIs */
+declare type Transferable = ArrayBuffer | MessagePort;
 
 /**
  * This type has been renamed to StructuredSerializeOptions. Use that type for
@@ -6878,10 +7282,10 @@ type Transferable = ArrayBuffer | MessagePort;
  * @deprecated use `StructuredSerializeOptions` instead.
  * @category DOM APIs
  */
-type PostMessageOptions = StructuredSerializeOptions;
+declare type PostMessageOptions = StructuredSerializeOptions;
 
 /** @category DOM APIs */
-interface StructuredSerializeOptions {
+declare interface StructuredSerializeOptions {
   transfer?: Transferable[];
 }
 
@@ -6891,14 +7295,24 @@ interface StructuredSerializeOptions {
  *
  * @category DOM APIs
  */
-declare class MessageChannel {
-  constructor();
+declare interface MessageChannel {
   readonly port1: MessagePort;
   readonly port2: MessagePort;
 }
 
+/** The MessageChannel interface of the Channel Messaging API allows us to
+ * create a new message channel and send data through it via its two MessagePort
+ * properties.
+ *
+ * @category DOM APIs
+ */
+declare var MessageChannel: {
+  readonly prototype: MessageChannel;
+  new (): MessageChannel;
+};
+
 /** @category DOM APIs */
-interface MessagePortEventMap {
+declare interface MessagePortEventMap {
   'message': MessageEvent;
   'messageerror': MessageEvent;
 }
@@ -6909,7 +7323,7 @@ interface MessagePortEventMap {
  *
  * @category DOM APIs
  */
-declare class MessagePort extends EventTarget {
+declare interface MessagePort extends EventTarget {
   onmessage: ((this: MessagePort, ev: MessageEvent) => any) | null;
   onmessageerror: ((this: MessagePort, ev: MessageEvent) => any) | null;
   /**
@@ -6952,6 +7366,17 @@ declare class MessagePort extends EventTarget {
     options?: boolean | EventListenerOptions,
   ): void;
 }
+
+/** The MessagePort interface of the Channel Messaging API represents one of the
+ * two ports of a MessageChannel, allowing messages to be sent from one port and
+ * listening out for them arriving at the other.
+ *
+ * @category DOM APIs
+ */
+declare var MessagePort: {
+  readonly prototype: MessagePort;
+  new (): never;
+};
 
 /**
  * Creates a deep copy of a given value using the structured clone algorithm.
@@ -6997,7 +7422,25 @@ declare function structuredClone(
  *
  * @category Compression Streams API
  */
-declare class CompressionStream {
+declare interface CompressionStream {
+  readonly readable: ReadableStream<Uint8Array>;
+  readonly writable: WritableStream<Uint8Array>;
+}
+
+/**
+ * An API for compressing a stream of data.
+ *
+ * @example
+ * ```ts
+ * await Deno.stdin.readable
+ *   .pipeThrough(new CompressionStream("gzip"))
+ *   .pipeTo(Deno.stdout.writable);
+ * ```
+ *
+ * @category Compression Streams API
+ */
+declare var CompressionStream: {
+  readonly prototype: CompressionStream;
   /**
    * Creates a new `CompressionStream` object which compresses a stream of
    * data.
@@ -7005,8 +7448,25 @@ declare class CompressionStream {
    * Throws a `TypeError` if the format passed to the constructor is not
    * supported.
    */
-  constructor(format: string);
+  new (format: string): CompressionStream;
+};
 
+/**
+ * An API for decompressing a stream of data.
+ *
+ * @example
+ * ```ts
+ * const input = await Deno.open("./file.txt.gz");
+ * const output = await Deno.create("./file.txt");
+ *
+ * await input.readable
+ *   .pipeThrough(new DecompressionStream("gzip"))
+ *   .pipeTo(output.writable);
+ * ```
+ *
+ * @category Compression Streams API
+ */
+declare interface DecompressionStream {
   readonly readable: ReadableStream<Uint8Array>;
   readonly writable: WritableStream<Uint8Array>;
 }
@@ -7026,7 +7486,8 @@ declare class CompressionStream {
  *
  * @category Compression Streams API
  */
-declare class DecompressionStream {
+declare var DecompressionStream: {
+  readonly prototype: DecompressionStream;
   /**
    * Creates a new `DecompressionStream` object which decompresses a stream of
    * data.
@@ -7034,11 +7495,8 @@ declare class DecompressionStream {
    * Throws a `TypeError` if the format passed to the constructor is not
    * supported.
    */
-  constructor(format: string);
-
-  readonly readable: ReadableStream<Uint8Array>;
-  readonly writable: WritableStream<Uint8Array>;
-}
+  new (format: string): DecompressionStream;
+};
 
 /** Dispatch an uncaught exception. Similar to a synchronous version of:
  * ```ts
@@ -7069,7 +7527,7 @@ declare function reportError(
 /// <reference lib="esnext" />
 
 /** @category DOM APIs */
-interface DomIterable<K, V> {
+declare interface DomIterable<K, V> {
   keys(): IterableIterator<K>;
   values(): IterableIterator<V>;
   entries(): IterableIterator<[K, V]>;
@@ -7081,7 +7539,7 @@ interface DomIterable<K, V> {
 }
 
 /** @category Fetch API */
-type FormDataEntryValue = File | string;
+declare type FormDataEntryValue = File | string;
 
 /** Provides a way to easily construct a set of key/value pairs representing
  * form fields and their values, which can then be easily sent using the
@@ -7090,31 +7548,23 @@ type FormDataEntryValue = File | string;
  *
  * @category Fetch API
  */
-interface FormData {
+declare interface FormData extends DomIterable<string, FormDataEntryValue> {
   append(name: string, value: string | Blob, fileName?: string): void;
   delete(name: string): void;
   get(name: string): FormDataEntryValue | null;
   getAll(name: string): FormDataEntryValue[];
   has(name: string): boolean;
   set(name: string, value: string | Blob, fileName?: string): void;
-  keys(): IterableIterator<string>;
-  values(): IterableIterator<string>;
-  entries(): IterableIterator<[string, FormDataEntryValue]>;
-  [Symbol.iterator](): IterableIterator<[string, FormDataEntryValue]>;
-  forEach(
-    callback: (value: FormDataEntryValue, key: string, parent: this) => void,
-    thisArg?: any,
-  ): void;
 }
 
 /** @category Fetch API */
 declare var FormData: {
-  prototype: FormData;
+  readonly prototype: FormData;
   new (): FormData;
 };
 
 /** @category Fetch API */
-interface Body {
+declare interface Body {
   /** A simple getter used to expose a `ReadableStream` of the body contents. */
   readonly body: ReadableStream<Uint8Array> | null;
   /** Stores a `Boolean` that declares whether the body has been used in a
@@ -7144,7 +7594,7 @@ interface Body {
 }
 
 /** @category Fetch API */
-type HeadersInit = Headers | string[][] | Record<string, string>;
+declare type HeadersInit = Iterable<string[]> | Record<string, string>;
 
 /** This Fetch API interface allows you to perform various actions on HTTP
  * request and response headers. These actions include retrieving, setting,
@@ -7156,33 +7606,13 @@ type HeadersInit = Headers | string[][] | Record<string, string>;
  *
  * @category Fetch API
  */
-interface Headers {
-  append(name: string, value: string): void;
-  delete(name: string): void;
-  get(name: string): string | null;
-  has(name: string): boolean;
-  set(name: string, value: string): void;
-  forEach(
-    callbackfn: (value: string, key: string, parent: Headers) => void,
-    thisArg?: any,
-  ): void;
-}
-
-/** @category Fetch API */
-declare class Headers implements DomIterable<string, string> {
-  constructor(init?: HeadersInit);
-
+declare interface Headers extends DomIterable<string, string> {
   /** Appends a new value onto an existing header inside a `Headers` object, or
    * adds the header if it does not already exist.
    */
   append(name: string, value: string): void;
   /** Deletes a header from a `Headers` object. */
   delete(name: string): void;
-  /** Returns an iterator allowing to go through all key/value pairs
-   * contained in this Headers object. The both the key and value of each pairs
-   * are ByteString objects.
-   */
-  entries(): IterableIterator<[string, string]>;
   /** Returns a `ByteString` sequence of all the values of a header within a
    * `Headers` object with a given name.
    */
@@ -7191,32 +7621,35 @@ declare class Headers implements DomIterable<string, string> {
    * header.
    */
   has(name: string): boolean;
-  /** Returns an iterator allowing to go through all keys contained in
-   * this Headers object. The keys are ByteString objects.
-   */
-  keys(): IterableIterator<string>;
   /** Sets a new value for an existing header inside a Headers object, or adds
    * the header if it does not already exist.
    */
   set(name: string, value: string): void;
-  /** Returns an iterator allowing to go through all values contained in
-   * this Headers object. The values are ByteString objects.
+  /** Returns an array containing the values of all `Set-Cookie` headers
+   * associated with a response.
    */
-  values(): IterableIterator<string>;
-  forEach(
-    callbackfn: (value: string, key: string, parent: this) => void,
-    thisArg?: any,
-  ): void;
-  /** The Symbol.iterator well-known symbol specifies the default
-   * iterator for this Headers object
-   */
-  [Symbol.iterator](): IterableIterator<[string, string]>;
+  getSetCookie(): string[];
 }
 
+/** This Fetch API interface allows you to perform various actions on HTTP
+ * request and response headers. These actions include retrieving, setting,
+ * adding to, and removing. A Headers object has an associated header list,
+ * which is initially empty and consists of zero or more name and value pairs.
+ * You can add to this using methods like append() (see Examples). In all
+ * methods of this interface, header names are matched by case-insensitive byte
+ * sequence.
+ *
+ * @category Fetch API
+ */
+declare var Headers: {
+  readonly prototype: Headers;
+  new (init?: HeadersInit): Headers;
+};
+
 /** @category Fetch API */
-type RequestInfo = Request | string;
+declare type RequestInfo = Request | string;
 /** @category Fetch API */
-type RequestCache =
+declare type RequestCache =
   | 'default'
   | 'force-cache'
   | 'no-cache'
@@ -7224,13 +7657,13 @@ type RequestCache =
   | 'only-if-cached'
   | 'reload';
 /** @category Fetch API */
-type RequestCredentials = 'include' | 'omit' | 'same-origin';
+declare type RequestCredentials = 'include' | 'omit' | 'same-origin';
 /** @category Fetch API */
-type RequestMode = 'cors' | 'navigate' | 'no-cors' | 'same-origin';
+declare type RequestMode = 'cors' | 'navigate' | 'no-cors' | 'same-origin';
 /** @category Fetch API */
-type RequestRedirect = 'error' | 'follow' | 'manual';
+declare type RequestRedirect = 'error' | 'follow' | 'manual';
 /** @category Fetch API */
-type ReferrerPolicy =
+declare type ReferrerPolicy =
   | ''
   | 'no-referrer'
   | 'no-referrer-when-downgrade'
@@ -7241,7 +7674,7 @@ type ReferrerPolicy =
   | 'strict-origin-when-cross-origin'
   | 'unsafe-url';
 /** @category Fetch API */
-type BodyInit =
+declare type BodyInit =
   | Blob
   | BufferSource
   | FormData
@@ -7249,7 +7682,7 @@ type BodyInit =
   | ReadableStream<Uint8Array>
   | string;
 /** @category Fetch API */
-type RequestDestination =
+declare type RequestDestination =
   | ''
   | 'audio'
   | 'audioworklet'
@@ -7270,7 +7703,7 @@ type RequestDestination =
   | 'xslt';
 
 /** @category Fetch API */
-interface RequestInit {
+declare interface RequestInit {
   /**
    * A BodyInit object or null to set request's body.
    */
@@ -7338,9 +7771,7 @@ interface RequestInit {
  *
  * @category Fetch API
  */
-declare class Request implements Body {
-  constructor(input: RequestInfo | URL, init?: RequestInit);
-
+declare interface Request extends Body {
   /**
    * Returns the cache mode associated with request, which is a string
    * indicating how the request will interact with the browser's cache when
@@ -7424,44 +7855,26 @@ declare class Request implements Body {
    */
   readonly url: string;
   clone(): Request;
-
-  /** A simple getter used to expose a `ReadableStream` of the body contents. */
-  readonly body: ReadableStream<Uint8Array> | null;
-  /** Stores a `Boolean` that declares whether the body has been used in a
-   * request yet.
-   */
-  readonly bodyUsed: boolean;
-  /** Takes a `Request` stream and reads it to completion. It returns a promise
-   * that resolves with an `ArrayBuffer`.
-   */
-  arrayBuffer(): Promise<ArrayBuffer>;
-  /** Takes a `Request` stream and reads it to completion. It returns a promise
-   * that resolves with a `Blob`.
-   */
-  blob(): Promise<Blob>;
-  /** Takes a `Request` stream and reads it to completion. It returns a promise
-   * that resolves with a `FormData` object.
-   */
-  formData(): Promise<FormData>;
-  /** Takes a `Request` stream and reads it to completion. It returns a promise
-   * that resolves with the result of parsing the body text as JSON.
-   */
-  json(): Promise<any>;
-  /** Takes a `Request` stream and reads it to completion. It returns a promise
-   * that resolves with a `USVString` (text).
-   */
-  text(): Promise<string>;
 }
 
+/** This Fetch API interface represents a resource request.
+ *
+ * @category Fetch API
+ */
+declare var Request: {
+  readonly prototype: Request;
+  new (input: RequestInfo | URL, init?: RequestInit): Request;
+};
+
 /** @category Fetch API */
-interface ResponseInit {
+declare interface ResponseInit {
   headers?: HeadersInit;
   status?: number;
   statusText?: string;
 }
 
 /** @category Fetch API */
-type ResponseType =
+declare type ResponseType =
   | 'basic'
   | 'cors'
   | 'default'
@@ -7473,12 +7886,7 @@ type ResponseType =
  *
  * @category Fetch API
  */
-declare class Response implements Body {
-  constructor(body?: BodyInit | null, init?: ResponseInit);
-  static json(data: unknown, init?: ResponseInit): Response;
-  static error(): Response;
-  static redirect(url: string | URL, status?: number): Response;
-
+declare interface Response extends Body {
   readonly headers: Headers;
   readonly ok: boolean;
   readonly redirected: boolean;
@@ -7487,34 +7895,19 @@ declare class Response implements Body {
   readonly type: ResponseType;
   readonly url: string;
   clone(): Response;
-
-  /** A simple getter used to expose a `ReadableStream` of the body contents. */
-  readonly body: ReadableStream<Uint8Array> | null;
-  /** Stores a `Boolean` that declares whether the body has been used in a
-   * response yet.
-   */
-  readonly bodyUsed: boolean;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
-   * that resolves with an `ArrayBuffer`.
-   */
-  arrayBuffer(): Promise<ArrayBuffer>;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
-   * that resolves with a `Blob`.
-   */
-  blob(): Promise<Blob>;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
-   * that resolves with a `FormData` object.
-   */
-  formData(): Promise<FormData>;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
-   * that resolves with the result of parsing the body text as JSON.
-   */
-  json(): Promise<any>;
-  /** Takes a `Response` stream and reads it to completion. It returns a promise
-   * that resolves with a `USVString` (text).
-   */
-  text(): Promise<string>;
 }
+
+/** This Fetch API interface represents the response to a request.
+ *
+ * @category Fetch API
+ */
+declare var Response: {
+  readonly prototype: Response;
+  new (body?: BodyInit | null, init?: ResponseInit): Response;
+  json(data: unknown, init?: ResponseInit): Response;
+  error(): Response;
+  redirect(url: string | URL, status?: number): Response;
+};
 
 /** Fetch a resource from the network. It returns a `Promise` that resolves to the
  * `Response` to that `Request`, whether it is successful or not.
@@ -7536,21 +7929,20 @@ declare function fetch(
 
 // Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
 
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-var
 
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
 
 /** @category Web Sockets */
-interface CloseEventInit extends EventInit {
+declare interface CloseEventInit extends EventInit {
   code?: number;
   reason?: string;
   wasClean?: boolean;
 }
 
 /** @category Web Sockets */
-declare class CloseEvent extends Event {
-  constructor(type: string, eventInitDict?: CloseEventInit);
+declare interface CloseEvent extends Event {
   /**
    * Returns the WebSocket connection close code provided by the server.
    */
@@ -7565,8 +7957,13 @@ declare class CloseEvent extends Event {
   readonly wasClean: boolean;
 }
 
+declare var CloseEvent: {
+  readonly prototype: CloseEvent;
+  new (type: string, eventInitDict?: CloseEventInit): CloseEvent;
+};
+
 /** @category Web Sockets */
-interface WebSocketEventMap {
+declare interface WebSocketEventMap {
   close: CloseEvent;
   error: Event;
   message: MessageEvent;
@@ -7583,14 +7980,7 @@ interface WebSocketEventMap {
  * @tags allow-net
  * @category Web Sockets
  */
-declare class WebSocket extends EventTarget {
-  constructor(url: string | URL, protocols?: string | string[]);
-
-  static readonly CLOSED: number;
-  static readonly CLOSING: number;
-  static readonly CONNECTING: number;
-  static readonly OPEN: number;
-
+declare interface WebSocket extends EventTarget {
   /**
    * Returns a string that indicates how binary data from the WebSocket object is exposed to scripts:
    *
@@ -7658,7 +8048,17 @@ declare class WebSocket extends EventTarget {
 }
 
 /** @category Web Sockets */
-type BinaryType = 'arraybuffer' | 'blob';
+declare var WebSocket: {
+  readonly prototype: WebSocket;
+  new (url: string | URL, protocols?: string | string[]): WebSocket;
+  readonly CLOSED: number;
+  readonly CLOSING: number;
+  readonly CONNECTING: number;
+  readonly OPEN: number;
+};
+
+/** @category Web Sockets */
+declare type BinaryType = 'arraybuffer' | 'blob';
 
 // Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
 
@@ -7673,7 +8073,7 @@ type BinaryType = 'arraybuffer' | 'blob';
  *
  * @category Web Storage API
  */
-interface Storage {
+declare interface Storage {
   /**
    * Returns the number of key/value pairs currently present in the list associated with the object.
    */
@@ -7705,8 +8105,8 @@ interface Storage {
 
 /** @category Web Storage API */
 declare var Storage: {
-  prototype: Storage;
-  new (): Storage;
+  readonly prototype: Storage;
+  new (): never;
 };
 
 // Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
@@ -7720,23 +8120,23 @@ declare var Storage: {
 declare var crypto: Crypto;
 
 /** @category Web Crypto API */
-interface Algorithm {
+declare interface Algorithm {
   name: string;
 }
 
 /** @category Web Crypto API */
-interface KeyAlgorithm {
+declare interface KeyAlgorithm {
   name: string;
 }
 
 /** @category Web Crypto API */
-type AlgorithmIdentifier = string | Algorithm;
+declare type AlgorithmIdentifier = string | Algorithm;
 /** @category Web Crypto API */
-type HashAlgorithmIdentifier = AlgorithmIdentifier;
+declare type HashAlgorithmIdentifier = AlgorithmIdentifier;
 /** @category Web Crypto API */
-type KeyType = 'private' | 'public' | 'secret';
+declare type KeyType = 'private' | 'public' | 'secret';
 /** @category Web Crypto API */
-type KeyUsage =
+declare type KeyUsage =
   | 'decrypt'
   | 'deriveBits'
   | 'deriveKey'
@@ -7746,19 +8146,19 @@ type KeyUsage =
   | 'verify'
   | 'wrapKey';
 /** @category Web Crypto API */
-type KeyFormat = 'jwk' | 'pkcs8' | 'raw' | 'spki';
+declare type KeyFormat = 'jwk' | 'pkcs8' | 'raw' | 'spki';
 /** @category Web Crypto API */
-type NamedCurve = string;
+declare type NamedCurve = string;
 
 /** @category Web Crypto API */
-interface RsaOtherPrimesInfo {
+declare interface RsaOtherPrimesInfo {
   d?: string;
   r?: string;
   t?: string;
 }
 
 /** @category Web Crypto API */
-interface JsonWebKey {
+declare interface JsonWebKey {
   alg?: string;
   crv?: string;
   d?: string;
@@ -7767,7 +8167,6 @@ interface JsonWebKey {
   e?: string;
   ext?: boolean;
   k?: string;
-  // deno-lint-ignore camelcase
   key_ops?: string[];
   kty?: string;
   n?: string;
@@ -7781,129 +8180,129 @@ interface JsonWebKey {
 }
 
 /** @category Web Crypto API */
-interface AesCbcParams extends Algorithm {
+declare interface AesCbcParams extends Algorithm {
   iv: BufferSource;
 }
 
 /** @category Web Crypto API */
-interface AesGcmParams extends Algorithm {
+declare interface AesGcmParams extends Algorithm {
   iv: BufferSource;
   additionalData?: BufferSource;
   tagLength?: number;
 }
 
 /** @category Web Crypto API */
-interface AesCtrParams extends Algorithm {
+declare interface AesCtrParams extends Algorithm {
   counter: BufferSource;
   length: number;
 }
 
 /** @category Web Crypto API */
-interface HmacKeyGenParams extends Algorithm {
+declare interface HmacKeyGenParams extends Algorithm {
   hash: HashAlgorithmIdentifier;
   length?: number;
 }
 
 /** @category Web Crypto API */
-interface EcKeyGenParams extends Algorithm {
+declare interface EcKeyGenParams extends Algorithm {
   namedCurve: NamedCurve;
 }
 
 /** @category Web Crypto API */
-interface EcKeyImportParams extends Algorithm {
+declare interface EcKeyImportParams extends Algorithm {
   namedCurve: NamedCurve;
 }
 
 /** @category Web Crypto API */
-interface EcdsaParams extends Algorithm {
+declare interface EcdsaParams extends Algorithm {
   hash: HashAlgorithmIdentifier;
 }
 
 /** @category Web Crypto API */
-interface RsaHashedImportParams extends Algorithm {
+declare interface RsaHashedImportParams extends Algorithm {
   hash: HashAlgorithmIdentifier;
 }
 
 /** @category Web Crypto API */
-interface RsaHashedKeyGenParams extends RsaKeyGenParams {
+declare interface RsaHashedKeyGenParams extends RsaKeyGenParams {
   hash: HashAlgorithmIdentifier;
 }
 
 /** @category Web Crypto API */
-interface RsaKeyGenParams extends Algorithm {
+declare interface RsaKeyGenParams extends Algorithm {
   modulusLength: number;
   publicExponent: Uint8Array;
 }
 
 /** @category Web Crypto API */
-interface RsaPssParams extends Algorithm {
+declare interface RsaPssParams extends Algorithm {
   saltLength: number;
 }
 
 /** @category Web Crypto API */
-interface RsaOaepParams extends Algorithm {
+declare interface RsaOaepParams extends Algorithm {
   label?: Uint8Array;
 }
 
 /** @category Web Crypto API */
-interface HmacImportParams extends Algorithm {
+declare interface HmacImportParams extends Algorithm {
   hash: HashAlgorithmIdentifier;
   length?: number;
 }
 
 /** @category Web Crypto API */
-interface EcKeyAlgorithm extends KeyAlgorithm {
+declare interface EcKeyAlgorithm extends KeyAlgorithm {
   namedCurve: NamedCurve;
 }
 
 /** @category Web Crypto API */
-interface HmacKeyAlgorithm extends KeyAlgorithm {
+declare interface HmacKeyAlgorithm extends KeyAlgorithm {
   hash: KeyAlgorithm;
   length: number;
 }
 
 /** @category Web Crypto API */
-interface RsaHashedKeyAlgorithm extends RsaKeyAlgorithm {
+declare interface RsaHashedKeyAlgorithm extends RsaKeyAlgorithm {
   hash: KeyAlgorithm;
 }
 
 /** @category Web Crypto API */
-interface RsaKeyAlgorithm extends KeyAlgorithm {
+declare interface RsaKeyAlgorithm extends KeyAlgorithm {
   modulusLength: number;
   publicExponent: Uint8Array;
 }
 
 /** @category Web Crypto API */
-interface HkdfParams extends Algorithm {
+declare interface HkdfParams extends Algorithm {
   hash: HashAlgorithmIdentifier;
   info: BufferSource;
   salt: BufferSource;
 }
 
 /** @category Web Crypto API */
-interface Pbkdf2Params extends Algorithm {
+declare interface Pbkdf2Params extends Algorithm {
   hash: HashAlgorithmIdentifier;
   iterations: number;
   salt: BufferSource;
 }
 
 /** @category Web Crypto API */
-interface AesDerivedKeyParams extends Algorithm {
+declare interface AesDerivedKeyParams extends Algorithm {
   length: number;
 }
 
 /** @category Web Crypto API */
-interface EcdhKeyDeriveParams extends Algorithm {
+declare interface EcdhKeyDeriveParams extends Algorithm {
   public: CryptoKey;
 }
 
 /** @category Web Crypto API */
-interface AesKeyGenParams extends Algorithm {
+declare interface AesKeyGenParams extends Algorithm {
   length: number;
 }
 
 /** @category Web Crypto API */
-interface AesKeyAlgorithm extends KeyAlgorithm {
+declare interface AesKeyAlgorithm extends KeyAlgorithm {
   length: number;
 }
 
@@ -7912,7 +8311,7 @@ interface AesKeyAlgorithm extends KeyAlgorithm {
  *
  * @category Web Crypto API
  */
-interface CryptoKey {
+declare interface CryptoKey {
   readonly algorithm: KeyAlgorithm;
   readonly extractable: boolean;
   readonly type: KeyType;
@@ -7921,8 +8320,8 @@ interface CryptoKey {
 
 /** @category Web Crypto API */
 declare var CryptoKey: {
-  prototype: CryptoKey;
-  new (): CryptoKey;
+  readonly prototype: CryptoKey;
+  new (): never;
 };
 
 /** The CryptoKeyPair dictionary of the Web Crypto API represents a key pair for
@@ -7930,15 +8329,15 @@ declare var CryptoKey: {
  *
  * @category Web Crypto API
  */
-interface CryptoKeyPair {
+declare interface CryptoKeyPair {
   privateKey: CryptoKey;
   publicKey: CryptoKey;
 }
 
 /** @category Web Crypto API */
 declare var CryptoKeyPair: {
-  prototype: CryptoKeyPair;
-  new (): CryptoKeyPair;
+  readonly prototype: CryptoKeyPair;
+  new (): never;
 };
 
 /** This Web Crypto API interface provides a number of low-level cryptographic
@@ -7947,7 +8346,7 @@ declare var CryptoKeyPair: {
  *
  * @category Web Crypto API
  */
-interface SubtleCrypto {
+declare interface SubtleCrypto {
   generateKey(
     algorithm: RsaHashedKeyGenParams | EcKeyGenParams,
     extractable: boolean,
@@ -8080,6 +8479,12 @@ interface SubtleCrypto {
 }
 
 /** @category Web Crypto API */
+declare var SubtleCrypto: {
+  readonly prototype: SubtleCrypto;
+  new (): never;
+};
+
+/** @category Web Crypto API */
 declare interface Crypto {
   readonly subtle: SubtleCrypto;
   getRandomValues<
@@ -8100,9 +8505,9 @@ declare interface Crypto {
 }
 
 /** @category Web Crypto API */
-declare var SubtleCrypto: {
-  prototype: SubtleCrypto;
-  new (): SubtleCrypto;
+declare var Crypto: {
+  readonly prototype: Crypto;
+  new (): never;
 };
 
 // Copyright 2018-2023 the Deno authors. All rights reserved. MIT license.
@@ -8113,13 +8518,13 @@ declare var SubtleCrypto: {
 /// <reference lib="esnext" />
 
 /** @category Broadcast Channel */
-interface BroadcastChannelEventMap {
+declare interface BroadcastChannelEventMap {
   'message': MessageEvent;
   'messageerror': MessageEvent;
 }
 
 /** @category Broadcast Channel */
-interface BroadcastChannel extends EventTarget {
+declare interface BroadcastChannel extends EventTarget {
   /**
    * Returns the channel name (as passed to the constructor).
    */
@@ -8160,7 +8565,7 @@ interface BroadcastChannel extends EventTarget {
 
 /** @category Broadcast Channel */
 declare var BroadcastChannel: {
-  prototype: BroadcastChannel;
+  readonly prototype: BroadcastChannel;
   new (name: string): BroadcastChannel;
 };
 
@@ -8327,6 +8732,12 @@ declare namespace Deno {
     keyFile?: string;
 
     transport?: 'tcp';
+
+    /** Application-Layer Protocol Negotiation (ALPN) protocols to announce to
+     * the client. If not specified, no ALPN extension will be included in the
+     * TLS handshake.
+     */
+    alpnProtocols?: string[];
   }
 
   /** Listen announces on the local transport address over TLS (transport layer
@@ -8409,6 +8820,11 @@ declare namespace Deno {
      *
      * Must be in PEM format. */
     caCerts?: string[];
+    /** Application-Layer Protocol Negotiation (ALPN) protocols supported by
+     * the client. If not specified, no ALPN extension will be included in the
+     * TLS handshake.
+     */
+    alpnProtocols?: string[];
   }
 
   /** Establishes a secure connection over TLS (transport layer security) using
@@ -8442,6 +8858,11 @@ declare namespace Deno {
      *
      * Must be in PEM format. */
     caCerts?: string[];
+    /** Application-Layer Protocol Negotiation (ALPN) protocols to announce to
+     * the client. If not specified, no ALPN extension will be included in the
+     * TLS handshake.
+     */
+    alpnProtocols?: string[];
   }
 
   /** Start TLS handshake from an existing connection using an optional list of
@@ -8902,7 +9323,7 @@ declare function clearInterval(id?: number): void;
 declare function clearTimeout(id?: number): void;
 
 /** @category Scheduling */
-interface VoidFunction {
+declare interface VoidFunction {
   (): void;
 }
 
@@ -8934,7 +9355,7 @@ declare function queueMicrotask(func: VoidFunction): void;
 declare function dispatchEvent(event: Event): boolean;
 
 /** @category DOM APIs */
-interface DOMStringList {
+declare interface DOMStringList {
   /** Returns the number of strings in strings. */
   readonly length: number;
   /** Returns true if strings contains string, and false otherwise. */
@@ -8945,13 +9366,13 @@ interface DOMStringList {
 }
 
 /** @category Typed Arrays */
-type BufferSource = ArrayBufferView | ArrayBuffer;
+declare type BufferSource = ArrayBufferView | ArrayBuffer;
 
 /** @category Console and Debugging */
 declare var console: Console;
 
 /** @category DOM Events */
-interface ErrorEventInit extends EventInit {
+declare interface ErrorEventInit extends EventInit {
   message?: string;
   filename?: string;
   lineno?: number;
@@ -8960,54 +9381,63 @@ interface ErrorEventInit extends EventInit {
 }
 
 /** @category DOM Events */
-declare class ErrorEvent extends Event {
+declare interface ErrorEvent extends Event {
   readonly message: string;
   readonly filename: string;
   readonly lineno: number;
   readonly colno: number;
   readonly error: any;
-  constructor(type: string, eventInitDict?: ErrorEventInit);
 }
 
+/** @category DOM Events */
+declare var ErrorEvent: {
+  readonly prototype: ErrorEvent;
+  new (type: string, eventInitDict?: ErrorEventInit): ErrorEvent;
+};
+
 /** @category Observability */
-interface PromiseRejectionEventInit extends EventInit {
+declare interface PromiseRejectionEventInit extends EventInit {
   promise: Promise<any>;
   reason?: any;
 }
 
 /** @category Observability */
-declare class PromiseRejectionEvent extends Event {
+declare interface PromiseRejectionEvent extends Event {
   readonly promise: Promise<any>;
   readonly reason: any;
-  constructor(type: string, eventInitDict?: PromiseRejectionEventInit);
 }
 
+/** @category Observability */
+declare var PromiseRejectionEvent: {
+  readonly prototype: PromiseRejectionEvent;
+  new (
+    type: string,
+    eventInitDict?: PromiseRejectionEventInit,
+  ): PromiseRejectionEvent;
+};
+
 /** @category Web Workers */
-interface AbstractWorkerEventMap {
+declare interface AbstractWorkerEventMap {
   'error': ErrorEvent;
 }
 
 /** @category Web Workers */
-interface WorkerEventMap extends AbstractWorkerEventMap {
+declare interface WorkerEventMap extends AbstractWorkerEventMap {
   'message': MessageEvent;
   'messageerror': MessageEvent;
 }
 
 /** @category Web Workers */
-interface WorkerOptions {
+declare interface WorkerOptions {
   type?: 'classic' | 'module';
   name?: string;
 }
 
 /** @category Web Workers */
-declare class Worker extends EventTarget {
+declare interface Worker extends EventTarget {
   onerror?: (e: ErrorEvent) => void;
   onmessage?: (e: MessageEvent) => void;
   onmessageerror?: (e: MessageEvent) => void;
-  constructor(
-    specifier: string | URL,
-    options?: WorkerOptions,
-  );
   postMessage(message: any, transfer: Transferable[]): void;
   postMessage(message: any, options?: StructuredSerializeOptions): void;
   addEventListener<K extends keyof WorkerEventMap>(
@@ -9033,14 +9463,19 @@ declare class Worker extends EventTarget {
   terminate(): void;
 }
 
+/** @category Web Workers */
+declare var Worker: {
+  readonly prototype: Worker;
+  new (specifier: string | URL, options?: WorkerOptions): Worker;
+};
+
 /** @category Performance */
 declare type PerformanceEntryList = PerformanceEntry[];
 
 /** @category Performance */
-declare class Performance extends EventTarget {
+declare interface Performance extends EventTarget {
   /** Returns a timestamp representing the start of the performance measurement. */
   readonly timeOrigin: number;
-  constructor();
 
   /** Removes the stored timestamp with the associated name. */
   clearMarks(markName?: string): void;
@@ -9071,7 +9506,7 @@ declare class Performance extends EventTarget {
 
   /** Returns a current time from Deno's start in milliseconds.
    *
-   * Use the permission flag `--allow-hrtime` return a precise value.
+   * Use the permission flag `--allow-hrtime` to return a precise value.
    *
    * ```ts
    * const t = performance.now();
@@ -9085,6 +9520,12 @@ declare class Performance extends EventTarget {
   /** Returns a JSON representation of the performance object. */
   toJSON(): any;
 }
+
+/** @category Performance */
+declare var Performance: {
+  readonly prototype: Performance;
+  new (): never;
+};
 
 /** @category Performance */
 declare var performance: Performance;
@@ -9120,12 +9561,36 @@ declare interface PerformanceMeasureOptions {
  *
  * @category Performance
  */
-declare class PerformanceEntry {
+declare interface PerformanceEntry {
   readonly duration: number;
   readonly entryType: string;
   readonly name: string;
   readonly startTime: number;
   toJSON(): any;
+}
+
+/** Encapsulates a single performance metric that is part of the performance
+ * timeline. A performance entry can be directly created by making a performance
+ * mark or measure (for example by calling the `.mark()` method) at an explicit
+ * point in an application.
+ *
+ * @category Performance
+ */
+declare var PerformanceEntry: {
+  readonly prototype: PerformanceEntry;
+  new (): never;
+};
+
+/** `PerformanceMark` is an abstract interface for `PerformanceEntry` objects
+ * with an entryType of `"mark"`. Entries of this type are created by calling
+ * `performance.mark()` to add a named `DOMHighResTimeStamp` (the mark) to the
+ * performance timeline.
+ *
+ * @category Performance
+ */
+declare interface PerformanceMark extends PerformanceEntry {
+  readonly detail: any;
+  readonly entryType: 'mark';
 }
 
 /** `PerformanceMark` is an abstract interface for `PerformanceEntry` objects
@@ -9135,10 +9600,21 @@ declare class PerformanceEntry {
  *
  * @category Performance
  */
-declare class PerformanceMark extends PerformanceEntry {
+declare var PerformanceMark: {
+  readonly prototype: PerformanceMark;
+  new (name: string, options?: PerformanceMarkOptions): PerformanceMark;
+};
+
+/** `PerformanceMeasure` is an abstract interface for `PerformanceEntry` objects
+ * with an entryType of `"measure"`. Entries of this type are created by calling
+ * `performance.measure()` to add a named `DOMHighResTimeStamp` (the measure)
+ * between two marks to the performance timeline.
+ *
+ * @category Performance
+ */
+declare interface PerformanceMeasure extends PerformanceEntry {
   readonly detail: any;
-  readonly entryType: 'mark';
-  constructor(name: string, options?: PerformanceMarkOptions);
+  readonly entryType: 'measure';
 }
 
 /** `PerformanceMeasure` is an abstract interface for `PerformanceEntry` objects
@@ -9148,10 +9624,10 @@ declare class PerformanceMark extends PerformanceEntry {
  *
  * @category Performance
  */
-declare class PerformanceMeasure extends PerformanceEntry {
-  readonly detail: any;
-  readonly entryType: 'measure';
-}
+declare var PerformanceMeasure: {
+  readonly prototype: PerformanceMeasure;
+  new (): never;
+};
 
 /** @category DOM Events */
 declare interface CustomEventInit<T = any> extends EventInit {
@@ -9159,15 +9635,20 @@ declare interface CustomEventInit<T = any> extends EventInit {
 }
 
 /** @category DOM Events */
-declare class CustomEvent<T = any> extends Event {
-  constructor(typeArg: string, eventInitDict?: CustomEventInit<T>);
+declare interface CustomEvent<T = any> extends Event {
   /** Returns any custom data event was created with. Typically used for
    * synthetic events. */
   readonly detail: T;
 }
 
+/** @category DOM Events */
+declare var CustomEvent: {
+  readonly prototype: CustomEvent;
+  new <T>(typeArg: string, eventInitDict?: CustomEventInit<T>): CustomEvent<T>;
+};
+
 /** @category DOM APIs */
-interface ErrorConstructor {
+declare interface ErrorConstructor {
   /** See https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions. */
   captureStackTrace(error: Object, constructor?: Function): void;
   // TODO(nayeemrmn): Support `Error.prepareStackTrace()`. We currently use this
@@ -9181,6 +9662,7 @@ interface ErrorConstructor {
 /// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
 
+// noinspection JSDuplicatedDeclaration
 /** @category Cache API */
 declare var caches: CacheStorage;
 
@@ -9230,18 +9712,18 @@ declare interface Cache {
 
 /** @category Cache API */
 declare var Cache: {
-  prototype: Cache;
-  new (name: string): Cache;
+  readonly prototype: Cache;
+  new (): never;
 };
 
 /** @category Cache API */
 declare var CacheStorage: {
-  prototype: CacheStorage;
-  new (): CacheStorage;
+  readonly prototype: CacheStorage;
+  new (): never;
 };
 
 /** @category Cache API */
-interface CacheQueryOptions {
+declare interface CacheQueryOptions {
   ignoreMethod?: boolean;
   ignoreSearch?: boolean;
   ignoreVary?: boolean;
@@ -9257,14 +9739,13 @@ interface CacheQueryOptions {
 /// <reference lib="deno.cache" />
 
 /** @category Web APIs */
-interface WindowEventMap {
+declare interface WindowEventMap {
   'error': ErrorEvent;
   'unhandledrejection': PromiseRejectionEvent;
 }
 
 /** @category Web APIs */
-declare class Window extends EventTarget {
-  new(): Window;
+declare interface Window extends EventTarget {
   readonly window: Window & typeof globalThis;
   readonly self: Window & typeof globalThis;
   onerror: ((this: Window, ev: ErrorEvent) => any) | null;
@@ -9317,9 +9798,19 @@ declare class Window extends EventTarget {
 }
 
 /** @category Web APIs */
+declare var Window: {
+  readonly prototype: Window;
+  new (): never;
+};
+
+/** @category Web APIs */
 declare var window: Window & typeof globalThis;
 /** @category Web APIs */
 declare var self: Window & typeof globalThis;
+/** @category Web APIs */
+declare var closed: boolean;
+/** @category Web APIs */
+declare function close(): void;
 /** @category DOM Events */
 declare var onerror: ((this: Window, ev: ErrorEvent) => any) | null;
 /** @category DOM Events */
@@ -9336,17 +9827,23 @@ declare var onunhandledrejection:
 declare var localStorage: Storage;
 /** @category Web Storage API */
 declare var sessionStorage: Storage;
+// noinspection JSDuplicatedDeclaration
 /** @category Cache API */
 declare var caches: CacheStorage;
 
 /** @category Web APIs */
-declare class Navigator {
-  constructor();
+declare interface Navigator {
   readonly hardwareConcurrency: number;
   readonly userAgent: string;
   readonly language: string;
   readonly languages: string[];
 }
+
+/** @category Web APIs */
+declare var Navigator: {
+  readonly prototype: Navigator;
+  new (): never;
+};
 
 /** @category Web APIs */
 declare var navigator: Navigator;
@@ -9448,8 +9945,7 @@ declare function removeEventListener(
  *
  * @category Web APIs
  */
-declare class Location {
-  constructor();
+declare interface Location {
   /** Returns a DOMStringList object listing the origins of the ancestor
    * browsing contexts, from the parent browsing context to the top-level
    * browsing context.
@@ -9510,6 +10006,19 @@ declare class Location {
    * Disabled in Deno. */
   replace(url: string): void;
 }
+
+// TODO(nayeemrmn): Move this to `extensions/web` where its implementation is.
+// The types there must first be split into window, worker and global types.
+/** The location (URL) of the object it is linked to. Changes done on it are
+ * reflected on the object it relates to. Accessible via
+ * `globalThis.location`.
+ *
+ * @category Web APIs
+ */
+declare var Location: {
+  readonly prototype: Location;
+  new (): never;
+};
 
 // TODO(nayeemrmn): Move this to `extensions/web` where its implementation is.
 // The types there must first be split into window, worker and global types.

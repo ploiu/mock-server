@@ -120,6 +120,7 @@ function startServing(
     }
   };
   const server = new Server({ port, handler });
+  // noinspection JSIgnoredPromiseFromCall
   server.listenAndServe();
 }
 

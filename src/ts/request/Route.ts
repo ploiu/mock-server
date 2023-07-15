@@ -384,6 +384,7 @@ export default class Route {
     }
   }
 
+  // noinspection JSUnusedGlobalSymbols this is used when formatting json with JSON.stringify
   public toJSON(): string {
     const result: any = {};
     for (const key in this) {
