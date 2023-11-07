@@ -1,4 +1,4 @@
-import { assertEquals, fail, Server } from './deps.ts';
+import { assertEquals, fail } from './deps.ts';
 import { RequestMethod } from '../ts/request/RequestMethod.ts';
 import { RouteTypes } from '../ts/request/RouteTypes.ts';
 import RouteFactory from '../ts/request/RouteFactory.ts';
@@ -23,7 +23,7 @@ Deno.test('should make a call to the redirect url when invoked', async () => {
     );
     return new Response('test body', { status: 200 });
   };
-  const server = new Server({ port: 8001, handler });
+  const server = Deno.serve({ port: 8001, handler });
   const route = RouteFactory.create({
     title: 'test route',
     url: '/test',
@@ -35,7 +35,6 @@ Deno.test('should make a call to the redirect url when invoked', async () => {
     redirectUrl: 'http://localhost:8001',
     routeType: RouteTypes.PASSTHROUGH,
   });
-  const listener = server.listenAndServe();
   const headers = new Headers();
   headers.set('Content-Type', 'application/json');
   route.execute(
@@ -45,19 +44,19 @@ Deno.test('should make a call to the redirect url when invoked', async () => {
       body: '{"test": 1}',
     }),
   ).then(async (response) => {
-    await server.close();
+    await (server as any).shutdown();
     assertEquals(response.status, 200);
     assertEquals(
       await response.text(),
       'test body',
     );
   }).catch(async (exception) => {
-    if (!server.closed) {
-      await server.close();
-    }
+    try {
+      await (server as any).shutdown();
+    } catch (_) {}
     fail('route execution failed\n' + exception);
   });
-  await listener;
+  await server.finished;
 });
 
 Deno.test('should pass along any path and query variables', async () => {
@@ -65,7 +64,7 @@ Deno.test('should pass along any path and query variables', async () => {
     assertEquals(request.url, 'http://localhost:8081/users?name=ploiu&age=24');
     return new Response('tests passed');
   };
-  const server = new Server({ port: 8081, handler });
+  const server = Deno.serve({ port: 8081, handler });
   const route = RouteFactory.create({
     title: 'test route',
     // this isn't restful or realistic, but it fits the test so oh well
@@ -78,19 +77,18 @@ Deno.test('should pass along any path and query variables', async () => {
     redirectUrl: 'http://localhost:8081',
     routeType: RouteTypes.PASSTHROUGH,
   });
-  const listener = server.listenAndServe();
   route.execute(
     new Request('http://localhost:8000/users?name=ploiu&age=24', {
       method: RequestMethod.GET,
     }),
   ).then(async (response) => {
-    await server.close();
+    await (server as any).shutdown();
     assertEquals(await response.text(), 'tests passed');
   }).catch(async (exception) => {
-    if (!server.closed) {
-      await server.close();
-    }
+    try {
+      await (server as any).shutdown();
+    } catch (_) {}
     fail('route execution failed\n' + exception);
   });
-  await listener;
+  await server.finished;
 });

@@ -21,7 +21,7 @@
     ]
   },
   "tasks": {
-    "test": "deno fmt; deno test --allow-net",
+    "test": "deno fmt; deno test --allow-net --unstable",
     "ui-test": "rm -f config-test.json; deno fmt; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts --test; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui --config ./config-test.json",
     "run": "deno task generate-ui; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui",
     "generate-ui": "deno fmt; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts",
