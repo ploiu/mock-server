@@ -34,7 +34,7 @@ export function readConfigFile(
   if (parseFloat(parsed.configVersion) < configVersion) {
     parsed = convertConfigToLatest(parsed, location);
   }
-  return <Config> (parsed);
+  return <Config> parsed;
 }
 
 /**
