@@ -255,7 +255,7 @@
         Ploiu.assertEquals(
           'Hello, {{name}}! You are {{age}} years old',
           responseBody,
-          'response body should be route\'s response body',
+          "response body should be route's response body",
         );
       });
     },
@@ -638,7 +638,7 @@
       Ploiu.assertEquals(
         404,
         result.status,
-        'The route should return a 404 since it\'s disabled',
+        "The route should return a 404 since it's disabled",
       );
       await Ploiu.delay(() => {}, 1_250);
       const logs = [

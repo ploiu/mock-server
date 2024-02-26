@@ -49,5 +49,5 @@ function getRegexForUIString(uiStringName: string): RegExp {
 }
 
 function fixBackSlashesAndQuotes(text: string) {
-  return text.replaceAll(/\r?\n/g, '\\n').replaceAll(/'/g, '\\\'');
+  return text.replaceAll(/\r?\n/g, '\\n').replaceAll(/'/g, "\\'");
 }
