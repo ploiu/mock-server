@@ -21,10 +21,14 @@
     ]
   },
   "tasks": {
+    "vite-dev": "deno run -A --node-modules-dir npm:vite",
+    "vite-build": "deno run -A --node-modules-dir npm:vite build",
+    "vite-preview": "deno run -A --node-modules-dir npm:vite preview",
+    "vite-serve": "deno run --allow-net --allow-read https://deno.land/std@0.157.0/http/file_server.ts dist/",
     "test": "deno fmt; deno test --allow-net",
     "ui-test": "rm -f config-test.json; deno fmt; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts --test; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui --config ./config-test.json",
     "run": "deno task generate-ui; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui",
-    "generate-ui": "deno fmt; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts",
+    "generate-ui": "deno fmt; deno task vite-build; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts",
     "install": "deno task generate-ui; deno install --allow-read --allow-write --allow-net --force ./src/ts/MockServer.ts",
     "install-unsafe": "deno task generate-ui; deno install --unsafely-ignore-certificate-errors --allow-read --allow-write --allow-net --force ./src/ts/MockServer.ts",
     "check": "deno fmt; deno lint",

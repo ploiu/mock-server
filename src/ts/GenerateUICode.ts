@@ -1,21 +1,22 @@
-import { parse } from './deps.ts';
+import { gray, green, parse, red } from './deps.ts';
 /**
  * Reads the contents of our ui files and inserts them into the ui strings in {/src/ts/MockServer.ts#createUIFileIfNotExists}
  */
 if (import.meta.main) {
   const { args } = Deno;
   const parsedArgs = parse(args);
-  const html = Deno.readTextFileSync('./src/ui/ui.html');
+  const html = Deno.readTextFileSync('./src/ui/dist/index.html');
+  const [rootJsScriptPath, rootCssPath] = determineGeneratedSourceNames(html);
   // using an array like this will make it easier to add new files in the future if we need to
   const jsFiles = [
-    Deno.readTextFileSync('./src/ui/controller.js'),
+    Deno.readTextFileSync(`./src/ui/dist${rootJsScriptPath}`),
     parsedArgs.test ? Deno.readTextFileSync('./src/test/uiTests.js') : '',
-    Deno.readTextFileSync('./src/ui/AccordionElement.min.js'),
+    // Deno.readTextFileSync('./src/ui/AccordionElement.min.js'),
   ];
   const cssFiles = [
     // accordion needs to go first because we override some of its variables
-    Deno.readTextFileSync('./src/ui/accordion.min.css'),
-    Deno.readTextFileSync('./src/ui/ui.css'),
+    // Deno.readTextFileSync('./src/ui/accordion.min.css'),
+    Deno.readTextFileSync(`./src/ui/dist${rootCssPath}`),
   ];
   let css = '';
   let js = '';
@@ -29,7 +30,7 @@ if (import.meta.main) {
   // properly format the html and css so that it doesn't interfere with the js, since it's inserted into js code
   const formattedHtml = fixBackSlashesAndQuotes(html);
   const formattedCss = fixBackSlashesAndQuotes(css);
-  const formattedJs = fixBackSlashesAndQuotes(js.replaceAll(/\\/g, '\\\\'));
+  const formattedJs = js.replaceAll(/\\/g, '\\\\').replaceAll(/\r?\n/g, '\n').replaceAll(/'/g, `\\'`);
   const tsFile = Deno.readTextFileSync('./src/ts/MockServer.ts');
   const replacedContents = tsFile
     // replace the html string
@@ -37,6 +38,7 @@ if (import.meta.main) {
     // replace the css string
     .replace(getRegexForUIString('uiCss'), `'${formattedCss}'`)
     // replace the js string
+    // TODO formattedJs contains !$&&(w=C, but tsFile does not
     .replace(getRegexForUIString('uiJs'), `'${formattedJs}'`);
   Deno.writeTextFileSync('./src/ts/MockServer.ts', replacedContents);
 }
@@ -50,4 +52,25 @@ function getRegexForUIString(uiStringName: string): RegExp {
 
 function fixBackSlashesAndQuotes(text: string) {
   return text.replaceAll(/\r?\n/g, '\\n').replaceAll(/'/g, "\\'");
+}
+
+function determineGeneratedSourceNames(html: string): [string, string] {
+  const scriptGex = /(?<=src=").*(?=")/i;
+  const cssGex = /(?<="stylesheet".*href=").*(?=")/i;
+  try {
+    console.info(gray('retrieving name of generated js file...'));
+    const scriptName = html.match(scriptGex)[0];
+    console.info(`${green(scriptName)}!`);
+    console.info(gray('retrieving name of generated css file...'));
+    const styleSheetName = html.match(cssGex)[0];
+    console.info(`${green(styleSheetName)}!`);
+    return [scriptName, styleSheetName];
+  } catch (e) {
+    console.error(
+      `${
+        red('Failed to retrieve js and css names from html file.')
+      }. Exception is ${e}`,
+    );
+    Deno.exit(1);
+  }
 }
