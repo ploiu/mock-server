@@ -5,7 +5,12 @@
   "fmt": {
     "exclude": [
       "README.md",
-      "src/ui/AccordionElement.min.js"
+      "src/ui/AccordionElement.min.js",
+      "src/ui/.vite/**/*.js",
+      "src/ui/.vite/**/*.ts",
+      "src/ui/vite-env.d.ts",
+      "src/ui/dist/**/*",
+      "src/ui-old/**/*"
     ],
     "singleQuote": true,
     "useTabs": false,
@@ -17,21 +22,32 @@
       "src/ts/Deno.d.ts",
       "src/test/uiTests.js",
       "generated",
-      "src/ui/AccordionElement.min.js"
+      "src/ui/AccordionElement.min.js",
+      "src/ui/.vite/**/*.js",
+      "src/ui/.vite/**/*.ts",
+      "src/ui/vite-env.d.ts",
+      "src/ui/dist/**/*",
+      "src/ui-old/**/*"
     ]
   },
   "tasks": {
     "vite-dev": "deno run -A --node-modules-dir npm:vite",
     "vite-build": "deno run -A --node-modules-dir npm:vite build",
-    "vite-preview": "deno run -A --node-modules-dir npm:vite preview",
-    "vite-serve": "deno run --allow-net --allow-read https://deno.land/std@0.157.0/http/file_server.ts dist/",
     "test": "deno fmt; deno test --allow-net",
+    // starts up the server with a test config file and a frontend with the testing script baked in. You will need to open the browser to the server page for the tests to run
     "ui-test": "rm -f config-test.json; deno fmt; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts --test; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui --config ./config-test.json",
+    // build the ui and runs the backend server for local testing and development
     "run": "deno task generate-ui; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui",
+    // bundles the UI files into the main application
     "generate-ui": "deno fmt; deno task vite-build; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts",
+    // installs this application onto your system path
     "install": "deno task generate-ui; deno install --allow-read --allow-write --allow-net --force ./src/ts/MockServer.ts",
+    // company intranet proxies can cause issues with TLS. use this option ONLY if you suffer these errors, they cannot be resolved otherwise, AND IF YOU KNOW WHAT YOU ARE DOING
     "install-unsafe": "deno task generate-ui; deno install --unsafely-ignore-certificate-errors --allow-read --allow-write --allow-net --force ./src/ts/MockServer.ts",
     "check": "deno fmt; deno lint",
     "types": "deno types > ./src/ts/Deno.d.ts"
+  },
+  "imports": {
+    "@std/cli": "jsr:@std/cli@^0.224.0"
   }
 }

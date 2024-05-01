@@ -1,4 +1,5 @@
-import { cyan, emptyDirSync, green, magenta, parse } from './deps.ts';
+import { cyan, emptyDirSync, green, magenta } from './deps.ts';
+import { parseArgs } from '@std/cli';
 import Config from './config/Config.ts';
 import { readConfigFile } from './config/ConfigManager.ts';
 import RouteManager from './request/RouteManager.ts';
@@ -10,6 +11,8 @@ import SaveRoutesRoute from './request/specialRoutes/SaveRoutesRoute.ts';
 import LogRoute from './request/specialRoutes/LogRoute.ts';
 import LogManager from './LogManager.ts';
 import './extensions/HeaderExtensions.ts';
+
+import uiComponents from './generatedUi.ts';
 
 const helpText = `
 	USAGE: MockServer [flags]
@@ -24,7 +27,7 @@ const helpText = `
 // different functionality if run from command line
 if (import.meta.main) {
   const { args } = Deno;
-  const parsedArgs = parse(args);
+  const parsedArgs = parseArgs(args);
   if (parsedArgs.help || parsedArgs.h) {
     console.log(helpText);
     Deno.exit(0);
@@ -126,22 +129,12 @@ function startServing(
  * Creates the UI html file
  */
 function createUIFiles() {
-  ////// DO NOT ALTER BELOW THIS LINE - IT IS THE STRING CONTENTS OF ../ui/ui.html & ../ui/ui.css AND SHOULD BE TREATED AS GENERATED CODE
-  //deno-lint-ignore no-inferrable-types
-  const uiHtml: string =
-'<!DOCTYPE html>\n<html lang="en">\n  <head>\n    <meta charset="UTF-8" />\n    <link rel="icon" type="image/svg+xml" href="/vite.svg" />\n    <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n    <title>Vite + Vue + TS</title>\n    <script type="module" crossorigin src="/assets/index-CgjqxnQb.js"></script>\n    <link rel="stylesheet" crossorigin href="/assets/index-DG_VaUly.css">\n  </head>\n  <body>\n    <div id="app"></div>\n  </body>\n</html>\n';
-  //deno-lint-ignore no-inferrable-types
-  const uiCss: string =
-'\n:root{font-family:Inter,system-ui,Avenir,Helvetica,Arial,sans-serif;line-height:1.5;font-weight:400;color-scheme:light dark;color:#ffffffde;background-color:#242424;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}a{font-weight:500;color:#646cff;text-decoration:inherit}a:hover{color:#535bf2}body{margin:0;display:flex;place-items:center;min-width:320px;min-height:100vh}h1{font-size:3.2em;line-height:1.1}button{border-radius:8px;border:1px solid transparent;padding:.6em 1.2em;font-size:1em;font-weight:500;font-family:inherit;background-color:#1a1a1a;cursor:pointer;transition:border-color .25s}button:hover{border-color:#646cff}button:focus,button:focus-visible{outline:4px auto -webkit-focus-ring-color}.card{padding:2em}#app{max-width:1280px;margin:0 auto;padding:2rem;text-align:center}@media (prefers-color-scheme: light){:root{color:#213547;background-color:#fff}a:hover{color:#747bff}button{background-color:#f9f9f9}}.read-the-docs[data-v-8fe7e3eb]{color:#888}.logo[data-v-cae44242]{height:6em;padding:1.5em;will-change:filter}.logo[data-v-cae44242]:hover{filter:drop-shadow(0 0 2em #646cffaa)}.logo.vue[data-v-cae44242]:hover{filter:drop-shadow(0 0 2em #42b883aa)}\n';
-  //deno-lint-ignore no-inferrable-types
-  const uiJs: string = '';
-  ////// END GENERATED CODE
   try {
     emptyDirSync('./generated');
   } catch { /*no-op*/ }
-  Deno.writeTextFileSync('./generated/ui.html', uiHtml);
-  Deno.writeTextFileSync('./generated/ui.css', uiCss);
-  Deno.writeTextFileSync('./generated/ui.js', uiJs);
+  Deno.writeTextFileSync('./generated/ui.html', uiComponents.uiHtml);
+  Deno.writeTextFileSync('./generated/ui.css', uiComponents.uiCss);
+  Deno.writeTextFileSync('./generated/ui.js', uiComponents.uiJs);
 }
 
 function setupSpecialRoutes(

@@ -24,8 +24,5 @@ export {
   yellow,
 } from 'https://deno.land/std@0.224.0/fmt/colors.ts';
 
-// CMD PARSING
-export { parse } from 'https://deno.land/std@0.224.0/flags/mod.ts';
-
 // HTTP
 export { serveFile } from 'https://deno.land/std@0.224.0/http/file_server.ts';

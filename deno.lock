@@ -2,11 +2,24 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@std/assert@^0.224.0": "jsr:@std/assert@0.224.0",
+      "jsr:@std/cli@^0.224.0": "jsr:@std/cli@0.224.0",
       "npm:@vitejs/plugin-vue@^5.0.4": "npm:@vitejs/plugin-vue@5.0.4_vite@5.2.10_vue@3.4.26",
       "npm:create-vite-extra": "npm:create-vite-extra@2.2.0",
       "npm:vite": "npm:vite@5.2.10",
       "npm:vite@^5.2.10": "npm:vite@5.2.10",
       "npm:vue@^3.4.23": "npm:vue@3.4.26"
+    },
+    "jsr": {
+      "@std/assert@0.224.0": {
+        "integrity": "8643233ec7aec38a940a8264a6e3eed9bfa44e7a71cc6b3c8874213ff401967f"
+      },
+      "@std/cli@0.224.0": {
+        "integrity": "2612373d68984637bdad8b9c9dd160e9838ac2a6d463354d537d2897a7cc6d1c",
+        "dependencies": [
+          "jsr:@std/assert@^0.224.0"
+        ]
+      }
     },
     "npm": {
       "@babel/parser@7.24.5": {
@@ -754,5 +767,10 @@
     "https://deno.land/std@0.224.0/path/windows/resolve.ts": "8dae1dadfed9d46ff46cc337c9525c0c7d959fb400a6308f34595c45bdca1972",
     "https://deno.land/std@0.224.0/streams/byte_slice_stream.ts": "5bbdcadb118390affa9b3d0a0f73ef8e83754f59bb89df349add669dd9369713",
     "https://deno.land/std@0.224.0/version.ts": "f6a28c9704d82d1c095988777e30e6172eb674a6570974a0d27a653be769bbbe"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@std/cli@^0.224.0"
+    ]
   }
 }
