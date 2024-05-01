@@ -4,6 +4,7 @@
 # files used for local testing
 config.json
 config-test.json
+src/ts/Deno.d.ts
 
 # node stuff
 node_modules
