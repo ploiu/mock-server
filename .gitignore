@@ -1,5 +1,6 @@
-# intellij files
+# IDE files
 .idea
+.vscode
 
 # files used for local testing
 config.json

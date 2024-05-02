@@ -1,7 +1,7 @@
-import { defineConfig } from 'npm:vite@^5.2.10';
-import vue from 'npm:@vitejs/plugin-vue@^5.0.4';
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 
-import 'npm:vue@^3.4.23';
+import 'vue';
 
 export default defineConfig({
   plugins: [vue()],

@@ -1,21 +1,26 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from './components/HelloWorld.vue'
+import {store} from './store';
 </script>
 
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+  <h1>Hello App!</h1>
+  <p>
+    <strong>Current route path:</strong> {{ $route.fullPath }}
+  </p>
+  <nav>
+    <RouterLink to="/">Go to Home</RouterLink>
+    <RouterLink to="/about">Go to About</RouterLink>
+    {{store.test}}
+  </nav>
+  <main>
+    <RouterView />
+  </main>
 </template>
 
 <style scoped>
+strong {
+  color: green;
+}
 .logo {
   height: 6em;
   padding: 1.5em;
