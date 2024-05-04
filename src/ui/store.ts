@@ -1,9 +1,10 @@
 import { reactive } from 'vue';
+import { UIRoute } from './models/index.ts';
 
 type StoreFields = {
-  test: number;
+  routes: UIRoute[];
 };
 
 export const store = reactive({
-  test: 1,
+  routes: [],
 } as StoreFields);
