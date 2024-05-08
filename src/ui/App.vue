@@ -6,58 +6,94 @@ import { RouteTypes } from '../ts/request/RouteTypes';
 
 fetchRoutes().then(routes => store.routes = routes).catch(() => store.routes.push(
   {
-    title: 'test',
-    url: '/test',
+    title: 'test GET',
+    url: '/testGET',
     method: RequestMethod.GET,
     responseHeaders: [],
     response: null,
     responseStatus: 200,
     isEnabled: true,
     routeType: RouteTypes.DEFAULT
-  },
-  {
-    title: 'test but with a lot longer name andWithLongSingleWordsWhatTheHell',
-    url: '/test',
-    method: RequestMethod.GET,
-    responseHeaders: [],
-    response: null,
-    responseStatus: 200,
-    isEnabled: true,
-    routeType: RouteTypes.DEFAULT
-  }
+  }, {
+  title: 'test PUT',
+  url: '/testPUT',
+  method: RequestMethod.PUT,
+  responseHeaders: [],
+  response: null,
+  responseStatus: 200,
+  isEnabled: true,
+  routeType: RouteTypes.DEFAULT
+}, {
+  title: 'test POST',
+  url: '/testPOST',
+  method: RequestMethod.POST,
+  responseHeaders: [],
+  response: null,
+  responseStatus: 200,
+  isEnabled: true,
+  routeType: RouteTypes.DEFAULT
+}, {
+  title: 'test DELETE',
+  url: '/testDELETE',
+  method: RequestMethod.DELETE,
+  responseHeaders: [],
+  response: null,
+  responseStatus: 200,
+  isEnabled: true,
+  routeType: RouteTypes.DEFAULT
+}, {
+  title: 'test HEAD',
+  url: '/testHEAD',
+  method: RequestMethod.HEAD,
+  responseHeaders: [],
+  response: null,
+  responseStatus: 200,
+  isEnabled: true,
+  routeType: RouteTypes.DEFAULT
+}, {
+  title: 'test CONNECT',
+  url: '/testCONNECT',
+  method: RequestMethod.CONNECT,
+  responseHeaders: [],
+  response: null,
+  responseStatus: 200,
+  isEnabled: true,
+  routeType: RouteTypes.DEFAULT
+}, {
+  title: 'test OPTIONS',
+  url: '/testOPTIONS',
+  method: RequestMethod.OPTIONS,
+  responseHeaders: [],
+  response: null,
+  responseStatus: 200,
+  isEnabled: true,
+  routeType: RouteTypes.DEFAULT
+}, {
+  title: 'test TRACE',
+  url: '/testTRACE',
+  method: RequestMethod.TRACE,
+  responseHeaders: [],
+  response: null,
+  responseStatus: 200,
+  isEnabled: true,
+  routeType: RouteTypes.DEFAULT
+}, {
+  title: 'test PATCH',
+  url: '/testPATCH',
+  method: RequestMethod.PATCH,
+  responseHeaders: [],
+  response: null,
+  responseStatus: 200,
+  isEnabled: true,
+  routeType: RouteTypes.DEFAULT
+}
 ))
 </script>
 
 <template>
-  <h1>Hello App!</h1>
-  <p>
-    <strong>Current route path:</strong> {{ $route.fullPath }}
-  </p>
-  <nav>
-    <RouterLink to="/">Go to Home</RouterLink>
-    <RouterLink to="/about">Go to About</RouterLink>
-  </nav>
   <main>
     <RouterView />
   </main>
 </template>
 
-<style scoped>
-strong {
-  color: green;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<style scoped></style>

@@ -1,12 +1,46 @@
-:root {
-  --color-scheme-primary: #5fb49c;
-  --color-scheme-primary-accent: #deefb7;
-  --color-scheme-secondary: #98dfaf;
-  --color-scheme-secondary-accent: #de6b48;
-  --color-scheme-background: #231F20;
+@import './assets/simple-grid.css';
 
+:root {
   /* non-color vars */
   --border-radius: 4px;
+  --font-family: 'Fira Code', 'Jetbrains Mono', monospace !important;
+}
+
+.request-method-get {
+  background-color: var(--green-500);
+}
+
+.request-method-put {
+  background-color: var(--blue-500);
+}
+
+.request-method-post {
+  background-color: var(--yellow-500);
+}
+
+.request-method-delete {
+  background-color: var(--red-500);
+}
+
+.request-method-head {
+  background-color: var(--teal-500);
+}
+
+.request-method-connect {
+  background-color: var(--indigo-500);
+}
+
+.request-method-options {
+  background-color: var(--green-100);
+  color: var(--surface-0);
+}
+
+.request-method-trace {
+  background-color: var(--purple-500);
+}
+
+.request-method-patch {
+  background-color: var(--cyan-500);
 }
 
 body {
@@ -17,12 +51,10 @@ body {
   min-height: 100vh;
   background-color: var(--color-scheme-background);
   color: var(--color-scheme-primary);
-  font-family: 'Fira Code', 'Jetbrains Mono', monospace;
 }
 
 #app {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }

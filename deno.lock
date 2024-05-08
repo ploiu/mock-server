@@ -6,6 +6,7 @@
       "jsr:@std/cli@^0.224.0": "jsr:@std/cli@0.224.0",
       "npm:@vitejs/plugin-vue@^5.0.4": "npm:@vitejs/plugin-vue@5.0.4_vite@5.2.10_vue@3.4.26",
       "npm:create-vite-extra": "npm:create-vite-extra@2.2.0",
+      "npm:primevue": "npm:primevue@3.52.0_vue@3.4.26",
       "npm:radix-vue": "npm:radix-vue@1.7.3_vue@3.4.26",
       "npm:vite": "npm:vite@5.2.10",
       "npm:vite@^5.2.10": "npm:vite@5.2.10",
@@ -447,6 +448,12 @@
           "nanoid": "nanoid@3.3.7",
           "picocolors": "picocolors@1.0.0",
           "source-map-js": "source-map-js@1.2.0"
+        }
+      },
+      "primevue@3.52.0_vue@3.4.26": {
+        "integrity": "sha512-HLOVP5YI0ArFKUhIyfZsWmTNMaBYNCBWC/3DYvdd/Po4LY5/WXf7yIYvArE2q/3OuwSXJXvjlR8UNQeJYRSQog==",
+        "dependencies": {
+          "vue": "vue@3.4.26"
         }
       },
       "prompts@2.4.2": {
@@ -900,7 +907,7 @@
     "dependencies": [
       "jsr:@std/cli@^0.224.0",
       "npm:@vitejs/plugin-vue@^5.0.4",
-      "npm:radix-vue@^1.7.3",
+      "npm:primevue@^3.52.0",
       "npm:vite@^5.2.10",
       "npm:vue-router@^4.3.2",
       "npm:vue@^3.4.26"
