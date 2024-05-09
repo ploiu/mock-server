@@ -23,6 +23,9 @@ export default class SaveRoutesRoute extends Route {
       true,
       RouteTypes.DEFAULT,
     );
+    if (Deno.env.get('MOCK_SERVER_ENV') === 'dev') {
+      this.responseHeaders.set('Access-Control-Allow-Origin', '*');
+    }
   }
 
   async execute(request: Request): Promise<Response> {
@@ -43,11 +46,17 @@ export default class SaveRoutesRoute extends Route {
       }
       writeConfigFile(config, this.configLocation);
       this.routeManager.setupRoutes(config);
-      return new Response('{"success": true}', { status: 200 });
+      return new Response('{"success": true}', {
+        status: 200,
+        headers: this.responseHeaders,
+      });
     } catch (e) {
       console.error('Failed to save routes!');
       console.trace(e);
-      return new Response('{"error": true}', { status: 500 });
+      return new Response('{"error": true}', {
+        status: 500,
+        headers: this.responseHeaders,
+      });
     }
   }
 }

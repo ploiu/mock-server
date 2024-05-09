@@ -31,19 +31,19 @@
     ]
   },
   "tasks": {
-    "vite-dev": "deno run -A --node-modules-dir npm:vite",
+    "dev": "export MOCK_SERVER_ENV=dev; deno run --watch -A ./src/ts/MockServer.ts & deno run -A --node-modules-dir npm:vite dev",
     "vite-build": "deno run -A --node-modules-dir npm:vite build",
     "test": "deno fmt; deno test --allow-net",
     // starts up the server with a test config file and a frontend with the testing script baked in. You will need to open the browser to the server page for the tests to run
     "ui-test": "rm -f config-test.json; deno fmt; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts --test; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui --config ./config-test.json",
     // build the ui and runs the backend server for local testing and development
-    "run": "deno task generate-ui; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui",
+    "run": "deno task generate-ui; deno run --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV ./src/ts/MockServer.ts --load-ui",
     // bundles the UI files into the main application
     "generate-ui": "deno fmt; deno task vite-build; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts",
     // installs this application onto your system path
-    "install": "deno task generate-ui; deno install --allow-read --allow-write --allow-net --force ./src/ts/MockServer.ts",
+    "install": "deno task generate-ui; deno install --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV --force ./src/ts/MockServer.ts",
     // company intranet proxies can cause issues with TLS. use this option ONLY if you suffer these errors, they cannot be resolved otherwise, AND IF YOU KNOW WHAT YOU ARE DOING
-    "install-unsafe": "deno task generate-ui; deno install --unsafely-ignore-certificate-errors --allow-read --allow-write --allow-net --force ./src/ts/MockServer.ts",
+    "install-unsafe": "deno task generate-ui; deno install --unsafely-ignore-certificate-errors --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV --force ./src/ts/MockServer.ts",
     "check": "deno fmt; deno lint",
     "types": "deno types > ./src/ts/Deno.d.ts"
   },

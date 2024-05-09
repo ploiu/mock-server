@@ -25,6 +25,9 @@ export default class FetchRoutesRoute extends Route {
       RouteTypes.DEFAULT,
     );
     this.responseHeaders.append('Content-Type', 'application/json');
+    if (Deno.env.get('MOCK_SERVER_ENV') === 'dev') {
+      this.responseHeaders.append('Access-Control-Allow-Origin', '*');
+    }
   }
 
   //deno-lint-ignore require-await
@@ -33,6 +36,9 @@ export default class FetchRoutesRoute extends Route {
     const routes = this.routeManager.routes.filter((it: Route) =>
       !this.excludedRoutes.includes(it.url)
     );
-    return new Response(JSON.stringify(routes), { status: 200 });
+    return new Response(JSON.stringify(routes), {
+      status: 200,
+      headers: this.responseHeaders,
+    });
   }
 }
