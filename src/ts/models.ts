@@ -1,9 +1,17 @@
 export enum RouteTokenType {
+  /** a normal part of a path; e.g. /test */
   NORMAL_PATH_PART,
+  /** a normal query parameter; e.g. ?test or &test */
   NORMAL_QUERY_PART,
+  /** a wildcard query parameter; e.g. ?:* */
+  QUERY_GLOB_PART,
+  /** a required path param; e.g. /:test */
   REQUIRED_PATH_PARAM_PART,
+  /** an optional path param; e.g. /:test? */
   OPTIONAL_PATH_PARAM_PART,
+  /** a required query param; e.g. ?:test or &:test */
   REQUIRED_QUERY_PARAM_PART,
+  /** an optional query param; e.g. ?:test? or &:test? */
   OPTIONAL_QUERY_PARAM_PART,
 }
 
@@ -11,7 +19,3 @@ export type RouteToken = {
   text: string;
   tokenType: RouteTokenType;
 };
-
-export function tokenizeRoute(_url: string): RouteToken[] {
-  return [];
-}
