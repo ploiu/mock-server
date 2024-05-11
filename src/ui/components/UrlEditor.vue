@@ -1,35 +1,44 @@
 <script setup lang="ts">
-    import InputText from 'primevue/inputtext';
-    import { ref } from 'vue';
+import InputText from 'primevue/inputtext';
+import { ref } from 'vue';
+import { tokenize } from '../../ts/request/RouteTokenizer.ts'
 
-    type UrlEditorProps = {
-        initialText: string
+type UrlEditorProps = {
+    initialText: string
+}
+
+const props = defineProps<UrlEditorProps>();
+
+const inputText = ref(props.initialText)
+
+const processInputText = (): string => {
+    const tokens = tokenize(inputText.value);
+    let builtText = '';
+    // keep track of this is the first query param we've found; used to know if we need to prepend `?` or `&`
+    let firstQueryParam = true;
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i]
+        let prepend: string;
+        if (token.tokenType.includes('PATH')) {
+            prepend = '/';
+        } else if (token.tokenType === 'INVALID') {
+            prepend = '';
+        } else if (firstQueryParam) {
+            firstQueryParam = false;
+            prepend = '?';
+        } else {
+            prepend = '&';
+        }
+        builtText += `<span class="${token.tokenType}">${prepend}${token.text}</span>`
     }
-
-    const props = defineProps<UrlEditorProps>();
-
-    const inputText = ref(props.initialText)
-    const renderedText = ref('')
-
-    const processInputText = (): void => {
-        renderedText.value = inputText.value;
-    }
-    
-    const setInputText = (value: string): void => {
-        inputText.value = value;
-        processInputText();
-    }
-
-    // calling setInputText here instead of default value for inputText will process the text as well
-    setInputText(props.initialText);
-
-    // TODO I want syntax highlighting on routes for things like path and query variables
+    return builtText;
+}
 
 </script>
 
 <template>
-    <code id="renderedText">{{ renderedText }}</code>
-    <InputText id="inputText" type="text" :model-value="inputText" @update:model-value="setInputText"/>
+    <div id="renderedText" v-html="processInputText()"></div>
+    <InputText id="inputText" type="text" :model-value="inputText" @update:model-value="value => inputText = value" />
 </template>
 
 <style scoped>
@@ -39,13 +48,15 @@
     caret-color: white;
 }
 
-#inputText, #renderedText {
+#inputText,
+#renderedText {
     position: absolute;
     top: 1vh;
     left: 18%;
     width: 85%;
     font-family: var(--font-family);
     font-feature-settings: var(--font-feature-settings);
+    font-variant-ligatures: none;
     font-size: 1rem;
 }
 
@@ -55,4 +66,30 @@
     height: 46px;
 }
 
+</style>
+// can't use scoped styles for generated html
+<style>
+.INVALID {
+    color: var(--red-500);
+}
+
+.QUERY_GLOB_PART {
+    color: var(--blue-500);
+}
+
+.REQUIRED_PATH_PARAM_PART {
+    color: var(--yellow-500);
+}
+
+.OPTIONAL_PATH_PARAM_PART {
+    color: var(--green-500);
+}
+
+.REQUIRED_QUERY_PARAM_PART {
+    color: var(--pink-500)
+}
+
+.OPTIONAL_QUERY_PARAM_PART {
+    color: var(--cyan-500);
+}
 </style>

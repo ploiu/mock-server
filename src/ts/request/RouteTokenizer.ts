@@ -2,6 +2,9 @@ import { RouteTokenType } from '../models.ts';
 import { type RouteToken } from '../models.ts';
 
 export function tokenize(url: string): RouteToken[] {
+  if (!url || url.trim().length === 0) {
+    return [];
+  }
   const pathTokens = tokenizePaths(url);
   const queryTokens = tokenizeQueryParams(url);
   return [...pathTokens, ...queryTokens];
@@ -56,7 +59,7 @@ function determineQueryParameterType(param: string): RouteTokenType {
     return RouteTokenType.OPTIONAL_QUERY_PARAM_PART;
   } else if (param.startsWith(':')) {
     return RouteTokenType.REQUIRED_QUERY_PARAM_PART;
-  } else if (!param.endsWith('?')) {
+  } else if (!param.endsWith('?') && !param.includes('*')) {
     return RouteTokenType.NORMAL_QUERY_PART;
   } else {
     return RouteTokenType.INVALID;

@@ -204,3 +204,20 @@ Deno.test('Test that tokenize can handle everything all at once', () => {
     assertObjectMatch(actualInstance, expectedInstance);
   }
 });
+
+Deno.test('Test that tokenize labels ?* as invalid (easy accidental mistype)', () => {
+  const url = '?*';
+  const expected: RouteToken[] = [
+    {
+      text: '*',
+      tokenType: RouteTokenType.INVALID,
+    },
+  ];
+  const actual = tokenize(url);
+  assertEquals(actual.length, expected.length);
+  for (let i = 0; i < expected.length; i++) {
+    const expectedInstance = expected[i];
+    const actualInstance = actual[i];
+    assertObjectMatch(actualInstance, expectedInstance);
+  }
+});

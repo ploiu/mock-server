@@ -82,7 +82,7 @@ const selectRoute = (route: UIRoute) => {
         </div>
         <div class="col-10">
           <!-- key is set here to force re-render when currentRoute changes -->
-          <UrlEditor :initial-text="currentRoute.url" :key="currentRoute.url" />
+          <UrlEditor :initial-text="currentRoute.url ?? ''" :key="currentRoute.url"/>
         </div>
       </div>
     </div>
