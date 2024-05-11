@@ -13,6 +13,8 @@ export enum RouteTokenType {
   REQUIRED_QUERY_PARAM_PART,
   /** an optional query param; e.g. ?:test? or &:test? */
   OPTIONAL_QUERY_PARAM_PART,
+  /** any value that the tokenizer can't figure out */
+  INVALID,
 }
 
 export type RouteToken = {

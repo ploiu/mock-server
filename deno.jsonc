@@ -16,7 +16,8 @@
     "singleQuote": true,
     "useTabs": false,
     "indentWidth": 2,
-    "proseWrap": "preserve"
+    "proseWrap": "preserve",
+    "semiColons": true
   },
   "lint": {
     "exclude": [
