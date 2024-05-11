@@ -1,6 +1,6 @@
 import Route from '../Route.ts';
 import { RequestMethod } from '../RequestMethod.ts';
-import { serveFile } from '../../deps.ts';
+import { serveFile } from '@std/http';
 import { RouteTypes } from '../RouteTypes.ts';
 
 export default class UIRoute extends Route {

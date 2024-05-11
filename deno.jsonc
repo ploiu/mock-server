@@ -10,7 +10,8 @@
       "src/ui/.vite/**/*.ts",
       "src/ui/vite-env.d.ts",
       "src/ui/dist/**/*",
-      "src/ui-old/**/*"
+      "src/ui-old/**/*",
+      "generated/**/*"
     ],
     "singleQuote": true,
     "useTabs": false,
@@ -48,7 +49,11 @@
     "types": "deno types > ./src/ts/Deno.d.ts"
   },
   "imports": {
+    "@std/assert": "jsr:@std/assert@^0.225.1",
     "@std/cli": "jsr:@std/cli@^0.224.0",
+    "@std/fmt": "jsr:@std/fmt@^0.224.0",
+    "@std/fs": "jsr:@std/fs@^0.224.0",
+    "@std/http": "jsr:@std/http@^0.224.0",
     "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^5.0.4",
     "primevue": "npm:primevue@^3.52.0",
     "vite": "npm:vite@^5.2.10",

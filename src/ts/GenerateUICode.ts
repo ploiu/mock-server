@@ -1,4 +1,4 @@
-import { gray, green, red } from './deps.ts';
+import { gray, green, red } from '@std/fmt/colors';
 import { parseArgs } from '@std/cli';
 /**
  * Reads the contents of our ui files and inserts them into the ui strings in {/src/ts/MockServer.ts#createUIFileIfNotExists}
@@ -66,11 +66,11 @@ function determineGeneratedSourceNames(html: string): [string, string] {
   try {
     console.info(gray('retrieving name of generated js file...'));
     const scriptName = html.match(scriptGex)?.[0];
-    console.info(`${green(scriptName)}!`);
+    console.info(`${green(scriptName!)}!`);
     console.info(gray('retrieving name of generated css file...'));
     const styleSheetName = html.match(cssGex)?.[0];
-    console.info(`${green(styleSheetName)}!`);
-    return [scriptName, styleSheetName];
+    console.info(`${green(styleSheetName!)}!`);
+    return [scriptName!, styleSheetName!];
   } catch (e) {
     console.error(
       `${

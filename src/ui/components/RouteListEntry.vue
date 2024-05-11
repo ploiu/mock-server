@@ -5,12 +5,12 @@ import InputSwitch from 'primevue/inputswitch';
 import Button from 'primevue/button';
 import { ref } from 'vue';
 
-interface props {
+interface RouteListEntryProps {
     route: UIRoute
 }
 
 
-const props = defineProps<props>()
+const props = defineProps<RouteListEntryProps>()
 // copy of the route so that we don't modify the original
 const emit = defineEmits<{
     (e: 'change', value: UIRoute),

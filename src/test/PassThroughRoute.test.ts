@@ -1,4 +1,4 @@
-import { assertEquals, fail } from './deps.ts';
+import { assertEquals, fail } from '@std/assert';
 import { RequestMethod } from '../ts/request/RequestMethod.ts';
 import { RouteTypes } from '../ts/request/RouteTypes.ts';
 import RouteFactory from '../ts/request/RouteFactory.ts';

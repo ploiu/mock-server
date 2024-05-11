@@ -1,4 +1,5 @@
-import { cyan, emptyDirSync, green, magenta } from './deps.ts';
+import { cyan, green, magenta } from '@std/fmt/colors';
+import { emptyDirSync } from '@std/fs';
 import { parseArgs } from '@std/cli';
 import Config from './config/Config.ts';
 import { readConfigFile } from './config/ConfigManager.ts';
