@@ -1,3 +1,7 @@
+import {
+  parseBackendHeaders,
+  parseFrontendHeaders,
+} from '../models/UIHeader.ts';
 import { UIRoute } from '../models/index.ts';
 
 const url = 'VITE_BASE_URL' in import.meta.env
@@ -7,14 +11,24 @@ const url = 'VITE_BASE_URL' in import.meta.env
 export async function fetchRoutes(): Promise<UIRoute[]> {
   const res = await fetch(`${url}/mock-server-routes`);
   if (res.status === 200) {
-    return res.json();
+    // deno-lint-ignore no-explicit-any
+    const parsedBody: Record<string, any>[] = await res.json();
+    return parsedBody.map((it) => {
+      it.responseHeaders = parseBackendHeaders(it.responseHeaders);
+      return it as UIRoute;
+    });
   } else {
     throw await res.text();
   }
 }
 
 export async function saveRoutes(routes: UIRoute[]): Promise<undefined> {
-  const body = JSON.stringify(routes);
+  const formatted = routes.map((route) => {
+    // deno-lint-ignore no-explicit-any
+    const detyped: Record<string, any> = { ...route };
+    detyped.responseHeaders = parseFrontendHeaders(detyped.responseHeaders);
+  });
+  const body = JSON.stringify(formatted);
   const res = await fetch(`${url}/mock-ui-save-routes`, {
     method: 'POST',
     body,
@@ -27,9 +41,4 @@ export async function saveRoutes(routes: UIRoute[]): Promise<undefined> {
   } else {
     throw await res.text();
   }
-}
-
-export function stringifyRoute(route: UIRoute): string {
-  return route.title + route.url + route.method + route.response +
-    route.responseStatus + route.isEnabled + route.routeType;
 }

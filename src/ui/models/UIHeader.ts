@@ -1,17 +1,31 @@
-export interface UIHeader {
-  name: string;
-  value: string;
-  // used for loop keys TODO maybe remove
-  readonly id: string;
+export function parseBackendHeaders(headers: Record<string, string>): string {
+  return Object.entries(headers)
+    .map(([key, value]) => key + ': ' + value)
+    .join('\n')
+    .trim();
 }
 
-export function fromBackendHeader(entry: [string, string]): UIHeader {
-  const [name, value] = entry;
-  return { name, value, id: crypto.randomUUID() };
+export function validateHeaderInput(input: string): boolean {
+  input = input.trim();
+  if (input === '') {
+    return true;
+  }
+  const invalidLines = input.split(/\r?\n/).filter((line) =>
+    !line.trim().match(/[^ \t\r\n]+?:[ \t]*[^ \t\r\n]+/)
+  );
+  return invalidLines.length === 0;
 }
 
-export function toHeaderMap(headers: UIHeader[]) {
-  const combined: Record<string, string> = {};
-  headers.forEach(({ name, value }) => combined[name] = value);
-  return combined;
+export function parseFrontendHeaders(headers: string): Record<string, string> {
+  headers = headers.trim();
+  if (headers === '') {
+    return {};
+  }
+  return headers.split(/\r?\n/)
+    .map((it) => {
+      const key = it.substring(0, it.indexOf(':')).trim();
+      const value = it.substring(it.indexOf(':') + 1).trim();
+      return { [key]: value };
+    })
+    .reduce((combined, current) => ({ ...combined, ...current }));
 }

@@ -210,7 +210,7 @@ Deno.test('Test that tokenize labels ?* as invalid (easy accidental mistype)', (
   const expected: RouteToken[] = [
     {
       text: '*',
-      tokenType: RouteTokenType.INVALID,
+      tokenType: RouteTokenType.INVALID_QUERY_PART,
     },
   ];
   const actual = tokenize(url);

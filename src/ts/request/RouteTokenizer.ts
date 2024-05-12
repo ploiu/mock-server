@@ -36,7 +36,7 @@ function determinePathParameterType(param: string): RouteTokenType {
     /* still ending with ? could indicate bad parsing */
     return RouteTokenType.NORMAL_PATH_PART;
   } else {
-    return RouteTokenType.INVALID;
+    return RouteTokenType.INVALID_PATH_PART;
   }
 }
 
@@ -62,7 +62,7 @@ function determineQueryParameterType(param: string): RouteTokenType {
   } else if (!param.endsWith('?') && !param.includes('*')) {
     return RouteTokenType.NORMAL_QUERY_PART;
   } else {
-    return RouteTokenType.INVALID;
+    return RouteTokenType.INVALID_QUERY_PART;
   }
 }
 

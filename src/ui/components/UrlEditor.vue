@@ -12,7 +12,13 @@ const props = defineProps<UrlEditorProps>();
 const inputText = ref(props.initialText)
 
 const processInputText = (): string => {
+    if(inputText.value.length === 0) {
+        inputText.value = '/'
+    }
     const tokens = tokenize(inputText.value);
+    if(tokens.length === 0) {
+        return inputText.value;
+    }
     let builtText = '';
     // keep track of this is the first query param we've found; used to know if we need to prepend `?` or `&`
     let firstQueryParam = true;
@@ -21,8 +27,6 @@ const processInputText = (): string => {
         let prepend: string;
         if (token.tokenType.includes('PATH')) {
             prepend = '/';
-        } else if (token.tokenType === 'INVALID') {
-            prepend = '';
         } else if (firstQueryParam) {
             firstQueryParam = false;
             prepend = '?';
@@ -51,9 +55,8 @@ const processInputText = (): string => {
 #inputText,
 #renderedText {
     position: absolute;
-    top: 1vh;
     left: 18%;
-    width: 85%;
+    width: 80%;
     font-family: var(--font-family);
     font-feature-settings: var(--font-feature-settings);
     font-variant-ligatures: none;
@@ -69,7 +72,7 @@ const processInputText = (): string => {
 </style>
 // can't use scoped styles for generated html
 <style>
-.INVALID {
+.INVALID_PATH_PART, .INVALID_QUERY_PART {
     color: var(--red-500);
 }
 
