@@ -1,3 +1,4 @@
+import { RouteTypes } from '../../ts/request/RouteTypes.ts';
 import {
   parseBackendHeaders,
   parseFrontendHeaders,
@@ -26,7 +27,10 @@ export async function saveRoutes(routes: UIRoute[]): Promise<undefined> {
   const formatted = routes.map((route) => {
     // deno-lint-ignore no-explicit-any
     const detyped: Record<string, any> = { ...route };
-    detyped.responseHeaders = parseFrontendHeaders(detyped.responseHeaders);
+    if (route.routeType === RouteTypes.DEFAULT) {
+      detyped.responseHeaders = parseFrontendHeaders(detyped.responseHeaders);
+    }
+    return detyped;
   });
   const body = JSON.stringify(formatted);
   const res = await fetch(`${url}/mock-ui-save-routes`, {

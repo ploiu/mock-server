@@ -1,4 +1,9 @@
-export function parseBackendHeaders(headers: Record<string, string>): string {
+export function parseBackendHeaders(
+  headers?: Record<string, string> | null,
+): string {
+  if (!headers) {
+    return '';
+  }
   return Object.entries(headers)
     .map(([key, value]) => key + ': ' + value)
     .join('\n')
@@ -16,8 +21,10 @@ export function validateHeaderInput(input: string): boolean {
   return invalidLines.length === 0;
 }
 
-export function parseFrontendHeaders(headers: string): Record<string, string> {
-  headers = headers.trim();
+export function parseFrontendHeaders(
+  headers?: string | null,
+): Record<string, string> {
+  headers = headers?.trim() ?? '';
   if (headers === '') {
     return {};
   }

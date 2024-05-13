@@ -56,8 +56,10 @@
     "@std/fs": "jsr:@std/fs@^0.224.0",
     "@std/http": "jsr:@std/http@^0.224.0",
     "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^5.0.4",
+    "primeicons": "npm:primeicons@^7.0.0",
     "primevue": "npm:primevue@^3.52.0",
     "vite": "npm:vite@^5.2.10",
+    "vitest": "npm:vitest@^1.6.0",
     "vue": "npm:vue@^3.4.26",
     "vue-router": "npm:vue-router@^4.3.2"
   }

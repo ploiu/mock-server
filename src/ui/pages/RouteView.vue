@@ -6,23 +6,24 @@ import { store } from '../store';
 import Button from 'primevue/button';
 import { ref } from 'vue';
 import RouteEditor from '../components/RouteEditor.vue';
+import { stringifyUIRoute, newUIRoute } from '../models/UIRoute';
 
 const currentRoute = ref<UIRoute | null>(null);
 
-const updateRoute = async (originalRoute: UIRoute, updatedRoute: UIRoute) => {
+const saveRoute = async (originalRoute: UIRoute | null, updatedRoute: UIRoute) => {
   const withoutOriginal = store.routes.filter(route => route !== originalRoute);
   await saveRoutes([...withoutOriginal, updatedRoute])
   store.routes = await fetchRoutes()
+  // re-select the saved route based on what we get
+  currentRoute.value = store.routes.filter(it => stringifyUIRoute(it) === stringifyUIRoute(updatedRoute))[0]
 }
 
 const deleteRoute = async (route: UIRoute) => {
-  const without = store.routes.filter(it => it !== route);
+  if(currentRoute.value && stringifyUIRoute(route) === stringifyUIRoute(currentRoute.value)) {
+    currentRoute.value = null;
+  }
+  const without = store.routes.filter(it => stringifyUIRoute(it) !== stringifyUIRoute(route));
   await saveRoutes(without)
-  store.routes = await fetchRoutes()
-}
-
-const createRoute = async (route: UIRoute) => {
-  await saveRoutes([...store.routes, route])
   store.routes = await fetchRoutes()
 }
 
@@ -30,24 +31,19 @@ const selectRoute = (route: UIRoute) => {
   currentRoute.value = route;
 }
 
-/*
-  TODO don't use v-model for any editor fields (update method)
-  use timeout + last edit times + @change
-*/
-
 </script>
 
 <template>
   <div class="row">
     <div id="routeListContainer" class="col-3">
       <div id="routeList">
-        <RouteListEntry v-for="route in store.routes" :key="route.method + '_' + route.url" :route="route"
-          @change="updated => updateRoute(route, updated)" @click="() => selectRoute(route)" />
+        <RouteListEntry v-for="route in store.routes" :key="stringifyUIRoute(route)" :route="route"
+          @change="updated => saveRoute(route, updated)" @click="() => selectRoute(route)" @delete="deleteRoute"/>
       </div>
-      <Button id="createRouteButton" label="Create New" @click="() => selectRoute({} as unknown as UIRoute)" />
+      <Button id="createRouteButton" label="Create New" @click="() => selectRoute(newUIRoute())" />
     </div>
     <div class="col-9">
-      <RouteEditor v-if="currentRoute !== null" :route="currentRoute" />
+      <RouteEditor v-if="currentRoute !== null && currentRoute !== undefined" :route="currentRoute" @save="route => saveRoute(currentRoute, route)" :key="currentRoute.title" />
     </div>
   </div>
 </template>

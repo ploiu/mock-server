@@ -7,6 +7,10 @@ type UrlEditorProps = {
     initialText: string
 }
 
+const emit = defineEmits<{
+    (e: 'change', value: string),
+}>()
+
 const props = defineProps<UrlEditorProps>();
 
 const inputText = ref(props.initialText)
@@ -38,11 +42,21 @@ const processInputText = (): string => {
     return builtText;
 }
 
+const cleanValue = () => {
+    return inputText
+    .value
+    .replace(/^\/\//, '/');
+}
+
+const change = () => {
+    emit('change', cleanValue());
+}
+
 </script>
 
 <template>
     <div id="renderedText" v-html="processInputText()"></div>
-    <InputText id="inputText" type="text" :model-value="inputText" @update:model-value="value => inputText = value" />
+    <InputText id="inputText" type="text" :model-value="inputText" @update:model-value="value => inputText = value" @change="change" />
 </template>
 
 <style scoped>

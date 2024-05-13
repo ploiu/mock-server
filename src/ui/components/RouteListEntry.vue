@@ -3,14 +3,16 @@ import type { UIRoute } from '../models'
 import Card from 'primevue/card';
 import InputSwitch from 'primevue/inputswitch';
 import Button from 'primevue/button';
-import { ref } from 'vue';
+import {ref} from 'vue';
+import RouteEditor from './RouteEditor.vue';
 
 interface RouteListEntryProps {
     route: UIRoute
 }
 
+const props = defineProps<RouteListEntryProps>();
+const route = ref({...props.route});
 
-const props = defineProps<RouteListEntryProps>()
 // copy of the route so that we don't modify the original
 const emit = defineEmits<{
     (e: 'change', value: UIRoute),
@@ -18,8 +20,8 @@ const emit = defineEmits<{
 }>()
 
 const toggleEnabled = (e: ChangeEvent) => {
-    const route = {...props.route, isEnabled: e.target.checked}
-    emit('change', route);
+    const updatedRoute = {...route.value, isEnabled: e.target.checked}
+    emit('change', updatedRoute);
 }
 
 </script>
@@ -35,7 +37,7 @@ const toggleEnabled = (e: ChangeEvent) => {
                     <InputSwitch :modelValue="props.route.isEnabled" @change="toggleEnabled" />
                 </div>
                 <div class="col-9 button-container">
-                    <Button label="Delete" severity="danger" />
+                    <Button label="Delete" severity="danger" @click="() => emit('delete', route)" />
                 </div>
             </div>
         </template>
