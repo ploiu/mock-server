@@ -66,8 +66,8 @@ const saveRoute = () => {
     <!-- method, url -->
     <div class="row">
       <div class="col-2">
-        <Dropdown id="requestMethod" v-model="item.method" :options="Object.keys(RequestMethod)"
-          placeholder="Method" @update:model-value="valueChange" />
+        <Dropdown id="requestMethod" v-model="item.method" :options="Object.keys(RequestMethod)" placeholder="Method"
+          @update:model-value="valueChange" />
       </div>
       <div class="col-10">
         <!-- key is set here to force re-render when props.route changes -->
@@ -103,7 +103,18 @@ const saveRoute = () => {
         </FloatLabel>
       </div>
     </div>
-    <Button id="saveButton" icon="pi pi-save" rounded v-if="hasChanges" @click="saveRoute" />
+    <Button id="saveButton" rounded v-if="hasChanges" @click="saveRoute">
+      <!-- from primeicons (MIT license; https://github.com/primefaces/primeicons/blob/master/raw-svg/save.svg)
+        Reason we import the raw svg is so that we don't have to add extra code to the backend to service the fonts file -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <g id="save">
+          <path
+            d="M17,20.75H7A2.75,2.75,0,0,1,4.25,18V6A2.75,2.75,0,0,1,7,3.25h7.5a.75.75,0,0,1,.53.22L19.53,8a.75.75,0,0,1,.22.53V18A2.75,2.75,0,0,1,17,20.75ZM7,4.75A1.25,1.25,0,0,0,5.75,6V18A1.25,1.25,0,0,0,7,19.25H17A1.25,1.25,0,0,0,18.25,18V8.81L14.19,4.75Z" />
+          <path d="M16.75,20h-1.5V13.75H8.75V20H7.25V13.5A1.25,1.25,0,0,1,8.5,12.25h7a1.25,1.25,0,0,1,1.25,1.25Z" />
+          <path d="M12.47,8.75H8.53a1.29,1.29,0,0,1-1.28-1.3V4h1.5V7.25h3.5V4h1.5V7.45A1.29,1.29,0,0,1,12.47,8.75Z" />
+        </g>
+      </svg>
+    </Button>
   </section>
 </template>
 
@@ -142,5 +153,10 @@ const saveRoute = () => {
   position: fixed;
   bottom: 3vh;
   right: 3vh;
+  padding: 15px;
+  > svg {
+    width: 25px;
+    height: 25px;
+  }
 }
 </style>

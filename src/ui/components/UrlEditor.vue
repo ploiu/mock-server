@@ -56,17 +56,17 @@ const change = () => {
 
 <template>
     <div id="renderedText" v-html="processInputText()"></div>
-    <InputText id="inputText" type="text" :model-value="inputText" @update:model-value="value => inputText = value" @change="change" />
+    <InputText id="urlInput" type="text" :model-value="inputText" @update:model-value="value => inputText = value" @change="change" />
 </template>
 
 <style scoped>
-#inputText {
+#urlInput {
     color: transparent;
     background-color: transparent;
     caret-color: white;
 }
 
-#inputText,
+#urlInput,
 #renderedText {
     position: absolute;
     left: 18%;

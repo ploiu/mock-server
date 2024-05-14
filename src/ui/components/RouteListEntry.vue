@@ -29,7 +29,7 @@ const toggleEnabled = (e: ChangeEvent) => {
 <template>
     <Card class="route-list-entry">
         <template #title><span :class="['request-method', `request-method-${route.method.toLowerCase()}`]">{{
-            route.method }}</span> {{ route.title }}</template>
+            route.method }}</span> <span class="route-title">{{ route.title }}</span></template>
         <template #footer>
             <div class="row">
                 <div class="col-3 enable-toggle-group">
@@ -90,5 +90,9 @@ const toggleEnabled = (e: ChangeEvent) => {
 span.request-method {
     padding: 4px;
     border-radius: var(--border-radius);
+}
+
+.route-title {
+    word-wrap: break-word;
 }
 </style>

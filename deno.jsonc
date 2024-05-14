@@ -37,7 +37,7 @@
     "vite-build": "deno run -A --node-modules-dir npm:vite build",
     "test": "deno fmt; deno test --allow-net",
     // starts up the server with a test config file and a frontend with the testing script baked in. You will need to open the browser to the server page for the tests to run
-    "ui-test": "rm -f config-test.json; deno fmt; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts --test; deno run --allow-read --allow-write --allow-net ./src/ts/MockServer.ts --load-ui --config ./config-test.json",
+    "ui-test": "rm -f config-test.json; deno fmt; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts --test; deno run --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV ./src/ts/MockServer.ts --load-ui --config ./config-test.json",
     // build the ui and runs the backend server for local testing and development
     "run": "deno task generate-ui; deno run --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV ./src/ts/MockServer.ts --load-ui",
     // bundles the UI files into the main application
@@ -56,10 +56,8 @@
     "@std/fs": "jsr:@std/fs@^0.224.0",
     "@std/http": "jsr:@std/http@^0.224.0",
     "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^5.0.4",
-    "primeicons": "npm:primeicons@^7.0.0",
     "primevue": "npm:primevue@^3.52.0",
     "vite": "npm:vite@^5.2.10",
-    "vitest": "npm:vitest@^1.6.0",
     "vue": "npm:vue@^3.4.26",
     "vue-router": "npm:vue-router@^4.3.2"
   }
