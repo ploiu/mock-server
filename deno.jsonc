@@ -5,7 +5,7 @@
   "fmt": {
     "exclude": [
       "README.md",
-      "src/ui/AccordionElement.min.js",
+      "src/ui/components/AccordionElement.min.js",
       "src/ui/.vite/**/*.js",
       "src/ui/.vite/**/*.ts",
       "src/ui/vite-env.d.ts",
@@ -24,7 +24,7 @@
       "src/ts/Deno.d.ts",
       "src/test/uiTests.js",
       "generated",
-      "src/ui/AccordionElement.min.js",
+      "src/ui/components/AccordionElement.min.js",
       "src/ui/.vite/**/*.js",
       "src/ui/.vite/**/*.ts",
       "src/ui/vite-env.d.ts",

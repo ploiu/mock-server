@@ -1,5 +1,6 @@
 import { reactive } from 'vue';
 import { UIRoute } from './models/index.ts';
+import { UILogEntry } from './models/UILogEntry.ts';
 
 type StoreFields = {
   routes: UIRoute[];
@@ -7,6 +8,7 @@ type StoreFields = {
 
 const storeBody = () => {
   let _routes: UIRoute[] = [];
+  let _logs: UILogEntry[] = [];
   return {
     get routes() {
       return _routes;
@@ -15,6 +17,12 @@ const storeBody = () => {
       _routes = r.sort((a, b) =>
         (a.title + a.method).localeCompare(b.title + b.method)
       );
+    },
+    get logs() {
+      return _logs;
+    },
+    set logs(l: UILogEntry[]) {
+      _logs = l;
     },
   } as StoreFields;
 };

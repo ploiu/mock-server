@@ -16,6 +16,7 @@
       "jsr:@std/path@^0.224.0": "jsr:@std/path@0.224.0",
       "jsr:@std/streams@^0.224.0": "jsr:@std/streams@0.224.0",
       "npm:@types/node": "npm:@types/node@18.16.19",
+      "npm:@vitejs/plugin-vue@^5.0.4": "npm:@vitejs/plugin-vue@5.0.4_vite@5.2.10__@types+node@18.16.19_vue@3.4.26_@types+node@18.16.19",
       "npm:cypress": "npm:cypress@13.9.0_enquirer@2.4.1",
       "npm:primevue": "npm:primevue@3.52.0_vue@3.4.26",
       "npm:primevue@^3.52.0": "npm:primevue@3.52.0_vue@3.4.26",
@@ -316,6 +317,13 @@
         "integrity": "sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==",
         "dependencies": {
           "@types/node": "@types/node@18.16.19"
+        }
+      },
+      "@vitejs/plugin-vue@5.0.4_vite@5.2.10__@types+node@18.16.19_vue@3.4.26_@types+node@18.16.19": {
+        "integrity": "sha512-WS3hevEszI6CEVEx28F8RjTX97k3KsrcY6kvTg7+Whm5y3oYvcqzVeGCU3hxSAn4uY2CLCkeokkGKpoctccilQ==",
+        "dependencies": {
+          "vite": "vite@5.2.10_@types+node@18.16.19",
+          "vue": "vue@3.4.26"
         }
       },
       "@vitest/expect@1.6.0": {

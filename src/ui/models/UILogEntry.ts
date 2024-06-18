@@ -1,0 +1,52 @@
+/**
+ * [
+  {
+    "url": "/api/v3/documents",
+    "method": "GET",
+    "body": "",
+    "timestamp": 1718647472364,
+    "message": null,
+    "headers": {
+      "accept": "*\/*",
+      "authorization": "<omitted>",
+      "host": "localhost:8000",
+      "user-agent": "curl/8.4.0",
+      "xxx_username": "doubleagent"
+    }
+  }
+]
+ *
+*/
+
+export interface UILogEntry {
+  url: string | null;
+  method: string | null;
+  // deno-lint-ignore no-explicit-any
+  body: any;
+  requestHeaders: Record<string, string> | null;
+  timestamp: number;
+  message: string | null;
+}
+
+export type ErrorUILogEntry = UILogEntry & {
+  url: null;
+  method: null;
+  body: null;
+  message: string;
+  headers: Record<never, never>;
+};
+
+export type SuccessUILogEntry = UILogEntry & {
+  url: string;
+  method: string;
+  requestHeaders: Record<string, string>;
+  message: null;
+};
+
+export function isSuccess(entry: UILogEntry): entry is SuccessUILogEntry {
+  return entry.message === null;
+}
+
+export function isError(entry: UILogEntry): entry is ErrorUILogEntry {
+  return entry.message !== null;
+}
