@@ -11,7 +11,7 @@ import { fetchLogs } from '../service/LogService.ts';
 import Button from 'primevue/button';
 
 const routePullInterval = setInterval(() => {
-    fetchLogs().then(logs => store.logs = [...store.logs, ...logs]);
+    fetchLogs().then(logs => store.logs = [...store.logs, ...logs].sort((a, b) => a.timestamp - b.timestamp));
 }, 1_000)
 onUnmounted(() => clearInterval(routePullInterval))
 
@@ -23,7 +23,7 @@ const clearLogs = () => store.logs = [];
 <template>
     <section id="logSection">
         <article v-for="log in store.logs" :key="log.message + log.timestamp + log.url">
-            <accordion-element v-if="isSuccess(log)" data-group="0">
+            <accordion-element class="log-success" v-if="isSuccess(log)" data-group="0">
                 <div class="ploiu-accordion-title">
                     <span :class="`request-method request-method-${log.method.toLowerCase()}`">{{ log.method }}</span>
                     <span class="url">{{ log.url }}</span>
@@ -57,6 +57,10 @@ const clearLogs = () => store.logs = [];
                     </accordion-element>
                 </div>
             </accordion-element>
+            <section class="log-error" v-if="isError(log)">
+                <span class="error-message">{{ log.message }}</span>
+                <span class="date">{{ formatDate(log.timestamp) }}</span>
+            </section>
         </article>
         <Button severity="danger" id="clearLogs" rounded @click="clearLogs">
             <!-- from primeicons (MIT license; https://github.com/primefaces/primeicons/blob/master/raw-svg/trash.svg)
@@ -78,7 +82,8 @@ const clearLogs = () => store.logs = [];
 #logSection {
     margin-left: 2em;
     margin-top: 1em;
-    article > accordion-element {
+
+    article>accordion-element {
         width: 100%;
     }
 
@@ -94,6 +99,7 @@ const clearLogs = () => store.logs = [];
 
     .date {
         float: right;
+        color: var(--text-color);
     }
 
     .log-headers {
@@ -125,6 +131,19 @@ const clearLogs = () => store.logs = [];
         padding: var(--content-padding);
         font-family: var(--font-family);
     }
+}
+
+.log-error {
+    background-color: var(--surface-a);
+    border-radius: var(--border-radius);
+    padding: var(--content-padding);
+    color: var(--red-500);
+}
+
+.log-success,
+.log-error {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
 }
 
 #clearLogs {
