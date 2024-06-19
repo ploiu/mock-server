@@ -48,5 +48,6 @@
     "install-unsafe": "deno task generate-ui; deno install --importmap=importMap.json --unsafely-ignore-certificate-errors --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV --force ./src/ts/MockServer.ts",
     "check": "deno fmt; deno lint",
     "types": "deno types > ./src/ts/Deno.d.ts"
-  }
+  },
+  "importMap": "importMap.json"
 }

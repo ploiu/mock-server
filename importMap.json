@@ -10,6 +10,7 @@
     "primevue": "npm:primevue@^3.52.0",
     "vite": "npm:vite@^5.2.10",
     "vue": "npm:vue@^3.4.26",
-    "vue-router": "npm:vue-router@^4.3.2"
+    "vue-router": "npm:vue-router@^4.3.2",
+    "@ploiu/arg-helper": "jsr:@ploiu/arg-helper@^1.0.0"
   }
 }

@@ -1,6 +1,5 @@
 import { cyan, green, magenta } from '@std/fmt/colors';
 import { emptyDirSync } from '@std/fs';
-import { parseArgs } from '@std/cli';
 import Config from './config/Config.ts';
 import { readConfigFile } from './config/ConfigManager.ts';
 import RouteManager from './request/RouteManager.ts';
@@ -12,31 +11,47 @@ import SaveRoutesRoute from './request/specialRoutes/SaveRoutesRoute.ts';
 import LogRoute from './request/specialRoutes/LogRoute.ts';
 import LogManager from './LogManager.ts';
 import './extensions/HeaderExtensions.ts';
+import { type ScriptDefinition, validateArgs } from '@ploiu/arg-helper';
 
 import uiComponents from './generatedUi.ts';
 
-const helpText = `
-	USAGE: MockServer [flags]
-	
-	flags:
-	--port,    -p    The port number to run the mock server on. Defaults to 8000
-	--config,  -c    The location of the config file. Defaults to ./config.json
-	--load-ui, -l    Start up with UI
-	--help,    -h    Show this help message
-	`;
+const definition: ScriptDefinition = {
+  arguments: [
+    {
+      name: 'port',
+      shortName: 'p',
+      required: false,
+      description:
+        'The port number to run the mock server on. Defaults to 8000',
+      validationFunction: (val) => !val || typeof val === 'number',
+      validationFailedMessage: (val) => `Invalid port number ${val}`,
+    },
+    {
+      name: 'config',
+      shortName: 'c',
+      required: false,
+      description: 'the config file location to load config and routes from',
+    },
+    {
+      name: 'load-ui',
+      shortName: 'l',
+      required: false,
+      description: 'whether or not to load the browser ui. Defaults to true',
+      validationFunction: (val) =>
+        val === undefined || typeof val === 'boolean',
+    },
+  ],
+  scriptDescription:
+    'Starts up a mock server that allows you to intercept requests and return whatever response you want. You need to point your new requests to this server in order for it to function',
+};
 
 // different functionality if run from command line
 if (import.meta.main) {
-  const { args } = Deno;
-  const parsedArgs = parseArgs(args);
-  if (parsedArgs.help || parsedArgs.h) {
-    console.log(helpText);
-    Deno.exit(0);
-  }
+  const parsedArgs = validateArgs({ args: Deno.args, definition });
   const port = parsedArgs.port ?? parsedArgs.p ?? 8000;
   const configLocation: string = parsedArgs.config ?? parsedArgs.c ??
     './config.json';
-  const loadUI: boolean = parsedArgs['load-ui'] ?? parsedArgs.l ?? false;
+  const loadUI: boolean = parsedArgs['load-ui'] ?? parsedArgs.l ?? true;
   startMockServer(port, configLocation, loadUI);
 }
 
