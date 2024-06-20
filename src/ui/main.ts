@@ -5,7 +5,6 @@ import { createMemoryHistory, createRouter, RouteRecordRaw } from 'vue-router';
 import RouteView from './pages/RouteView.vue';
 import LogView from './pages/LogView.vue';
 import PrimeVue from 'primevue/config';
-import 'primevue/resources/themes/lara-dark-indigo/theme.css';
 
 const routes = [
   { path: '/', component: RouteView },
