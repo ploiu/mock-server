@@ -58,3 +58,7 @@ body {
     width: 100%;
   }
 }
+
+accordion-element, span.error-message {
+  font-family: var(--font-family);
+}
