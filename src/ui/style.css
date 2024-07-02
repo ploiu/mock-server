@@ -62,3 +62,9 @@ body {
 accordion-element, span.error-message {
   font-family: var(--font-family);
 }
+
+@layer primevue {
+  * {
+    font-family: var(--font-family);
+  }
+}
