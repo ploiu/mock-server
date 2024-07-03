@@ -1,7 +1,7 @@
 //deno-lint-ignore-file no-explicit-any
 import { RequestMethod } from './RequestMethod.ts';
 import UrlVariable from './UrlVariable.ts';
-import { red } from '../deps.ts';
+import { red } from '@std/fmt/colors';
 import LogManager from '../LogManager.ts';
 import { RouteTypes } from './RouteTypes.ts';
 

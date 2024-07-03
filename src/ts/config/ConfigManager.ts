@@ -1,6 +1,6 @@
 //deno-lint-ignore-file no-explicit-any
 
-import { ensureFileSync } from '../deps.ts';
+import { ensureFileSync } from '@std/fs';
 import Config from './Config.ts';
 import { RouteTypes } from '../request/RouteTypes.ts';
 import { RequestMethod } from '../request/RequestMethod.ts';

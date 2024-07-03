@@ -19,6 +19,9 @@ export default class LogRoute extends Route {
       true,
       RouteTypes.DEFAULT,
     );
+    if (Deno.env.get('MOCK_SERVER_ENV') === 'dev') {
+      this.responseHeaders.append('Access-Control-Allow-Origin', '*');
+    }
   }
 
   /**
@@ -29,6 +32,7 @@ export default class LogRoute extends Route {
     // if we're not done writing, we should store our logs in our backLogs and re-try sending everything next time
     return new Response(JSON.stringify(LogManager.getLogs()), {
       status: 200,
+      headers: this.responseHeaders,
     });
   }
 }

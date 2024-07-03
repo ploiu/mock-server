@@ -1,0 +1,74 @@
+@import './assets/simple-grid.css';
+
+
+:root {
+  /* non-color vars */
+  --border-radius: 4px;
+  --font-family: 'Fira Code', 'Jetbrains Mono', monospace !important;
+}
+
+.request-method-get {
+  background-color: var(--green-500);
+}
+
+.request-method-put {
+  background-color: var(--blue-500);
+}
+
+.request-method-post {
+  background-color: var(--yellow-500);
+}
+
+.request-method-delete {
+  background-color: var(--red-500);
+}
+
+.request-method-head {
+  background-color: var(--teal-500);
+}
+
+.request-method-connect {
+  background-color: var(--indigo-500);
+}
+
+.request-method-options {
+  background-color: var(--green-100);
+  color: var(--surface-0);
+}
+
+.request-method-trace {
+  background-color: var(--purple-500);
+}
+
+.request-method-patch {
+  background-color: var(--cyan-500);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--color-scheme-background);
+  color: var(--color-scheme-primary);
+}
+
+html {
+  overflow-y: hidden;
+}
+
+#app {
+  width: 98%;
+  > main {
+    width: 100%;
+  }
+}
+
+accordion-element, span.error-message {
+  font-family: var(--font-family);
+}
+
+@layer primevue {
+  * {
+    font-family: var(--font-family);
+  }
+}

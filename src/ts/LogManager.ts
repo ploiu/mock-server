@@ -11,7 +11,7 @@ import {
   bgYellow,
   black,
   yellow,
-} from './deps.ts';
+} from '@std/fmt/colors';
 import { RequestMethod } from './request/RequestMethod.ts';
 
 /**

@@ -1,7 +1,22 @@
+# IDE files
 .idea
-config.json
-*.exe
-/generated
-/src/ui/ui.css.map
-/config-test.json
+.vscode
+!.vscode/mock-server-snippet.code-snippets
 
+# files used for local testing
+config.json
+config-test.json
+src/ts/Deno.d.ts
+
+# node stuff
+node_modules
+.vite
+
+# UI stuff
+/generated
+src/ui/dist
+/src/ui/ui.css.map
+/src/ts/generatedUi.ts
+
+# I can't remember why, but there was a reason for this
+*.exe

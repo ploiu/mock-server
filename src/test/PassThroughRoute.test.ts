@@ -1,4 +1,4 @@
-import { assertEquals, fail } from './deps.ts';
+import { assertEquals, fail } from '@std/assert';
 import { RequestMethod } from '../ts/request/RequestMethod.ts';
 import { RouteTypes } from '../ts/request/RouteTypes.ts';
 import RouteFactory from '../ts/request/RouteFactory.ts';
@@ -44,16 +44,14 @@ Deno.test('should make a call to the redirect url when invoked', async () => {
       body: '{"test": 1}',
     }),
   ).then(async (response) => {
-    await (server as any).shutdown();
+    await server.shutdown();
     assertEquals(response.status, 200);
     assertEquals(
       await response.text(),
       'test body',
     );
   }).catch(async (exception) => {
-    try {
-      await (server as any).shutdown();
-    } catch (_) {}
+    await server.shutdown();
     fail('route execution failed\n' + exception);
   });
   await server.finished;
@@ -82,12 +80,10 @@ Deno.test('should pass along any path and query variables', async () => {
       method: RequestMethod.GET,
     }),
   ).then(async (response) => {
-    await (server as any).shutdown();
+    await server.shutdown();
     assertEquals(await response.text(), 'tests passed');
   }).catch(async (exception) => {
-    try {
-      await (server as any).shutdown();
-    } catch (_) {}
+    await server.shutdown();
     fail('route execution failed\n' + exception);
   });
   await server.finished;
