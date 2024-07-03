@@ -31,6 +31,13 @@ If you need help remembering what does what, just run `deno task`
 ## Testing
 `deno task test` for unit tests, `deno task ui-tests` for UI tests. Be sure for UI tests to navigate to the url provided in console output
 
+## Troubleshooting
+if you get the error `Error: The following dependencies are imported but could not be resolved:`, you need to cache all the npm dependencies listed in `importMap.json` with `deno cache`
+example: 
+```sh
+deno cache npm:primevue npm:vite npm:vue npm:vue-router
+```
+
 ## Mocks
 When run, a `config.json` file will be created with an example route, if a `config.json` file does not exist in _your current directory_ (you can also specify a config file with the --config flag). The config file should list all your mock routes. An example route would look like this:
 ```json
