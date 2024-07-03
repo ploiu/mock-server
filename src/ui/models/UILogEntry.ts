@@ -1,23 +1,3 @@
-/**
- * [
-  {
-    "url": "/api/v3/documents",
-    "method": "GET",
-    "body": "",
-    "timestamp": 1718647472364,
-    "message": null,
-    "headers": {
-      "accept": "*\/*",
-      "authorization": "<omitted>",
-      "host": "localhost:8000",
-      "user-agent": "curl/8.4.0",
-      "xxx_username": "doubleagent"
-    }
-  }
-]
- *
-*/
-
 export interface UILogEntry {
   url: string | null;
   method: string | null;

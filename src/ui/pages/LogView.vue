@@ -82,6 +82,9 @@ const clearLogs = () => store.logs = [];
 #logSection {
     margin-left: 2em;
     margin-top: 1em;
+    max-height: 75vh;
+    overflow-y: auto;
+    margin-bottom: 2em;
 
     article>accordion-element {
         width: 100%;
