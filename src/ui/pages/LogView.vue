@@ -1,10 +1,6 @@
 <script lang="ts" setup>
 import { onUnmounted } from 'vue'
 
-import Accordion from 'primevue/accordion';
-import AccordionPanel from 'primevue/accordionpanel';
-import AccordionHeader from 'primevue/accordionheader';
-import AccordionContent from 'primevue/accordioncontent';
 import { store } from '../store';
 import { isSuccess, isError } from '../models/UILogEntry.ts';
 import { fetchLogs } from '../service/LogService.ts';
