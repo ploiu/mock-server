@@ -1,6 +1,6 @@
 # mock-server
 
-A simple mock server written in Typescript and using [Deno](https://deno.land)
+A simple mock server written in Vue + Typescript + [Deno](https://deno.land)
 
 ## Why
 
@@ -21,11 +21,15 @@ any advance functionality. For what I personally need, it should:
 - be portable; mocks should be easily transferable across machines
 - support path and query variables
 
-## Building
-`deno task install`
+## Getting Started
+- `deno task dev` starts up the deno backend and vue frontend, and allows for live reloading
+- `deno task run` builds the entire project and runs the application how it would when installed
+- `deno task install` builds and installs the application
+
+If you need help remembering what does what, just run `deno task`
 
 ## Testing
-`deno task test` for uni tests, `deno task ui-tests` for UI tests. Be sure for UI tests to navigate to the url provided in console output
+`deno task test` for unit tests, `deno task ui-tests` for UI tests. Be sure for UI tests to navigate to the url provided in console output
 
 ## Mocks
 When run, a `config.json` file will be created with an example route, if a `config.json` file does not exist in _your current directory_ (you can also specify a config file with the --config flag). The config file should list all your mock routes. An example route would look like this:
