@@ -16,6 +16,7 @@ node_modules
 /generated
 src/ui/dist
 /src/ui/ui.css.map
+/src/ts/generatedUi.ts
 
 # I can't remember why, but there was a reason for this
 *.exe
