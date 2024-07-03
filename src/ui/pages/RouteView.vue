@@ -54,7 +54,7 @@ const selectRoute = (route: UIRoute) => {
 
   >#routeList {
     display: flex;
-    max-height: 85vh;
+    max-height: 70vh;
     overflow-y: auto;
     flex-direction: column;
 

@@ -122,6 +122,7 @@ const saveRoute = () => {
 #routeEditor {
   overflow-y: auto;
   height: 90vh;
+  padding-bottom: 5em;
 }
 
 #routeEditor>.row {

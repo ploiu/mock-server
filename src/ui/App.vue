@@ -10,22 +10,25 @@ fetchRoutes().then(routes => store.routes = routes)
 <template>
   <main>
     <div class="row">
+      <h1>Ploiu Mock Server</h1>
+    </div>
+    <div class="row">
       <nav class="col-3">
-      <RouterLink to="/">
-        <Button label="Route Editor" />
-      </RouterLink>
-      <RouterLink to="/logs">
-        <Button label="Route Log" />
-      </RouterLink>
-    </nav>
+        <RouterLink to="/">
+          <Button label="Route Editor" />
+        </RouterLink>
+        <RouterLink to="/logs">
+          <Button label="Route Log" />
+        </RouterLink>
+      </nav>
     </div>
     <RouterView />
   </main>
 </template>
 
 <style scoped>
-  nav {
-    display: flex;
-    justify-content: space-between;
-  }
+nav {
+  display: flex;
+  justify-content: space-between;
+}
 </style>

@@ -52,6 +52,10 @@ body {
   color: var(--color-scheme-primary);
 }
 
+html {
+  overflow-y: hidden;
+}
+
 #app {
   width: 98%;
   > main {
