@@ -6,13 +6,13 @@ import LogManager from '../../LogManager.ts';
 export class PassThroughRoute extends Route {
   constructor(
     // a name to help the user distinguish which route is which
-    public title: string,
+    public override title: string,
     // the url that the route gets bound on, may include path and query variables
-    public url: string,
+    public override url: string,
     // the request method the route gets bound on
-    public method: RequestMethod,
+    public override method: RequestMethod,
     // whether the route is "turned on"
-    public isEnabled: boolean,
+    public override isEnabled: boolean,
     // the url to redirect to, our `url` property will be appended to this as the path to hit
     public redirectUrl: string,
   ) {
@@ -29,7 +29,7 @@ export class PassThroughRoute extends Route {
     );
   }
 
-  async execute(request: Request): Promise<Response> {
+  override async execute(request: Request): Promise<Response> {
     const body = await request.text();
     try {
       const url = new URL(request.url);

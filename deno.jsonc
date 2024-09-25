@@ -11,7 +11,9 @@
       "src/ui/vite-env.d.ts",
       "src/ui/dist/**/*",
       "src/ui-old/**/*",
-      "generated/**/*"
+      "generated/**/*",
+      "**/*.css",
+      "**/*.html"
     ],
     "singleQuote": true,
     "useTabs": false,
