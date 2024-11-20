@@ -24,7 +24,7 @@ export class LogRoute extends Route {
   constructor() {
     super(
       'New Log Route',
-      '/mock-server-logs-new',
+      '/mock-server-logs',
       RequestMethod.GET,
       new Headers(),
       null,
@@ -59,7 +59,11 @@ export class LogRoute extends Route {
       start(controller) {
         const handler = (e: Event) => {
           if (e instanceof CustomEvent) {
-            controller.enqueue(e.detail);
+            try {
+              controller.enqueue(e.detail);
+            } catch (e) {
+              console.error((e as Error).message);
+            }
           }
         };
         globalThis.addEventListener('log', handler);

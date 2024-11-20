@@ -6,10 +6,9 @@ import { isSuccess, isError } from '../models/UILogEntry.ts';
 import { fetchLogs } from '../service/LogService.ts';
 import Button from 'primevue/button';
 
-const routePullInterval = setInterval(() => {
-    fetchLogs().then(logs => store.logs = [...store.logs, ...logs].sort((a, b) => a.timestamp - b.timestamp));
-}, 1_000)
-onUnmounted(() => clearInterval(routePullInterval))
+const source = fetchLogs();
+source.onmessage = console.log
+onUnmounted(() => source.close())
 
 const formatDate = (timestamp: number) => new Date(timestamp).toISOString()
 
