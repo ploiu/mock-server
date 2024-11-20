@@ -2,8 +2,13 @@
 import { RequestMethod } from './RequestMethod.ts';
 import UrlVariable from './UrlVariable.ts';
 import { red } from '@std/fmt/colors';
-import LogManager from '../LogManager.ts';
+import {
+  LogManager,
+  RequestLogEntry,
+  ResponseLogEntry,
+} from '../LogManager.ts';
 import { RouteTypes } from './RouteTypes.ts';
+import { LogTypes } from '../model/LogModels.ts';
 
 /**
  * Object that matches against a request and generates a mock response
@@ -64,19 +69,30 @@ export default class Route {
    * @param request
    */
   public async execute(request: Request): Promise<Response> {
+    const logId = crypto.randomUUID().toLowerCase();
     let bodyString = '';
     if (request.body) {
       bodyString = await request.text();
     }
-    LogManager.newEntry(
+    const requestLog = new RequestLogEntry(
       Route.getPath(request.url),
       request.method.toUpperCase(),
+      null,
       bodyString,
       request.headers,
+      +new Date(),
     );
+    LogManager.enqueueLog(requestLog, logId, LogTypes.REQUEST);
     try {
       const url = request.url;
       const responseBody = this.populateBodyTemplate(url);
+      const responseLog = new ResponseLogEntry(
+        responseBody,
+        this.responseHeaders,
+        +new Date(),
+        this.responseStatus,
+      );
+      LogManager.enqueueLog(responseLog, logId, LogTypes.RESPONSE);
       return new Response(responseBody, {
         status: this.responseStatus,
         headers: this.createResponseHeaders(),

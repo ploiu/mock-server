@@ -8,16 +8,12 @@ import UpdateConfigRoute from './request/specialRoutes/UpdateConfigRoute.ts';
 import UIRoute from './request/specialRoutes/UIRoute.ts';
 import FetchRoutesRoute from './request/specialRoutes/FetchRoutesRoute.ts';
 import SaveRoutesRoute from './request/specialRoutes/SaveRoutesRoute.ts';
-import LogRoute from './request/specialRoutes/LogRoute.ts';
-import LogManager from './LogManager.ts';
+import { LogManager } from './LogManager.ts';
 import './extensions/HeaderExtensions.ts';
 import { type ScriptDefinition, validateArgs } from '@ploiu/arg-helper';
 
 import uiComponents from './generatedUi.ts';
-import {
-  LogRoute as NewLogRoute,
-  LogTypes,
-} from './request/specialRoutes/NewLogRoute.ts';
+import { LogRoute as NewLogRoute } from './request/specialRoutes/LogRoute.ts';
 
 const definition: ScriptDefinition = {
   arguments: [
@@ -166,7 +162,6 @@ function setupSpecialRoutes(
     new UIRoute(),
     new FetchRoutesRoute(routeManager),
     new SaveRoutesRoute(configLocation, routeManager),
-    new LogRoute(),
     new NewLogRoute(),
   ];
 }

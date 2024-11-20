@@ -3,6 +3,8 @@ import { RouteTypes } from '../ts/request/RouteTypes.ts';
 import { RequestMethod } from '../ts/request/RequestMethod.ts';
 import RouteFactory from '../ts/request/RouteFactory.ts';
 
+globalThis.enqueueLogEvent = () => {};
+
 Deno.test('fromObject differentiates between response as object and response as string', () => {
   const routeStringResponse = RouteFactory.create({
     title: 'test',
