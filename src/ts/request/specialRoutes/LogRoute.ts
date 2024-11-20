@@ -28,7 +28,7 @@ export default class LogRoute extends Route {
    * sends the current batch of logs to the client. This is meant to be periodically polled
    */
   //deno-lint-ignore require-await
-  async execute(_request: Request): Promise<Response> {
+  override async execute(_request: Request): Promise<Response> {
     // if we're not done writing, we should store our logs in our backLogs and re-try sending everything next time
     return new Response(JSON.stringify(LogManager.getLogs()), {
       status: 200,

@@ -31,6 +31,7 @@ export default class LogManager {
    * @param headers
    * @param message
    */
+  // TODO id for request and response logs
   public static newEntry(
     url: string | null,
     method: string | null,

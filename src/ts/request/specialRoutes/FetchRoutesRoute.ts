@@ -31,7 +31,7 @@ export default class FetchRoutesRoute extends Route {
   }
 
   //deno-lint-ignore require-await
-  async execute(_request: Request): Promise<Response> {
+  override async execute(_request: Request): Promise<Response> {
     // get all the routes in the route manager
     const routes = this.routeManager.routes.filter((it: Route) =>
       !this.excludedRoutes.includes(it.url)

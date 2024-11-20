@@ -28,7 +28,7 @@ export default class SaveRoutesRoute extends Route {
     }
   }
 
-  async execute(request: Request): Promise<Response> {
+  override async execute(request: Request): Promise<Response> {
     try {
       // our json is passed in as bytes, so we need to read them into a buffer and parse the buffer into a JSON string
       const requestBody: ReadableStream | null = request.body;
