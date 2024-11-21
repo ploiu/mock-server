@@ -1,16 +1,7 @@
-import { LogTypes } from '../../model/LogModels.ts';
+import { Log } from '../../model/LogModels.ts';
 import { RequestMethod } from '../RequestMethod.ts';
 import Route from '../Route.ts';
 import { RouteTypes } from '../RouteTypes.ts';
-
-export type Log = {
-  /** whether the log is for an outgoing request or an incoming response */
-  type: LogTypes;
-  /** the data for the request/response */
-  data: string;
-  /** the id for the request/response used to tie the requests and responses for the same transaction together */
-  id: string;
-};
 
 declare global {
   /** Adds a new log event to be sent to consumers in the browser */
@@ -41,7 +32,7 @@ export class LogRoute extends Route {
   private init() {
     if (!('enqueLogEvent' in globalThis)) {
       globalThis.enqueueLogEvent = (log: Log): void => {
-        const event = `data: ${JSON.stringify(log)}\nid: ${log.id}\n\n`;
+        const event = `data: ${JSON.stringify(log)}\n\n`;
         globalThis.dispatchEvent(
           new CustomEvent('log', {
             detail: this.encoder.encode(event),
@@ -57,7 +48,7 @@ export class LogRoute extends Route {
     // also handling it this way allows all open tabs to receive events, which was a bug introduced when this project moved off of SSE when deno broke it a few years ago
     const stream = new ReadableStream({
       start(controller) {
-        const handler = (e: Event) => {
+        handler = (e: Event) => {
           if (e instanceof CustomEvent) {
             try {
               controller.enqueue(e.detail);

@@ -67,6 +67,18 @@ accordion-element, span.error-message {
   font-family: var(--font-family);
 }
 
+accordion-element {
+  &.request-response-log {
+    --accordion-title-background: var(--teal-900);
+    --accordion-open-title-background: var(--teal-800);
+  }
+
+  &.headers-body-log {
+    --accordion-title-background: var(--bluegray-900);
+    --accordion-open-title-background: var(--bluegray-800);
+  }
+}
+
 @layer primevue {
   * {
     font-family: var(--font-family);

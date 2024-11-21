@@ -1,4 +1,3 @@
-//deno-lint-ignore-file no-explicit-any
 import {
   bgBlue,
   bgBrightBlue,
@@ -13,9 +12,11 @@ import {
   yellow,
 } from '@std/fmt/colors';
 import { RequestMethod } from './request/RequestMethod.ts';
-import { Log } from './request/specialRoutes/LogRoute.ts';
-import { LogTypes } from './model/LogModels.ts';
-
+import { Log, LogEntry, LogTypes, RequestLogEntry } from './model/LogModels.ts';
+declare global {
+  /** Adds a new log event to be sent to consumers in the browser */
+  function enqueueLogEvent(log: Log): void;
+}
 /**
  * A class that logs to the console when certain routes are hit, and stores those logs for the
  * `LogRoutes` route to consume every time it needs to poll for log updates
@@ -41,7 +42,7 @@ export class LogManager {
     type: LogTypes,
   ): void {
     const log: Log = {
-      data: JSON.stringify(logData),
+      data: logData,
       type,
       id,
     };
@@ -86,52 +87,5 @@ export class LogManager {
         // we should never reach here
         return ((str: string) => str);
     }
-  }
-}
-
-/**
- * Represents a log entry to be transformed into a console log on the server side and an event entry to be sent to the client side
- */
-class LogEntry {
-  public headers: any = {};
-
-  constructor(
-    // public url: string | null,
-    // public method: string | null,
-    public body: any,
-    headers: Headers | null,
-    public timestamp: number,
-    // public message: string | null,
-  ) {
-    // the `Headers` prototype doesn't map to a simple object, so we need to do that ourselves
-    if (headers) {
-      for (const headerPair of headers.entries()) {
-        this.headers[headerPair[0]] = headerPair[1];
-      }
-    }
-  }
-}
-
-export class RequestLogEntry extends LogEntry {
-  constructor(
-    public url: string | null,
-    public method: string | null,
-    public message: string | null,
-    body: any,
-    headers: Headers | null,
-    timestamp: number,
-  ) {
-    super(body, headers, timestamp);
-  }
-}
-
-export class ResponseLogEntry extends LogEntry {
-  constructor(
-    body: any,
-    headers: Headers,
-    timestamp: number,
-    public responseCode: number,
-  ) {
-    super(body, headers, timestamp);
   }
 }

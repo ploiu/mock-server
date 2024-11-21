@@ -1,12 +1,12 @@
 import Route from '../Route.ts';
 import { RequestMethod } from '../RequestMethod.ts';
 import { RouteTypes } from '../RouteTypes.ts';
+import { LogManager } from '../../LogManager.ts';
 import {
-  LogManager,
+  LogTypes,
   RequestLogEntry,
   ResponseLogEntry,
-} from '../../LogManager.ts';
-import { LogTypes } from '../../model/LogModels.ts';
+} from '../../model/LogModels.ts';
 
 export class PassThroughRoute extends Route {
   constructor(

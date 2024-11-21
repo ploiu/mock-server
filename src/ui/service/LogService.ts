@@ -1,5 +1,3 @@
-import { UILogEntry } from '../models/UILogEntry.ts';
-
 const url = 'VITE_BASE_URL' in import.meta.env
   ? import.meta.env.VITE_BASE_URL
   : '';

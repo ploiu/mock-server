@@ -2,13 +2,13 @@
 import { RequestMethod } from './RequestMethod.ts';
 import UrlVariable from './UrlVariable.ts';
 import { red } from '@std/fmt/colors';
+import { LogManager } from '../LogManager.ts';
+import { RouteTypes } from './RouteTypes.ts';
 import {
-  LogManager,
+  LogTypes,
   RequestLogEntry,
   ResponseLogEntry,
-} from '../LogManager.ts';
-import { RouteTypes } from './RouteTypes.ts';
-import { LogTypes } from '../model/LogModels.ts';
+} from '../model/LogModels.ts';
 
 /**
  * Object that matches against a request and generates a mock response

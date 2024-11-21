@@ -1,6 +1,6 @@
 import { reactive } from 'vue';
 import { UIRoute } from './models/index.ts';
-import { UILogEntry } from './models/UILogEntry.ts';
+import { LogEntry } from '../ts/model/LogModels.ts';
 
 type StoreFields = {
   routes: UIRoute[];
@@ -8,7 +8,7 @@ type StoreFields = {
 
 const storeBody = () => {
   let _routes: UIRoute[] = [];
-  let _logs: UILogEntry[] = [];
+  let _logs: LogEntry[] = [];
   return {
     get routes() {
       return _routes;
@@ -21,7 +21,8 @@ const storeBody = () => {
     get logs() {
       return _logs;
     },
-    set logs(l: UILogEntry[]) {
+    set logs(l: LogEntry[]) {
+      console.log('setting logs');
       _logs = l;
     },
   } as StoreFields;
