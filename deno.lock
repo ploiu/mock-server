@@ -44,6 +44,7 @@
     "jsr:@std/streams@^1.0.6": "1.0.6",
     "jsr:@std/streams@^1.0.8": "1.0.8",
     "jsr:@std/streams@~0.224.5": "0.224.5",
+    "npm:@primevue/themes@*": "4.2.3",
     "npm:@types/node@*": "18.16.19",
     "npm:@vitejs/plugin-vue@^5.0.4": "5.0.4_vite@5.2.10__@types+node@18.16.19_vue@3.4.27_@types+node@18.16.19",
     "npm:@vitejs/plugin-vue@^5.1.4": "5.1.4_vite@5.2.10__@types+node@18.16.19_vue@3.4.27_@types+node@18.16.19",
@@ -52,6 +53,7 @@
     "npm:primevue@*": "3.52.0_vue@3.4.27",
     "npm:primevue@^3.52.0": "3.52.0_vue@3.4.27",
     "npm:primevue@^4.2.2": "4.2.2_vue@3.4.27",
+    "npm:primevue@^4.2.3": "4.2.3_vue@3.4.27",
     "npm:vite@*": "5.2.10_@types+node@18.16.19",
     "npm:vite@^5.4.11": "5.4.11_@types+node@18.16.19",
     "npm:vite@^5.4.7": "5.4.7_@types+node@18.16.19",
@@ -438,25 +440,55 @@
     "@primeuix/styled@0.3.1": {
       "integrity": "sha512-MIPtektNrFwEKJU0qXrguoultADtxMC39ghwXIGP3DR3zsB7vWk6VhJ1Mo7TxgWsVi3kHnh6g5v9X50eMFcBHw==",
       "dependencies": [
-        "@primeuix/utils"
+        "@primeuix/utils@0.3.1"
+      ]
+    },
+    "@primeuix/styled@0.3.2": {
+      "integrity": "sha512-ColZes0+/WKqH4ob2x8DyNYf1NENpe5ZguOvx5yCLxaP8EIMVhLjWLO/3umJiDnQU4XXMLkn2mMHHw+fhTX/mw==",
+      "dependencies": [
+        "@primeuix/utils@0.3.2"
       ]
     },
     "@primeuix/utils@0.3.1": {
       "integrity": "sha512-KFJ8FylTX2j3AN6AvkF8JGSUNb7Dtqz1T5mlZnINDb6bwW+/V/d5wISiMEdhzdso69mmOX7IlYUDsj0w0pvxvA=="
     },
+    "@primeuix/utils@0.3.2": {
+      "integrity": "sha512-B+nphqTQeq+i6JuICLdVWnDMjONome2sNz0xI65qIOyeB4EF12CoKRiCsxuZ5uKAkHi/0d1LqlQ9mIWRSdkavw=="
+    },
     "@primevue/core@4.2.2_vue@3.4.27": {
       "integrity": "sha512-ZxlbPBKTSpKN2mht2noiFQV689HH2KiM5yDxHyY0NJafxbB16SLgWWwRDcPulNrbLmu5e3joutTv5tB/52kvAQ==",
       "dependencies": [
-        "@primeuix/styled",
-        "@primeuix/utils",
+        "@primeuix/styled@0.3.1",
+        "@primeuix/utils@0.3.1",
+        "vue@3.4.27"
+      ]
+    },
+    "@primevue/core@4.2.3_vue@3.4.27": {
+      "integrity": "sha512-Qjxl6rPzkvLaUQQeM5wXlmFQK9Pox+rSC+r7sX9ZGXeacD0LJny9YAF0APDv/V5Z1RiXApDvfOQGeu7Xg50vyg==",
+      "dependencies": [
+        "@primeuix/styled@0.3.2",
+        "@primeuix/utils@0.3.2",
         "vue@3.4.27"
       ]
     },
     "@primevue/icons@4.2.2_vue@3.4.27": {
       "integrity": "sha512-x0AwfjB94MoLsmNyQtSGgrEWhZ52SzRQ3X5hEUA30L7tdob66qYmiMKCnjfq2gvJIB477DwB7cxJZhaTxspsDw==",
       "dependencies": [
-        "@primeuix/utils",
-        "@primevue/core"
+        "@primeuix/utils@0.3.1",
+        "@primevue/core@4.2.2_vue@3.4.27"
+      ]
+    },
+    "@primevue/icons@4.2.3_vue@3.4.27": {
+      "integrity": "sha512-2yitSASyLdKtKPy8Fw8A71wycfZ14/lIlJ70JP0yGRy1nYbEBzEteMDGFOnlkFokbK/wdx9oOdYTDEul37FDdg==",
+      "dependencies": [
+        "@primeuix/utils@0.3.2",
+        "@primevue/core@4.2.3_vue@3.4.27"
+      ]
+    },
+    "@primevue/themes@4.2.3": {
+      "integrity": "sha512-hzHEwUWkTQihUEDmT9U3QADoAsYbA6mif6RJSR/hDTnPdXIcmr5RuZGq3pnLl943KfJTBiSp98F6LvSB8boJAw==",
+      "dependencies": [
+        "@primeuix/styled@0.3.2"
       ]
     },
     "@rollup/rollup-android-arm-eabi@4.17.1": {
@@ -1735,10 +1767,19 @@
     "primevue@4.2.2_vue@3.4.27": {
       "integrity": "sha512-L+WWWdSbyTCwJDLMKoFQpTr2C/VFQHoArPzw8xFwADOB7I5OsDCd5ZQaD+WEn3iFG/25EkFFt59sxGb69zf3eQ==",
       "dependencies": [
-        "@primeuix/styled",
-        "@primeuix/utils",
-        "@primevue/core",
-        "@primevue/icons"
+        "@primeuix/styled@0.3.1",
+        "@primeuix/utils@0.3.1",
+        "@primevue/core@4.2.2_vue@3.4.27",
+        "@primevue/icons@4.2.2_vue@3.4.27"
+      ]
+    },
+    "primevue@4.2.3_vue@3.4.27": {
+      "integrity": "sha512-kAkSOHmyBhe0NNzjfmZSAFNlxAWPTuTjWvYSxSv2OLVdy61F+IPQAENygaB7UdB4wY7NNxeBVbphEgjuipwTww==",
+      "dependencies": [
+        "@primeuix/styled@0.3.2",
+        "@primeuix/utils@0.3.2",
+        "@primevue/core@4.2.3_vue@3.4.27",
+        "@primevue/icons@4.2.3_vue@3.4.27"
       ]
     },
     "process@0.11.10": {

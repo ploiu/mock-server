@@ -5,6 +5,7 @@ import { createMemoryHistory, createRouter, RouteRecordRaw } from 'vue-router';
 import RouteView from './pages/RouteView.vue';
 import LogView from './pages/LogView/LogView.vue';
 import PrimeVue from 'primevue/config';
+import Lara from '@primevue/themes/lara';
 
 const routes = [
   { path: '/', component: RouteView },
@@ -18,5 +19,14 @@ const router = createRouter({
 
 createApp(App)
   .use(router)
-  .use(PrimeVue)
+  .use(PrimeVue, {
+    theme: {
+      preset: Lara,
+      options: {
+        prefix: 'p',
+        darkModeSelector: 'system',
+        cssLayer: true,
+      },
+    },
+  })
   .mount('#app');

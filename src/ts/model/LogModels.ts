@@ -17,15 +17,13 @@ export type Log = {
  * Represents a log entry to be transformed into a console log on the server side and an event entry to be sent to the client side
  */
 export class LogEntry {
-  public headers: any = {};
+  public headers: Record<string, string> = {};
 
   constructor(
-    // public url: string | null,
-    // public method: string | null,
+    // deno-lint-ignore no-explicit-any
     public body: any,
     headers: Headers | null,
     public timestamp: number,
-    // public message: string | null,
   ) {
     // the `Headers` prototype doesn't map to a simple object, so we need to do that ourselves
     if (headers) {
@@ -41,6 +39,7 @@ export class RequestLogEntry extends LogEntry {
     public url: string | null,
     public method: string | null,
     public message: string | null,
+    // deno-lint-ignore no-explicit-any
     body: any,
     headers: Headers | null,
     timestamp: number,
@@ -51,6 +50,7 @@ export class RequestLogEntry extends LogEntry {
 
 export class ResponseLogEntry extends LogEntry {
   constructor(
+    // deno-lint-ignore no-explicit-any
     body: any,
     headers: Headers,
     timestamp: number,

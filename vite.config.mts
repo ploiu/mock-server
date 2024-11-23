@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [vue({
     template: {
       compilerOptions: {
-        isCustomElement: (tag) => ['accordion-element'].includes(tag),
+        isCustomElement: (tag) =>
+          ['accordion-element', 'accordion-fan'].includes(tag),
       },
     },
   })],

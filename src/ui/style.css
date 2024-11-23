@@ -5,6 +5,9 @@
   /* non-color vars */
   --border-radius: 4px;
   --font-family: 'Fira Code', 'Jetbrains Mono', monospace !important;
+  --accordion-title-background: var(--primary-900);
+  --accordion-open-title-background: var(--primary-800);
+  --accordion-title-text-transorm: none;
 }
 
 .request-method-get {

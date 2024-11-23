@@ -32,13 +32,6 @@ watch(store.logs, (newLogs: Log[]) => {
       group.error = log.data as RequestLogEntry;
     }
   }
-  // accordion is only expanded to the initial child count. However the accordion element does not currently resize when children are added to the body, so we have to add this hack for now
-  // TODO use Mutation Observer in the accordion library to detect when children are added and resize the body https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-  [...document.querySelectorAll('accordion-element.open')].forEach((el) => {
-    console.log('toggling');
-    el.collapse();
-    setTimeout(() => el.expand(), 10);
-  });
 });
 
 export { logs };

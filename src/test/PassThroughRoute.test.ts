@@ -3,6 +3,7 @@ import { RequestMethod } from '../ts/request/RequestMethod.ts';
 import { RouteTypes } from '../ts/request/RouteTypes.ts';
 import RouteFactory from '../ts/request/RouteFactory.ts';
 
+// deno-lint-ignore no-explicit-any
 (globalThis as any).enqueueLogEvent = () => {};
 
 Deno.test('should make a call to the redirect url when invoked', async () => {

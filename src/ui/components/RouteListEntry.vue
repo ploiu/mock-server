@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { UIRoute } from '../models'
 import Card from 'primevue/card';
-import InputSwitch from 'primevue/inputswitch';
+import ToggleSwitch from 'primevue/toggleswitch';
 import Button from 'primevue/button';
 import {ref} from 'vue';
 import RouteEditor from './RouteEditor.vue';
@@ -34,7 +34,7 @@ const toggleEnabled = (e: ChangeEvent) => {
             <div class="row">
                 <div class="col-3 enable-toggle-group">
                     <span>enabled</span>
-                    <InputSwitch :modelValue="props.route.isEnabled" @change="toggleEnabled" />
+                    <ToggleSwitch :modelValue="props.route.isEnabled" @change="toggleEnabled" />
                 </div>
                 <div class="col-9 button-container">
                     <Button label="Delete" severity="danger" @click="() => emit('delete', route)" />
