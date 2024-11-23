@@ -2,7 +2,7 @@ import Route from '../Route.ts';
 import RouteManager from '../RouteManager.ts';
 import { RequestMethod } from '../RequestMethod.ts';
 import { readConfigFile } from '../../config/ConfigManager.ts';
-import { LogManager } from '../../LogManager.ts';
+import LogManager from '../../LogManager.ts';
 import { RouteTypes } from '../RouteTypes.ts';
 
 /**

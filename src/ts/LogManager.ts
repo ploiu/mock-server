@@ -21,11 +21,7 @@ declare global {
  * A class that logs to the console when certain routes are hit, and stores those logs for the
  * `LogRoutes` route to consume every time it needs to poll for log updates
  */
-export class LogManager {
-  private static sseLogs: LogEntry[] = [];
-  // determines if we can read logs. This lock is in place because we clear the list when read
-  private static canReadLogs = true;
-
+export default class LogManager {
   /**
    * adds a log entry for the console and browser clients
    * @param url the request url

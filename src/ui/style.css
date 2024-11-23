@@ -5,54 +5,55 @@
   /* non-color vars */
   --border-radius: 4px;
   --font-family: 'Fira Code', 'Jetbrains Mono', monospace !important;
-  --accordion-title-background: var(--primary-900);
-  --accordion-open-title-background: var(--primary-800);
+  --accordion-title-background: var(--p-primary-900);
+  --accordion-open-title-background: var(--p-primary-800);
   --accordion-title-text-transorm: none;
+  --content-padding: 1.25rem;
 }
 
 .request-method-get {
-  background-color: var(--green-500);
+  background-color: var(--p-green-500);
 }
 
 .request-method-put {
-  background-color: var(--blue-500);
+  background-color: var(--p-blue-500);
 }
 
 .request-method-post {
-  background-color: var(--yellow-500);
+  background-color: var(--p-yellow-500);
 }
 
 .request-method-delete {
-  background-color: var(--red-500);
+  background-color: var(--p-red-500);
 }
 
 .request-method-head {
-  background-color: var(--teal-500);
+  background-color: var(--p-teal-500);
 }
 
 .request-method-connect {
-  background-color: var(--indigo-500);
+  background-color: var(--p-indigo-500);
 }
 
 .request-method-options {
-  background-color: var(--green-100);
-  color: var(--surface-0);
+  background-color: var(--p-green-100);
+  color: var(--p-surface-0);
 }
 
 .request-method-trace {
-  background-color: var(--purple-500);
+  background-color: var(--p-purple-500);
 }
 
 .request-method-patch {
-  background-color: var(--cyan-500);
+  background-color: var(--p-cyan-500);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--color-scheme-background);
-  color: var(--color-scheme-primary);
+  background-color: var(--p-color-scheme-background);
+  color: var(--p-color-scheme-primary);
 }
 
 html {
@@ -72,13 +73,13 @@ accordion-element, span.error-message {
 
 accordion-element {
   &.request-response-log {
-    --accordion-title-background: var(--teal-900);
-    --accordion-open-title-background: var(--teal-800);
+    --accordion-title-background: var(--p-teal-900);
+    --accordion-open-title-background: var(--p-teal-800);
   }
 
   &.headers-body-log {
-    --accordion-title-background: var(--bluegray-900);
-    --accordion-open-title-background: var(--bluegray-800);
+    --accordion-title-background: #282e38;
+    --accordion-open-title-background: #37404c;
   }
 }
 
