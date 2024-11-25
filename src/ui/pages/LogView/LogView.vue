@@ -18,7 +18,8 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
                 </div>
                 <div class="ploiu-accordion-body">
                     <!-- request log -->
-                    <accordion-element class="log-success request-response-log" v-if="'request' in logGroup" data-group="request/response">
+                    <accordion-element class="log-success request-response-log" v-if="'request' in logGroup"
+                        data-group="request/response">
                         <div class="ploiu-accordion-title">
                             <span>Request</span>
                             <span class="date">{{ formatDate(logGroup.request.timestamp) }}</span>
@@ -54,7 +55,8 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
                         </div>
                     </accordion-element>
                     <!-- response log -->
-                    <accordion-element class="log-success request-response-log" v-if="'response' in logGroup" data-group="request/response">
+                    <accordion-element class="log-success request-response-log" v-if="'response' in logGroup"
+                        data-group="request/response">
                         <div class="ploiu-accordion-title">
                             <span>Response</span>
                             <span class="date">{{ formatDate(logGroup.response.timestamp) }}</span>
@@ -139,7 +141,7 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
     }
 
     .log-headers {
-        background-color: var(--surface-a);
+        background-color: var(--surface-primary);
         border-radius: var(--border-radius);
         padding: var(--content-padding);
 
@@ -151,7 +153,7 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
                 margin: 0.5em;
 
                 .header-name {
-                    color: var(--primary-300);
+                    color: var(--p-primary-300);
 
                     &::after {
                         content: ": ";
@@ -162,7 +164,7 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
     }
 
     .log-body {
-        background-color: var(--surface-a);
+        background-color: var(--surface-primary);
         border-radius: var(--border-radius);
         padding: var(--content-padding);
         font-family: var(--font-family);
@@ -170,10 +172,10 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
 }
 
 .log-error {
-    background-color: var(--surface-a);
+    background-color: var(--surface-primary);
     border-radius: var(--border-radius);
     padding: var(--content-padding);
-    color: var(--red-500);
+    color: var(--p-red-500);
 }
 
 .log-success,

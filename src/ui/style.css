@@ -5,10 +5,10 @@
   /* non-color vars */
   --border-radius: 4px;
   --font-family: 'Fira Code', 'Jetbrains Mono', monospace !important;
-  --accordion-title-background: var(--p-primary-900);
-  --accordion-open-title-background: var(--p-primary-800);
-  --accordion-title-text-transorm: none;
+  --accordion-title-background: var(--p-primary-950);
+  --accordion-open-title-background: var(--p-primary-900);
   --content-padding: 1.25rem;
+  --surface-primary: var(--p-surface-800);
 }
 
 .request-method-get {
@@ -37,7 +37,7 @@
 
 .request-method-options {
   background-color: var(--p-green-100);
-  color: var(--p-surface-0);
+  color: black;
 }
 
 .request-method-trace {
@@ -64,6 +64,13 @@ html {
   width: 98%;
   > main {
     width: 100%;
+  }
+}
+
+accordion-element {
+  color: white;
+  > .ploiu-accordion-title {
+    text-transform: none;
   }
 }
 

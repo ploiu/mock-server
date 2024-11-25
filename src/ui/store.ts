@@ -22,7 +22,6 @@ const storeBody = () => {
       return _logs;
     },
     set logs(l: LogEntry[]) {
-      console.log('setting logs');
       _logs = l;
     },
   } as StoreFields;

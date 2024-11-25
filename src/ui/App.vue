@@ -10,7 +10,6 @@ fetchRoutes().then(routes => store.routes = routes)
 const source = fetchLogs();
 source.onmessage = e => {
   const parsed: LogEntry = JSON.parse(e.data)
-  console.debug(parsed)
   store.logs.push(parsed)
 }
 window.addEventListener('beforeunload', () => source.close())

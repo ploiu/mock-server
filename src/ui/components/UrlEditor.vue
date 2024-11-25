@@ -79,7 +79,7 @@ const change = () => {
 
 #renderedText {
     padding: calc(46px - 2em);
-    background-color: var(--surface-b);
+    background-color: var(--p-inputtext-background);
     height: 46px;
 }
 
@@ -87,26 +87,26 @@ const change = () => {
 // can't use scoped styles for generated html
 <style>
 .INVALID_PATH_PART, .INVALID_QUERY_PART {
-    color: var(--red-500);
+    color: var(--p-red-500);
 }
 
 .QUERY_GLOB_PART {
-    color: var(--blue-500);
+    color: var(--p-blue-500);
 }
 
 .REQUIRED_PATH_PARAM_PART {
-    color: var(--yellow-500);
+    color: var(--p-yellow-500);
 }
 
 .OPTIONAL_PATH_PARAM_PART {
-    color: var(--green-500);
+    color: var(--p-green-500);
 }
 
 .REQUIRED_QUERY_PARAM_PART {
-    color: var(--pink-500)
+    color: var(--p-pink-500)
 }
 
 .OPTIONAL_QUERY_PARAM_PART {
-    color: var(--cyan-500);
+    color: var(--p-cyan-500);
 }
 </style>

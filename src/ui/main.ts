@@ -4,7 +4,7 @@ import { createMemoryHistory, createRouter, RouteRecordRaw } from 'vue-router';
 import RouteView from './pages/RouteView.vue';
 import LogView from './pages/LogView/LogView.vue';
 import PrimeVue from 'primevue/config';
-import {definePreset} from '@primevue/themes';
+import { definePreset } from '@primevue/themes';
 import Lara from '@primevue/themes/lara';
 
 const routes = [
@@ -33,7 +33,7 @@ const themePreset = definePreset(Lara, {
       950: '{indigo.950}',
     },
   },
-})
+});
 
 createApp(App)
   .use(router)
@@ -45,6 +45,6 @@ createApp(App)
         darkModeSelector: 'system',
         cssLayer: true,
       },
-    }
+    },
   })
   .mount('#app');

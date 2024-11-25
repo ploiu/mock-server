@@ -4,7 +4,7 @@ import { RouteTypes } from '../../ts/request/RouteTypes.ts';
 import { RequestMethod } from '../../ts/request/RequestMethod.ts';
 import InputText from 'primevue/inputtext';
 import FloatLabel from 'primevue/floatlabel';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import UrlEditor from '../components/UrlEditor.vue';
 import TextArea from 'primevue/textarea';
 import Button from 'primevue/button';
@@ -51,7 +51,7 @@ const saveRoute = () => {
       </div>
       <!-- type  -->
       <div class="col-4">
-        <Dropdown id="routeTypes" v-model="item.routeType" :options="Object.values(RouteTypes)" placeholder="type"
+        <Select id="routeTypes" v-model="item.routeType" :options="Object.values(RouteTypes)" placeholder="type"
           @update:model-value="valueChange" />
       </div>
       <!-- status code  -->
@@ -66,7 +66,7 @@ const saveRoute = () => {
     <!-- method, url -->
     <div class="row">
       <div class="col-2">
-        <Dropdown id="requestMethod" v-model="item.method" :options="Object.keys(RequestMethod)" placeholder="Method"
+        <Select id="requestMethod" v-model="item.method" :options="Object.keys(RequestMethod)" placeholder="Method"
           @update:model-value="valueChange" />
       </div>
       <div class="col-10">
