@@ -4,7 +4,6 @@ import Card from 'primevue/card';
 import ToggleSwitch from 'primevue/toggleswitch';
 import Button from 'primevue/button';
 import {ref} from 'vue';
-import RouteEditor from './RouteEditor.vue';
 
 interface RouteListEntryProps {
     route: UIRoute
@@ -34,10 +33,10 @@ const toggleEnabled = (e: ChangeEvent) => {
             <div class="row">
                 <div class="col-3 enable-toggle-group">
                     <span>enabled</span>
-                    <ToggleSwitch :modelValue="props.route.isEnabled" @change="toggleEnabled" />
+                    <ToggleSwitch :modelValue="props.route.isEnabled" @change.stop="toggleEnabled" />
                 </div>
                 <div class="col-9 button-container">
-                    <Button label="Delete" severity="danger" @click="() => emit('delete', route)" />
+                    <Button label="Delete" severity="danger" @click.stop="() => emit('delete', route)" />
                 </div>
             </div>
         </template>

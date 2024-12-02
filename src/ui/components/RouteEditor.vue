@@ -11,6 +11,7 @@ import Button from 'primevue/button';
 import { ref, reactive } from 'vue';
 import { validateHeaderInput } from '../models/UIHeader.ts';
 
+
 type RouteEditorProps = {
   route: UIRoute
 }
@@ -35,7 +36,6 @@ const saveRoute = () => {
   emit('save', item);
   hasChanges.value = false;
 }
-
 </script>
 
 <template>

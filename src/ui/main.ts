@@ -5,6 +5,7 @@ import RouteView from './pages/RouteView.vue';
 import LogView from './pages/LogView/LogView.vue';
 import PrimeVue from 'primevue/config';
 import { definePreset } from '@primevue/themes';
+import ToastService from 'primevue/toastservice';
 import Lara from '@primevue/themes/lara';
 
 const routes = [
@@ -47,4 +48,5 @@ createApp(App)
       },
     },
   })
+  .use(ToastService)
   .mount('#app');

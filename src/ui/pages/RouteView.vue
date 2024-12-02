@@ -4,26 +4,44 @@ import { UIRoute } from '../models';
 import { fetchRoutes, saveRoutes } from '../service/RouteService';
 import { store } from '../store';
 import Button from 'primevue/button';
+import Toast from 'primevue/toast'
 import { ref } from 'vue';
 import RouteEditor from '../components/RouteEditor.vue';
 import { stringifyUIRoute, newUIRoute } from '../models/UIRoute';
+import { useToast } from 'primevue/usetoast';
+import type { ToastMessageOptions } from 'primevue/toast'
 
 const currentRoute = ref<UIRoute | null>(null);
 
+const toast = useToast();
+const successToast: ToastMessageOptions = { severity: 'success', summary: 'success', detail: 'Successfully saved mock', life: 2_500 }
+const errorToast: ToastMessageOptions = { severity: 'error', summary: 'error', detail: 'Failed to save mock. Check server logs for details.', life: 2_500 }
+const showSuccess = () => toast.add(successToast)
+const showError = () => toast.add(errorToast)
+
 const saveRoute = async (originalRoute: UIRoute | null, updatedRoute: UIRoute) => {
   const withoutOriginal = store.routes.filter(route => route !== originalRoute);
-  await saveRoutes([...withoutOriginal, updatedRoute])
+  try {
+    await saveRoutes([...withoutOriginal, updatedRoute])
+    showSuccess()
+  } catch {
+    showError()
+  }
   store.routes = await fetchRoutes()
   // re-select the saved route based on what we get
   currentRoute.value = store.routes.filter(it => stringifyUIRoute(it) === stringifyUIRoute(updatedRoute))[0]
 }
 
 const deleteRoute = async (route: UIRoute) => {
-  if(currentRoute.value && stringifyUIRoute(route) === stringifyUIRoute(currentRoute.value)) {
+  if (currentRoute.value && stringifyUIRoute(route) === stringifyUIRoute(currentRoute.value)) {
     currentRoute.value = null;
   }
   const without = store.routes.filter(it => stringifyUIRoute(it) !== stringifyUIRoute(route));
-  await saveRoutes(without)
+  try {
+    await saveRoutes(without)
+  } catch {
+    showError()
+  }
   store.routes = await fetchRoutes()
 }
 
@@ -34,6 +52,7 @@ const selectRoute = (route: UIRoute) => {
 </script>
 
 <template>
+  <Toast />
   <div class="row">
     <div id="routeListContainer" class="col-3">
       <div id="routeList">
