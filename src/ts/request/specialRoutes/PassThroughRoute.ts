@@ -67,6 +67,7 @@ export class PassThroughRoute extends Route {
         const headers = res.headers;
         const status = res.status;
         const responseLog = new ResponseLogEntry(
+          res.status,
           body,
           headers,
           +new Date(),

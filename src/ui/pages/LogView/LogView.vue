@@ -58,7 +58,7 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
                     <accordion-element class="log-success request-response-log" v-if="'response' in logGroup"
                         data-group="request/response">
                         <div class="ploiu-accordion-title">
-                            <span>Response</span>
+                            <span>Response - HTTP {{ logGroup.response.statusCode }}</span>
                             <span class="date">{{ formatDate(logGroup.response.timestamp) }}</span>
                         </div>
                         <div class="ploiu-accordion-body">

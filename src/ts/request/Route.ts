@@ -87,6 +87,7 @@ export default class Route {
       const url = request.url;
       const responseBody = this.populateBodyTemplate(url);
       const responseLog = new ResponseLogEntry(
+        this.responseStatus,
         responseBody,
         this.responseHeaders,
         +new Date(),

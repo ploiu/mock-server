@@ -50,6 +50,7 @@ export class RequestLogEntry extends LogEntry {
 
 export class ResponseLogEntry extends LogEntry {
   constructor(
+    public statusCode: number,
     // deno-lint-ignore no-explicit-any
     body: any,
     headers: Headers,
