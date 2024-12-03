@@ -5,7 +5,7 @@
   /* non-color vars */
   --border-radius: 4px;
   --font-family: 'Fira Code', 'Jetbrains Mono', monospace !important;
-  --accordion-title-background: var(--p-primary-950);
+  --accordion-title-background: var(--p-surface-800);
   --accordion-open-title-background: var(--p-primary-900);
   --content-padding: 1.25rem;
   --surface-primary: var(--p-surface-800);
