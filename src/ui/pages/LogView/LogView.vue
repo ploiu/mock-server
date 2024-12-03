@@ -15,6 +15,7 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
                     <span :class="`request-method request-method-${logGroup.request.method.toLowerCase()}`">{{
                         logGroup.request.method }}</span>
                     <span class="url">{{ logGroup.request.url }}</span>
+                    <span v-if="'response' in logGroup" class="http-code">HTTP {{ logGroup.response.statusCode }}</span>
                 </div>
                 <div class="ploiu-accordion-body">
                     <!-- request log -->
@@ -58,7 +59,7 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
                     <accordion-element class="log-success request-response-log" v-if="'response' in logGroup"
                         data-group="request/response">
                         <div class="ploiu-accordion-title">
-                            <span>Response - HTTP {{ logGroup.response.statusCode }}</span>
+                            <span>Response</span>
                             <span class="date">{{ formatDate(logGroup.response.timestamp) }}</span>
                         </div>
                         <div class="ploiu-accordion-body">
@@ -194,5 +195,9 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
         width: 25px;
         height: 25px;
     }
+}
+
+.http-code {
+    float: right;
 }
 </style>
