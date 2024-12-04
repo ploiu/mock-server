@@ -28,7 +28,7 @@ export default class UpdateConfigRoute extends Route {
   }
 
   //deno-lint-ignore require-await
-  async execute(request: Request): Promise<Response> {
+  override async execute(request: Request): Promise<Response> {
     LogManager.newEntry(
       Route.getPath(request.url),
       request.method.toUpperCase(),

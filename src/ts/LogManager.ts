@@ -1,4 +1,3 @@
-//deno-lint-ignore-file no-explicit-any
 import {
   bgBlue,
   bgBrightBlue,
@@ -13,44 +12,49 @@ import {
   yellow,
 } from '@std/fmt/colors';
 import { RequestMethod } from './request/RequestMethod.ts';
-
+import { Log, LogEntry, LogTypes, RequestLogEntry } from './model/LogModels.ts';
+declare global {
+  /** Adds a new log event to be sent to consumers in the browser */
+  function enqueueLogEvent(log: Log): void;
+}
 /**
  * A class that logs to the console when certain routes are hit, and stores those logs for the
  * `LogRoutes` route to consume every time it needs to poll for log updates
  */
 export default class LogManager {
-  private static sseLogs: LogEntry[] = [];
-  // determines if we can read logs. This lock is in place because we clear the list when read
-  private static canReadLogs = true;
-
   /**
-   * Logs the entry to the console and stores the entry in our sseLogs object
-   * @param url
-   * @param method
-   * @param body
-   * @param headers
-   * @param message
+   * adds a log entry for the console and browser clients
+   * @param url the request url
+   * @param method the request method
+   * @param body the request body
+   * @param headers request headers
+   * @param message error message, if any
+   * @param id the log id, must be same for the request/response in the same transaction
+   * @param type whether the log is for a request or a response
    */
-  public static newEntry(
-    url: string | null,
-    method: string | null,
-    body: string | null = '',
-    headers: Headers | null = null,
-    message: string | null = null,
+  public static enqueueLog(
+    logData: LogEntry,
+    id: string,
+    type: LogTypes,
   ): void {
-    LogManager.canReadLogs = false;
-    this.sseLogs.push(
-      new LogEntry(url, method, body, headers, +new Date(), message),
-    );
-    const color = this.getColorForMethod(
-      <RequestMethod> method?.toUpperCase(),
-    );
-    if (method && url) {
-      console.log(color(` ${method?.toUpperCase()} `) + ' ' + url);
-    } else if (message) {
-      console.log(yellow(message));
+    const log: Log = {
+      data: logData,
+      type,
+      id,
+    };
+    globalThis.enqueueLogEvent(log);
+    // logging responses to the console will only cause confusion
+    if (logData instanceof RequestLogEntry) {
+      const { method, url, message } = logData;
+      const color = this.getColorForMethod(
+        <RequestMethod> method?.toUpperCase(),
+      );
+      if (method && url) {
+        console.log(color(` ${method?.toUpperCase()} `) + ' ' + url);
+      } else if (message) {
+        console.log(yellow(message));
+      }
     }
-    LogManager.canReadLogs = true;
   }
 
   private static getColorForMethod(
@@ -78,40 +82,6 @@ export default class LogManager {
       default:
         // we should never reach here
         return ((str: string) => str);
-    }
-  }
-
-  /**
-   * clears and returns all the stored logs to be sent to the client
-   */
-  public static getLogs(): LogEntry[] {
-    if (LogManager.canReadLogs) {
-      return LogManager.sseLogs.splice(0, this.sseLogs.length);
-    } else {
-      return [];
-    }
-  }
-}
-
-/**
- * Represents a log entry to be transformed into a console log on the server side and an event entry to be sent to the client side
- */
-class LogEntry {
-  public headers: any = {};
-
-  constructor(
-    public url: string | null,
-    public method: string | null,
-    public body: any,
-    requestHeaders: Headers | null,
-    public timestamp: number,
-    public message: string | null,
-  ) {
-    // the `Headers` prototype doesn't map to a simple object, so we need to do that ourselves
-    if (requestHeaders) {
-      for (const headerPair of requestHeaders.entries()) {
-        this.headers[headerPair[0]] = headerPair[1];
-      }
     }
   }
 }

@@ -5,51 +5,55 @@
   /* non-color vars */
   --border-radius: 4px;
   --font-family: 'Fira Code', 'Jetbrains Mono', monospace !important;
+  --accordion-title-background: var(--p-surface-800);
+  --accordion-open-title-background: var(--p-primary-900);
+  --content-padding: 1.25rem;
+  --surface-primary: var(--p-surface-800);
 }
 
 .request-method-get {
-  background-color: var(--green-500);
+  background-color: var(--p-green-500);
 }
 
 .request-method-put {
-  background-color: var(--blue-500);
+  background-color: var(--p-blue-500);
 }
 
 .request-method-post {
-  background-color: var(--yellow-500);
+  background-color: var(--p-yellow-500);
 }
 
 .request-method-delete {
-  background-color: var(--red-500);
+  background-color: var(--p-red-500);
 }
 
 .request-method-head {
-  background-color: var(--teal-500);
+  background-color: var(--p-teal-500);
 }
 
 .request-method-connect {
-  background-color: var(--indigo-500);
+  background-color: var(--p-indigo-500);
 }
 
 .request-method-options {
-  background-color: var(--green-100);
-  color: var(--surface-0);
+  background-color: var(--p-green-100);
+  color: black;
 }
 
 .request-method-trace {
-  background-color: var(--purple-500);
+  background-color: var(--p-purple-500);
 }
 
 .request-method-patch {
-  background-color: var(--cyan-500);
+  background-color: var(--p-cyan-500);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--color-scheme-background);
-  color: var(--color-scheme-primary);
+  background-color: var(--p-color-scheme-background);
+  color: var(--p-color-scheme-primary);
 }
 
 html {
@@ -63,8 +67,27 @@ html {
   }
 }
 
+accordion-element {
+  color: white;
+  > .ploiu-accordion-title {
+    text-transform: none;
+  }
+}
+
 accordion-element, span.error-message {
   font-family: var(--font-family);
+}
+
+accordion-element {
+  &.request-response-log {
+    --accordion-title-background: var(--p-teal-900);
+    --accordion-open-title-background: var(--p-teal-800);
+  }
+
+  &.headers-body-log {
+    --accordion-title-background: #282e38;
+    --accordion-open-title-background: #37404c;
+  }
 }
 
 @layer primevue {

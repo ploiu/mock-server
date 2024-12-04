@@ -17,7 +17,7 @@ export default class UIRoute extends Route {
     );
   }
 
-  doesUrlMatch(url = ''): boolean {
+  override doesUrlMatch(url = ''): boolean {
     return url.toLowerCase().includes('/mock-server-ui') ||
       url.toLowerCase().includes('ui.css') ||
       url.toLowerCase().includes('ui.js') ||
@@ -29,7 +29,7 @@ export default class UIRoute extends Route {
    * handles serving the files to the browser
    * @param request
    */
-  async execute(request: Request): Promise<Response> {
+  override async execute(request: Request): Promise<Response> {
     if (request.url.toLowerCase().includes('/mock-server-ui')) {
       return await serveFile(request, './generated/ui.html');
     } else if (request.url.toLowerCase().includes('ui.css')) {

@@ -8,12 +8,13 @@ import UpdateConfigRoute from './request/specialRoutes/UpdateConfigRoute.ts';
 import UIRoute from './request/specialRoutes/UIRoute.ts';
 import FetchRoutesRoute from './request/specialRoutes/FetchRoutesRoute.ts';
 import SaveRoutesRoute from './request/specialRoutes/SaveRoutesRoute.ts';
-import LogRoute from './request/specialRoutes/LogRoute.ts';
 import LogManager from './LogManager.ts';
 import './extensions/HeaderExtensions.ts';
 import { type ScriptDefinition, validateArgs } from '@ploiu/arg-helper';
 
 import uiComponents from './generatedUi.ts';
+import { LogRoute } from './request/specialRoutes/LogRoute.ts';
+import { LogTypes, RequestLogEntry } from './model/LogModels.ts';
 
 const definition: ScriptDefinition = {
   arguments: [
@@ -123,16 +124,18 @@ function startServing(
         }
       }
     } else {
-      // new log saying the route wasn't found
-      LogManager.newEntry(
-        null,
-        null,
+      const notFoundLog = new RequestLogEntry(
         null,
         null,
         `requested route ${
           Route.getPath(request.url)
         }, method ${request.method} not found`,
+        null,
+        null,
+        +new Date(),
       );
+      // new log saying the route wasn't found
+      LogManager.enqueueLog(notFoundLog, crypto.randomUUID(), LogTypes.ERROR);
       return new Response('', {
         status: 404,
       });
