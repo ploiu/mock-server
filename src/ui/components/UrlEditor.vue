@@ -56,7 +56,7 @@ const change = () => {
 
 <template>
     <div id="renderedText" v-html="processInputText()"></div>
-    <InputText id="urlInput" type="text" :model-value="inputText" @update:model-value="value => inputText = value" @change="change" />
+    <InputText id="urlInput" type="text" :model-value="inputText" @update:model-value="value => inputText = ('/' + value).replace(/^\/\//, '/')" @change="change" />
 </template>
 
 <style scoped>
