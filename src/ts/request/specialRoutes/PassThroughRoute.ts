@@ -65,7 +65,14 @@ export class PassThroughRoute extends Route {
       .then(async (res) => {
         const body = await res.text();
         const headers = res.headers;
-        const status = res.status;
+        let status = res.status;
+        // deno throws an error if the status is 204 but the body is present. some APIs do this because they're dumb
+        if (
+          status === 101 || status === 204 || status === 205 ||
+          status === 304 && !!body
+        ) {
+          status = 200;
+        }
         const responseLog = new ResponseLogEntry(
           res.status,
           body,

@@ -2247,5 +2247,21 @@
     "yocto-queue@1.0.0": {
       "integrity": "sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g=="
     }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@ploiu/arg-helper@^1.0.1",
+      "jsr:@std/assert@^1.0.8",
+      "jsr:@std/cli@^1.0.6",
+      "jsr:@std/fmt@^1.0.3",
+      "jsr:@std/fs@^1.0.5",
+      "jsr:@std/http@^1.0.10",
+      "npm:@primevue/themes@*",
+      "npm:@vitejs/plugin-vue@^5.2.0",
+      "npm:primevue@^4.2.3",
+      "npm:vite@^5.4.11",
+      "npm:vue-router@^4.4.5",
+      "npm:vue@^3.5.13"
+    ]
   }
 }
