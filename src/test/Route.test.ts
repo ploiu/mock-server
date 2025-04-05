@@ -88,7 +88,7 @@ Deno.test('specificity for regular path segment', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(3, route.specificity);
+  assertEquals(route.specificity, 3);
 });
 
 Deno.test('specificity for required path variable', () => {
@@ -102,7 +102,7 @@ Deno.test('specificity for required path variable', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(2, route.specificity);
+  assertEquals(route.specificity, 2);
 });
 
 Deno.test('specificity for optional path variable', () => {
@@ -116,7 +116,7 @@ Deno.test('specificity for optional path variable', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(1, route.specificity);
+  assertEquals(route.specificity, 1);
 });
 
 Deno.test('specificity for catch-all path variable', () => {
@@ -130,7 +130,7 @@ Deno.test('specificity for catch-all path variable', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(0, route.specificity);
+  assertEquals(route.specificity, 0);
 });
 
 Deno.test('specificity for regular query param', () => {
@@ -144,7 +144,7 @@ Deno.test('specificity for regular query param', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(3, route.specificity);
+  assertEquals(route.specificity, 3);
 });
 
 Deno.test('specificity for mandatory query variable', () => {
@@ -158,7 +158,7 @@ Deno.test('specificity for mandatory query variable', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(2, route.specificity);
+  assertEquals(route.specificity, 2);
 });
 
 Deno.test('specificity for optional query variable', () => {
@@ -172,7 +172,7 @@ Deno.test('specificity for optional query variable', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(3, route.specificity);
+  assertEquals(route.specificity, 1);
 });
 
 Deno.test('specificity for catch-all query variable', () => {
@@ -186,7 +186,7 @@ Deno.test('specificity for catch-all query variable', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(0, route.specificity);
+  assertEquals(route.specificity, 0);
 });
 
 Deno.test('specificity for all path types', () => {
@@ -200,7 +200,7 @@ Deno.test('specificity for all path types', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(6, route.specificity);
+  assertEquals(route.specificity, 6);
 });
 
 Deno.test('specificity for all query types', () => {
@@ -214,7 +214,7 @@ Deno.test('specificity for all query types', () => {
     isEnabled: true,
     routeType: RouteTypes.DEFAULT,
   });
-  assertEquals(6, route.specificity);
+  assertEquals(route.specificity, 6);
 });
 
 Deno.test('misc specificity routes', () => {
@@ -227,8 +227,10 @@ Deno.test('misc specificity routes', () => {
     ':a': 2,
     ':a?': 1,
     '/a/:b?/:c?': 5,
-    '/:a/b/:c??test': 11,
-    '/:a/b/:c?test&:test2?': 12,
+    '/:a/b/:c??test': 9,
+    '/:a/b/:c?test&:test2?': 11,
+    '/a/b/c?test&:test2': 14,
+    '/:a/:b?/:c?test&:test2?': 9,
   };
   for (const [url, specificity] of Object.entries(routes)) {
     const route = RouteFactory.create({
@@ -242,8 +244,8 @@ Deno.test('misc specificity routes', () => {
       routeType: RouteTypes.DEFAULT,
     });
     assertEquals(
-      specificity,
       route.specificity,
+      specificity,
       `Expected route ${url} to have specificity ${specificity}, but it was actually ${route.specificity}`,
     );
   }

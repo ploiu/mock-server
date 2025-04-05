@@ -208,7 +208,7 @@ export default class Route {
         if (varValue) {
           bodyCopy = bodyCopy.replaceAll(
             replaceRegex,
-            <string>varValue,
+            <string> varValue,
           );
         }
       }
@@ -263,14 +263,42 @@ export default class Route {
    * - catch all query param (?:*) get +0 points
    */
   private scoreSpecificity() {
-    // instead of complicated regex, we're gonna split on ?. Splitting on ? means that we can separate out the query from the path
-    // but what if we have an optional path variable right next to a query param (like /:a??b)? We can actually detect that, because it
-    // shows up as an empty string (e.g. /:a??:b? => ['/:a', '', ':b', '']). This means that wherever we encounter a blank string, there's a ?? (or just ? if it's the last one)
-    const split = this.url.split('?').map(it => it === '' ? '?' : it)
-    // make sure that we don't orphan stray ? at the end
-    if (split.at(-1) === '?') {
-      const lastPart = // TODO it's not guaranteed that we have query params
+    let specificity = 0;
+    let url = this.url;
+    // make sure a "bad" url is normalized
+    if (!url.startsWith('/')) {
+      url = '/' + url;
     }
+    // it's way simpler to handle the path section and the query section separately
+    const [path, query] = url.split(/\?(?=[a-z0-9:])/i);
+    const splitPath = path.split('/');
+    // path will always be defined because we prefix it, but query could be undefined
+    const splitQuery = (query ?? '').split('&');
+    for (const pathPart of splitPath) {
+      // wild cards get nothing
+      if (pathPart.endsWith('*')) {
+        continue;
+      }
+      if (pathPart.startsWith(':')) {
+        specificity += pathPart.endsWith('?') ? 1 : 2;
+      } else if (pathPart.length > 0) {
+        specificity += 3;
+      }
+    }
+
+    for (const queryPart of splitQuery) {
+      // wild cards get nothing
+      if (queryPart.endsWith('*')) {
+        continue;
+      }
+      if (queryPart.startsWith(':')) {
+        specificity += queryPart.endsWith('?') ? 1 : 2;
+      } else if (queryPart.length > 0) {
+        specificity += 3;
+      }
+    }
+
+    this.#specificity = specificity;
   }
 
   /**
