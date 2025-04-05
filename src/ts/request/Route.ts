@@ -208,7 +208,7 @@ export default class Route {
         if (varValue) {
           bodyCopy = bodyCopy.replaceAll(
             replaceRegex,
-            <string> varValue,
+            <string>varValue,
           );
         }
       }
@@ -263,6 +263,14 @@ export default class Route {
    * - catch all query param (?:*) get +0 points
    */
   private scoreSpecificity() {
+    // instead of complicated regex, we're gonna split on ?. Splitting on ? means that we can separate out the query from the path
+    // but what if we have an optional path variable right next to a query param (like /:a??b)? We can actually detect that, because it
+    // shows up as an empty string (e.g. /:a??:b? => ['/:a', '', ':b', '']). This means that wherever we encounter a blank string, there's a ?? (or just ? if it's the last one)
+    const split = this.url.split('?').map(it => it === '' ? '?' : it)
+    // make sure that we don't orphan stray ? at the end
+    if (split.at(-1) === '?') {
+      const lastPart = // TODO it's not guaranteed that we have query params
+    }
   }
 
   /**

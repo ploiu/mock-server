@@ -137,7 +137,7 @@ Deno.test('specificity for regular query param', () => {
   const route = RouteFactory.create({
     title: 'test',
     method: RequestMethod.GET,
-    url: '?test',
+    url: '/:*?test',
     responseHeaders: {},
     response: null,
     responseStatus: 200,
@@ -151,7 +151,7 @@ Deno.test('specificity for mandatory query variable', () => {
   const route = RouteFactory.create({
     title: 'test',
     method: RequestMethod.GET,
-    url: '?:test',
+    url: '/:*?:test',
     responseHeaders: {},
     response: null,
     responseStatus: 200,
@@ -165,7 +165,7 @@ Deno.test('specificity for optional query variable', () => {
   const route = RouteFactory.create({
     title: 'test',
     method: RequestMethod.GET,
-    url: '?:test?',
+    url: '/:*?:test?',
     responseHeaders: {},
     response: null,
     responseStatus: 200,
@@ -179,7 +179,7 @@ Deno.test('specificity for catch-all query variable', () => {
   const route = RouteFactory.create({
     title: 'test',
     method: RequestMethod.GET,
-    url: '?:*',
+    url: '/:*?:*',
     responseHeaders: {},
     response: null,
     responseStatus: 200,
@@ -187,4 +187,64 @@ Deno.test('specificity for catch-all query variable', () => {
     routeType: RouteTypes.DEFAULT,
   });
   assertEquals(0, route.specificity);
+});
+
+Deno.test('specificity for all path types', () => {
+  const route = RouteFactory.create({
+    title: 'test',
+    method: RequestMethod.GET,
+    url: '/a/:b?/:c/:*',
+    responseHeaders: {},
+    response: null,
+    responseStatus: 200,
+    isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
+  });
+  assertEquals(6, route.specificity);
+});
+
+Deno.test('specificity for all query types', () => {
+  const route = RouteFactory.create({
+    title: 'test',
+    method: RequestMethod.GET,
+    url: '/:*?a&:b?&:c&:*',
+    responseHeaders: {},
+    response: null,
+    responseStatus: 200,
+    isEnabled: true,
+    routeType: RouteTypes.DEFAULT,
+  });
+  assertEquals(6, route.specificity);
+});
+
+Deno.test('misc specificity routes', () => {
+  const routes = {
+    '/a': 3,
+    'a': 3,
+    '/:b': 2,
+    '/:c?': 1,
+    '/:*': 0,
+    ':a': 2,
+    ':a?': 1,
+    '/a/:b?/:c?': 5,
+    '/:a/b/:c??test': 11,
+    '/:a/b/:c?test&:test2?': 12,
+  };
+  for (const [url, specificity] of Object.entries(routes)) {
+    const route = RouteFactory.create({
+      title: 'test',
+      method: RequestMethod.GET,
+      url,
+      responseHeaders: {},
+      response: null,
+      responseStatus: 200,
+      isEnabled: true,
+      routeType: RouteTypes.DEFAULT,
+    });
+    assertEquals(
+      specificity,
+      route.specificity,
+      `Expected route ${url} to have specificity ${specificity}, but it was actually ${route.specificity}`,
+    );
+  }
 });
