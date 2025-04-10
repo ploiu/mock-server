@@ -1,8 +1,7 @@
-import { assert, assertEquals, fail } from '@std/assert';
-import { RequestMethod } from '../ts/request/RequestMethod.ts';
-import RouteFactory from '../ts/request/RouteFactory.ts';
-import { RouteTypes } from '../ts/request/RouteTypes.ts';
-import Route from '../ts/request/Route.ts';
+import { assert, assertEquals } from '@std/assert';
+import { RequestMethod } from '../../ts/request/RequestMethod.ts';
+import RouteFactory from '../../ts/request/RouteFactory.ts';
+import { RouteTypes } from '../../ts/request/RouteTypes.ts';
 
 Deno.test('fromObject differentiates between response as object and response as string', () => {
   const routeStringResponse = RouteFactory.create({

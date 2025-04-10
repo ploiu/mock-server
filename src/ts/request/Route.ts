@@ -451,11 +451,11 @@ export default class Route {
     }
   }
 
-  public get compiledUrlRegex() {
+  get compiledUrlRegex() {
     return this.#compiledUrlRegex;
   }
 
-  public get specificity() {
+  get specificity() {
     return this.#specificity;
   }
 }

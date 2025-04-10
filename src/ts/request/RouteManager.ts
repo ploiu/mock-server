@@ -29,7 +29,6 @@ export default class RouteManager {
     specialRoutes: Route[],
     port: number,
   ): Route | null {
-    let matchingRoute: Route | null = null;
     const url = request.url.replace(/(?<=http:\/\/)127\.0\.0\.1/, 'localhost')
       .split(
         new RegExp(`localhost:${port}`),
@@ -37,16 +36,12 @@ export default class RouteManager {
     const method = request.method;
     // put specialRoutes first as they have priority
     const routesToMatchOn = [...specialRoutes, ...this.routes];
-    for (const route of routesToMatchOn) {
-      if (
-        (route.method === method || method === 'HEAD') &&
-        route.doesUrlMatch(url) &&
-        route.isEnabled
-      ) {
-        matchingRoute = route;
-        break;
-      }
-    }
-    return matchingRoute;
+    const matches = routesToMatchOn.filter((route) =>
+      route.isEnabled && (route.method === method || method === 'HEAD') &&
+      route.doesUrlMatch(url)
+    );
+    // sort on specificity so that we can get the most accurate match if there are multiples
+    const sorted = matches.sort((a, b) => a.specificity - b.specificity);
+    return sorted[0] ?? null;
   }
 }
