@@ -1,7 +1,7 @@
-//deno-lint-ignore-file no-explicit-any
 import Route from './Route.ts';
 import Config from '../config/Config.ts';
 import RouteFactory from './RouteFactory.ts';
+import { ConfigRouteV3 } from '../config/ConfigRoutes.ts';
 
 /**
  * Central location for matching requests to routes and executing the responses for those routes
@@ -14,8 +14,9 @@ export default class RouteManager {
    * @param {Config} config
    */
   public setupRoutes(config: Config) {
-    // @ts-ignore there's no type to cast it to aside from Object, and typescript doesn't like that either
-    this.routes = config.routes.map((it: any) => RouteFactory.create(it));
+    this.routes = config.routes.map((it: object) =>
+      RouteFactory.create(it as ConfigRouteV3)
+    );
   }
 
   /**
@@ -41,7 +42,7 @@ export default class RouteManager {
       route.doesUrlMatch(url)
     );
     // sort on specificity so that we can get the most accurate match if there are multiples
-    const sorted = matches.sort((a, b) => a.specificity - b.specificity);
+    const sorted = matches.sort((a, b) => b.specificity - a.specificity);
     return sorted[0] ?? null;
   }
 }
