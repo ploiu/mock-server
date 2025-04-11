@@ -1,4 +1,9 @@
-import { assert, assertEquals, assertNotEquals } from '@std/assert';
+import {
+  assert,
+  assertEquals,
+  assertFalse,
+  assertNotEquals,
+} from '@std/assert';
 import { RequestMethod } from '../../ts/request/RequestMethod.ts';
 import { RouteTypes } from '../../ts/request/RouteTypes.ts';
 import RouteFactory from '../../ts/request/RouteFactory.ts';
@@ -306,4 +311,135 @@ Deno.test('doesUrlMatch matches trailing / in url path', () => {
         route.compiledUrlRegex,
     );
   }
+});
+
+Deno.test('matches path wildcard with no query params', () => {
+  const route = RouteFactory.create({
+    routeType: RouteTypes.DEFAULT,
+    isEnabled: true,
+    title: 'test',
+    url: '/:*',
+    method: RequestMethod.GET,
+    responseHeaders: {},
+    response: null,
+    responseStatus: 0,
+  });
+  assert(route.doesUrlMatch('/asdfasdfasdf/gasd;f/asdfaskjdfl;ak'));
+  assert(route.doesUrlMatch('/asdfasdfasd'));
+  assert(route.doesUrlMatch('/asdfasdfasd/'));
+});
+
+Deno.test('matches path wildcard with query params', () => {
+  const route = RouteFactory.create({
+    routeType: RouteTypes.DEFAULT,
+    isEnabled: true,
+    title: 'test',
+    url: '/:*?:test',
+    method: RequestMethod.GET,
+    responseHeaders: {},
+    response: null,
+    responseStatus: 0,
+  });
+  assert(route.doesUrlMatch('/asdfasdfasdf/gasd;f/asdfaskjdfl;ak?test=5'));
+  assert(route.doesUrlMatch('/asdfasdfasd?test=56'));
+  assert(route.doesUrlMatch('/asdfasdfasd/?test=54'));
+});
+
+Deno.test('matches path and query wild cards', () => {
+  const route = RouteFactory.create({
+    routeType: RouteTypes.DEFAULT,
+    isEnabled: true,
+    title: 'test',
+    url: '/:*?:*',
+    method: RequestMethod.GET,
+    responseHeaders: {},
+    response: null,
+    responseStatus: 0,
+  });
+  assert(route.doesUrlMatch('/asdfasdfasdf/gasd;f/asdfaskjdfl;ak'));
+  assert(route.doesUrlMatch('/asdfasdfasd?asdfasdf=asdfasdf&asdfasdf=5'));
+  assert(
+    route.doesUrlMatch(
+      '/asdfasdfasd/?asdfasdf=a234q&bvpwoiequ=asdlasdf&rickRoll=neverGonnaGiveYouUp',
+    ),
+  );
+});
+
+Deno.test('matches wild card for beginning of path', () => {
+  const route = RouteFactory.create({
+    routeType: RouteTypes.DEFAULT,
+    isEnabled: true,
+    title: 'test',
+    url: '/:*/b/c',
+    method: RequestMethod.GET,
+    responseHeaders: {},
+    response: null,
+    responseStatus: 0,
+  });
+  assert(route.doesUrlMatch('/asdfasdfasdf/b/c'));
+  assert(route.doesUrlMatch('/asdfasdfasdf/lkjhlkjh/b/c'));
+  assertFalse(route.doesUrlMatch('/asdfasdf/b/asdfasdf'));
+  ``;
+});
+
+Deno.test('matches wild card for middle of path', () => {
+  const route = RouteFactory.create({
+    routeType: RouteTypes.DEFAULT,
+    isEnabled: true,
+    title: 'test',
+    url: '/a/:*/:c',
+    method: RequestMethod.GET,
+    responseHeaders: {},
+    response: null,
+    responseStatus: 0,
+  });
+  assert(
+    route.doesUrlMatch('/a/asdfasdfasdf/b/c'),
+    String(route.compiledUrlRegex),
+  );
+  assert(route.doesUrlMatch('/a/asdfasdfasdf/lkjhlkjh/b/hi'));
+  assertFalse(route.doesUrlMatch('/asdfasdf/b/asdfasdf'));
+});
+
+Deno.test('matches wild card for end of path', () => {
+  const route = RouteFactory.create({
+    routeType: RouteTypes.DEFAULT,
+    isEnabled: true,
+    title: 'test',
+    url: '/a/:b/:*',
+    method: RequestMethod.GET,
+    responseHeaders: {},
+    response: null,
+    responseStatus: 0,
+  });
+  assert(route.doesUrlMatch('/a/test/asdfasdfasdf/asdfasdf'));
+  assert(route.doesUrlMatch('/a/test/asdfasdfasdfasdf'));
+  assertFalse(route.doesUrlMatch('/a/asdfasdfasdf'));
+});
+
+Deno.test('matches multiple path wildcards', () => {
+  const route = RouteFactory.create({
+    routeType: RouteTypes.DEFAULT,
+    isEnabled: true,
+    title: 'test',
+    url: '/:*/b/:*',
+    method: RequestMethod.GET,
+    responseHeaders: {},
+    response: null,
+    responseStatus: 0,
+  });
+  assert(
+    route.doesUrlMatch('/asdfasdfasdf/b/c'),
+    String(route.compiledUrlRegex),
+  );
+  assert(
+    route.doesUrlMatch(
+      '/asdfasdfasdf/lkjhlkjh/b/asdfasdfasdfasdf/asdfasdfasdf',
+    ),
+    String(route.compiledUrlRegex),
+  );
+  assertFalse(
+    route.doesUrlMatch('/asdfasdf/huh/asdfasdf'),
+    String(route.compiledUrlRegex),
+  );
 });

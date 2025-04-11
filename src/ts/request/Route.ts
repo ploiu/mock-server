@@ -313,6 +313,7 @@ export default class Route {
     const nonOptionalPathRegex =
       /(?<=\/):(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=(\?:|\/|\\))))/g;
     const optionalPathRegex = /\/:[a-zA-Z_\-0-9]+\?(?!:)/g;
+    const anythingPathRegex = /(?<=\/):\*/g;
     const nonOptionalQueryRegex =
       /(\\?)?[?&]:(([a-zA-Z_\-0-9.]+$)|([a-zA-Z_\-0-9.]+(?=&)))/g;
     const optionalQueryRegex = /(\\?)?[?&]:[a-zA-Z_\-0-9.]+(?=\?)\?/g;
@@ -348,6 +349,13 @@ export default class Route {
       anythingQueryRegex,
       '([?&][^=/?&]+=[^&]+)*',
     );
+    // for anything path param
+    compiledUrlString = compiledUrlString.replaceAll(
+      anythingPathRegex,
+      '[^?]+?',
+    );
+    // final cleanup to make sure the regex is valid
+    compiledUrlString = compiledUrlString.replaceAll(/\?\?/g, '?\\?');
     return new RegExp(`^${compiledUrlString}\$`, 'i');
   }
 
