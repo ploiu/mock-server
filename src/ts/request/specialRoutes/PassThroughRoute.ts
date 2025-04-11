@@ -15,7 +15,7 @@ export class PassThroughRoute extends Route {
     // the url that the route gets bound on, may include path and query variables
     public override url: string,
     // the request method the route gets bound on
-    public override method: RequestMethod,
+    public override method: RequestMethod | '*',
     // whether the route is "turned on"
     public override isEnabled: boolean,
     // the url to redirect to, our `url` property will be appended to this as the path to hit

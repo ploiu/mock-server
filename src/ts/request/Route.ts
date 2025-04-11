@@ -25,8 +25,8 @@ export default class Route {
     public title: string,
     // the url that the route gets bound on, may include path and query variables
     public url: string,
-    // the request method the route gets bound on
-    public method: RequestMethod,
+    // the request method the route gets bound on. '*' means it accepts any method
+    public method: RequestMethod | '*',
     // the headers used in the response for this route
     public responseHeaders: Headers,
     // the response body

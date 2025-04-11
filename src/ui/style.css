@@ -48,6 +48,10 @@
   background-color: var(--p-cyan-500);
 }
 
+.request-method-all {
+  background-color: var(--p-primary-900);
+}
+
 body {
   margin: 0;
   min-width: 320px;

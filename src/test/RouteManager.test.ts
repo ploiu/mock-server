@@ -160,3 +160,25 @@ Deno.test('routes are returned in specificity order', () => {
   const match = manager.match(req, [], 8000);
   assertEquals(match?.title, 'good');
 });
+
+Deno.test('routes with ALL method type accept any request method', () => {
+  const config: Config = {
+    configVersion: '',
+    routes: [{
+      routeType: RouteTypes.DEFAULT,
+      isEnabled: true,
+      title: '',
+      url: '/test',
+      method: '*',
+      responseHeaders: {},
+      response: null,
+      responseStatus: 0,
+    }],
+  };
+  const manager = new RouteManager();
+  manager.setupRoutes(config);
+  const request = new Request('http://localhost:8000/test', {
+    method: 'basdfasdf',
+  });
+  assert(!!manager.match(request, [], 8000));
+});

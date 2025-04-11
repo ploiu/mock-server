@@ -66,7 +66,7 @@ const saveRoute = () => {
     <!-- method, url -->
     <div class="row">
       <div class="col-2">
-        <Select id="requestMethod" v-model="item.method" :options="Object.keys(RequestMethod)" placeholder="Method"
+        <Select id="requestMethod" v-model="item.method" :options="['*', ...Object.keys(RequestMethod)]" placeholder="Method"
           @update:model-value="valueChange" />
       </div>
       <div class="col-10">

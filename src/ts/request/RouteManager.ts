@@ -38,7 +38,9 @@ export default class RouteManager {
     // put specialRoutes first as they have priority
     const routesToMatchOn = [...specialRoutes, ...this.routes];
     const matches = routesToMatchOn.filter((route) =>
-      route.isEnabled && (route.method === method || method === 'HEAD') &&
+      route.isEnabled &&
+      (route.method === method || method === 'HEAD' ||
+        route.method === '*') &&
       route.doesUrlMatch(url)
     );
     // sort on specificity so that we can get the most accurate match if there are multiples

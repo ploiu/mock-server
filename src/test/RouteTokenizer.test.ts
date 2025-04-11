@@ -164,8 +164,25 @@ Deno.test('Test that tokenize can handle glob query variables (?:*)', () => {
   }
 });
 
+Deno.test('Test that tokenize can handle glob path variables (/:*)', () => {
+  const url = '/:*';
+  const expected: RouteToken[] = [
+    {
+      text: ':*',
+      tokenType: RouteTokenType.PATH_GLOB_PART,
+    },
+  ];
+  const actual = tokenize(url);
+  assertEquals(actual.length, expected.length);
+  for (let i = 0; i < expected.length; i++) {
+    const expectedInstance = expected[i];
+    const actualInstance = actual[i];
+    assertObjectMatch(actualInstance, expectedInstance);
+  }
+});
+
 Deno.test('Test that tokenize can handle everything all at once', () => {
-  const url = '/test/:a/test2/:b??:c&d&:e?';
+  const url = '/test/:a/test2/:*/:b??:c&d&:e?';
   const expected: RouteToken[] = [
     {
       text: 'test',
@@ -178,6 +195,10 @@ Deno.test('Test that tokenize can handle everything all at once', () => {
     {
       text: 'test2',
       tokenType: RouteTokenType.NORMAL_PATH_PART,
+    },
+    {
+      text: ':*',
+      tokenType: RouteTokenType.PATH_GLOB_PART,
     },
     {
       text: ':b?',
@@ -211,6 +232,23 @@ Deno.test('Test that tokenize labels ?* as invalid (easy accidental mistype)', (
     {
       text: '*',
       tokenType: RouteTokenType.INVALID_QUERY_PART,
+    },
+  ];
+  const actual = tokenize(url);
+  assertEquals(actual.length, expected.length);
+  for (let i = 0; i < expected.length; i++) {
+    const expectedInstance = expected[i];
+    const actualInstance = actual[i];
+    assertObjectMatch(actualInstance, expectedInstance);
+  }
+});
+
+Deno.test('Test that tokenize labels /* as invalid (easy accidental mistype)', () => {
+  const url = '/*';
+  const expected: RouteToken[] = [
+    {
+      text: '*',
+      tokenType: RouteTokenType.INVALID_PATH_PART,
     },
   ];
   const actual = tokenize(url);
