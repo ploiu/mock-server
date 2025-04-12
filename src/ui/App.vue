@@ -1,30 +1,10 @@
 <script setup lang="ts">
 import { store } from './store';
 import { fetchRoutes } from './service/RouteService.ts';
-import { onUnmounted } from 'vue'
-import { fetchLogs } from './service/LogService.ts';
+import { initSSE } from './service/LogService.ts';
 import Button from 'primevue/button'
 fetchRoutes().then(routes => store.routes = routes)
-</script>
-<script lang="ts">
-function setupEventSource() {
-  const s = fetchLogs();
-  s.onmessage = e => {
-    const parsed: LogEntry = JSON.parse(e.data)
-    store.logs.push(parsed)
-  }
-  window.addEventListener('beforeunload', () => s?.close())
-  onUnmounted(() => { s.close() })
-  return s
-}
-globalThis.source = setupEventSource();
-console.log('source: ', globalThis.source)
-// sometimes the source just dies, so this lets us revive it
-const interval = setInterval(() => {
-  if (globalThis.source.readyState === EventSource.CLOSED) {
-    globalThis.source = setupEventSource();
-  }
-}, 100)
+initSSE()
 </script>
 
 <template>

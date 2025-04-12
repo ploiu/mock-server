@@ -27,4 +27,6 @@ const storeBody = () => {
   } as StoreFields;
 };
 
-export const store = reactive(storeBody());
+export const store: { routes: UIRoute[]; logs: LogEntry[] } = reactive(
+  storeBody(),
+);
