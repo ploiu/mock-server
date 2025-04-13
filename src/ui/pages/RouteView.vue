@@ -5,7 +5,7 @@ import { fetchRoutes, saveRoutes } from '../service/RouteService';
 import { store } from '../store';
 import Button from 'primevue/button';
 import Toast from 'primevue/toast'
-import { ref } from 'vue';
+import { ref, onBeforeMount, type Ref } from 'vue';
 import RouteEditor from '../components/RouteEditor.vue';
 import { stringifyUIRoute, newUIRoute } from '../models/UIRoute';
 import { useToast } from 'primevue/usetoast';
@@ -13,7 +13,13 @@ import type { ToastMessageOptions } from 'primevue/toast'
 import InputText from 'primevue/inputtext'
 
 const currentRoute = ref<UIRoute | null>(null);
-const filteredRoutes = ref<UIRoute[]>(store.routes)
+const filteredRoutes: Ref<UIRoute[]> = ref<UIRoute[]>(store.routes)
+
+onBeforeMount(async () => {
+  const routes = await fetchRoutes()
+  store.routes = routes
+  filteredRoutes.value = routes
+})
 
 const toast = useToast();
 const successToast: ToastMessageOptions = { severity: 'success', summary: 'success', detail: 'Successfully saved mock', life: 2_500 }

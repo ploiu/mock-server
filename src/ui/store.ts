@@ -4,6 +4,7 @@ import { LogEntry } from '../ts/model/LogModels.ts';
 
 type StoreFields = {
   routes: UIRoute[];
+  logs: LogEntry[];
 };
 
 const storeBody = () => {
@@ -27,6 +28,6 @@ const storeBody = () => {
   } as StoreFields;
 };
 
-export const store: { routes: UIRoute[]; logs: LogEntry[] } = reactive(
+export const store: StoreFields = reactive(
   storeBody(),
 );

@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { store } from './store';
-import { fetchRoutes } from './service/RouteService.ts';
+import Button from 'primevue/button';
 import { initSSE } from './service/LogService.ts';
-import Button from 'primevue/button'
-fetchRoutes().then(routes => store.routes = routes)
 initSSE()
 </script>
 
