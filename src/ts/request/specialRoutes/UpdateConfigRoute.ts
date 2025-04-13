@@ -1,8 +1,7 @@
+import { readConfigFile } from '../../config/ConfigManager.ts';
+import { RequestMethod } from '../RequestMethod.ts';
 import Route from '../Route.ts';
 import RouteManager from '../RouteManager.ts';
-import { RequestMethod } from '../RequestMethod.ts';
-import { readConfigFile } from '../../config/ConfigManager.ts';
-import LogManager from '../../LogManager.ts';
 import { RouteTypes } from '../RouteTypes.ts';
 
 /**
@@ -29,10 +28,6 @@ export default class UpdateConfigRoute extends Route {
 
   //deno-lint-ignore require-await
   override async execute(request: Request): Promise<Response> {
-    LogManager.newEntry(
-      Route.getPath(request.url),
-      request.method.toUpperCase(),
-    );
     const args = this.parseVariablesFromUrl(request.url);
     const configPath = args.location ?? this.configPath;
     console.log(configPath);
