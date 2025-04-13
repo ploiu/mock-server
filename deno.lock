@@ -6,31 +6,35 @@
     "jsr:@ploiu/arg-helper@^1.0.1": "1.0.1",
     "jsr:@std/assert@0.224": "0.224.0",
     "jsr:@std/assert@1": "1.0.6",
-    "jsr:@std/assert@^1.0.8": "1.0.8",
+    "jsr:@std/assert@^1.0.12": "1.0.12",
     "jsr:@std/assert@~0.225.1": "0.225.3",
     "jsr:@std/async@^1.0.0-rc.1": "1.0.0-rc.1",
     "jsr:@std/cli@0.224": "0.224.7",
-    "jsr:@std/cli@1": "1.0.6",
+    "jsr:@std/cli@1": "1.0.16",
+    "jsr:@std/cli@^1.0.16": "1.0.16",
     "jsr:@std/cli@^1.0.6": "1.0.6",
     "jsr:@std/cli@~0.224.1": "0.224.7",
     "jsr:@std/cli@~0.224.7": "0.224.7",
     "jsr:@std/encoding@1.0.0-rc.2": "1.0.0-rc.2",
     "jsr:@std/encoding@^1.0.5": "1.0.5",
+    "jsr:@std/encoding@^1.0.9": "1.0.9",
     "jsr:@std/fmt@0.224": "0.224.0",
-    "jsr:@std/fmt@1": "1.0.3",
+    "jsr:@std/fmt@1": "1.0.6",
     "jsr:@std/fmt@^1.0.2": "1.0.2",
     "jsr:@std/fmt@^1.0.3": "1.0.3",
+    "jsr:@std/fmt@^1.0.6": "1.0.6",
     "jsr:@std/fmt@~0.225.1": "0.225.4",
     "jsr:@std/fmt@~0.225.4": "0.225.4",
     "jsr:@std/fs@0.224": "0.224.0",
     "jsr:@std/fs@1": "1.0.4",
-    "jsr:@std/fs@^1.0.5": "1.0.5",
+    "jsr:@std/fs@^1.0.16": "1.0.16",
+    "jsr:@std/html@^1.0.3": "1.0.3",
     "jsr:@std/http@0.224": "0.224.5",
     "jsr:@std/http@1": "1.0.7",
-    "jsr:@std/http@^1.0.10": "1.0.10",
+    "jsr:@std/http@^1.0.14": "1.0.14",
     "jsr:@std/internal@1": "1.0.0",
     "jsr:@std/internal@^1.0.4": "1.0.4",
-    "jsr:@std/internal@^1.0.5": "1.0.5",
+    "jsr:@std/internal@^1.0.6": "1.0.6",
     "jsr:@std/media-types@^1.0.0-rc.1": "1.0.0-rc.1",
     "jsr:@std/media-types@^1.0.3": "1.0.3",
     "jsr:@std/media-types@^1.1.0": "1.1.0",
@@ -39,28 +43,23 @@
     "jsr:@std/path@0.224": "0.224.0",
     "jsr:@std/path@1.0.0-rc.2": "1.0.0-rc.2",
     "jsr:@std/path@^1.0.6": "1.0.6",
-    "jsr:@std/path@^1.0.7": "1.0.8",
     "jsr:@std/path@^1.0.8": "1.0.8",
     "jsr:@std/streams@^1.0.6": "1.0.6",
-    "jsr:@std/streams@^1.0.8": "1.0.8",
+    "jsr:@std/streams@^1.0.9": "1.0.9",
     "jsr:@std/streams@~0.224.5": "0.224.5",
     "npm:@primevue/themes@*": "4.2.3",
     "npm:@types/node@*": "18.16.19",
     "npm:@vitejs/plugin-vue@^5.0.4": "5.0.4_vite@5.2.10__@types+node@18.16.19_vue@3.4.27_@types+node@18.16.19",
     "npm:@vitejs/plugin-vue@^5.1.4": "5.1.4_vite@5.2.10__@types+node@18.16.19_vue@3.4.27_@types+node@18.16.19",
-    "npm:@vitejs/plugin-vue@^5.2.0": "5.2.0_vite@5.2.10__@types+node@18.16.19_vue@3.4.27_@types+node@18.16.19",
     "npm:cypress@*": "13.9.0_enquirer@2.4.1",
     "npm:primevue@*": "3.52.0_vue@3.4.27",
     "npm:primevue@^3.52.0": "3.52.0_vue@3.4.27",
     "npm:primevue@^4.2.2": "4.2.2_vue@3.4.27",
-    "npm:primevue@^4.2.3": "4.2.3_vue@3.4.27",
     "npm:vite@*": "5.2.10_@types+node@18.16.19",
-    "npm:vite@^5.4.11": "5.4.11_@types+node@18.16.19",
     "npm:vite@^5.4.7": "5.4.7_@types+node@18.16.19",
     "npm:vitest@*": "1.6.0_@types+node@18.16.19",
     "npm:vue-router@*": "4.3.2_vue@3.4.27",
     "npm:vue-router@^4.3.2": "4.3.2_vue@3.4.27",
-    "npm:vue-router@^4.4.5": "4.4.5_vue@3.4.27",
     "npm:vue@*": "3.4.27",
     "npm:vue@^3.5.13": "3.5.13",
     "npm:vue@^3.5.8": "3.5.8"
@@ -95,10 +94,10 @@
         "jsr:@std/internal@^1.0.4"
       ]
     },
-    "@std/assert@1.0.8": {
-      "integrity": "ebe0bd7eb488ee39686f77003992f389a06c3da1bbd8022184804852b2fa641b",
+    "@std/assert@1.0.12": {
+      "integrity": "08009f0926dda9cbd8bef3a35d3b6a4b964b0ab5c3e140a4e0351fbf34af5b9a",
       "dependencies": [
-        "jsr:@std/internal@^1.0.5"
+        "jsr:@std/internal@^1.0.6"
       ]
     },
     "@std/async@1.0.0-rc.1": {
@@ -110,11 +109,17 @@
     "@std/cli@1.0.6": {
       "integrity": "d22d8b38c66c666d7ad1f2a66c5b122da1704f985d3c47f01129f05abb6c5d3d"
     },
+    "@std/cli@1.0.16": {
+      "integrity": "02df293099c35b9e97d8ca05f57f54bd1ee08134f25d19a4756b3924695f4b00"
+    },
     "@std/encoding@1.0.0-rc.2": {
       "integrity": "160d7674a20ebfbccdf610b3801fee91cf6e42d1c106dd46bbaf46e395cd35ef"
     },
     "@std/encoding@1.0.5": {
       "integrity": "ecf363d4fc25bd85bd915ff6733a7e79b67e0e7806334af15f4645c569fefc04"
+    },
+    "@std/encoding@1.0.9": {
+      "integrity": "025b8f18eb1749bc30d1353bf48b77d1eb5e35610220fa226f5a046b9240c5d7"
     },
     "@std/fmt@0.224.0": {
       "integrity": "e20e9a2312a8b5393272c26191c0a68eda8d2c4b08b046bad1673148f1d69851"
@@ -127,6 +132,9 @@
     },
     "@std/fmt@1.0.3": {
       "integrity": "97765c16aa32245ff4e2204ecf7d8562496a3cb8592340a80e7e554e0bb9149f"
+    },
+    "@std/fmt@1.0.6": {
+      "integrity": "a2c56a69a2369876ddb3ad6a500bb6501b5bad47bb3ea16bfb0c18974d2661fc"
     },
     "@std/fs@0.224.0": {
       "integrity": "52a5ec89731ac0ca8f971079339286f88c571a4d61686acf75833f03a89d8e69",
@@ -141,11 +149,14 @@
         "jsr:@std/path@^1.0.6"
       ]
     },
-    "@std/fs@1.0.5": {
-      "integrity": "41806ad6823d0b5f275f9849a2640d87e4ef67c51ee1b8fb02426f55e02fd44e",
+    "@std/fs@1.0.16": {
+      "integrity": "81878f62b6eeda0bf546197fc3daa5327c132fee1273f6113f940784a468b036",
       "dependencies": [
-        "jsr:@std/path@^1.0.7"
+        "jsr:@std/path@^1.0.8"
       ]
+    },
+    "@std/html@1.0.3": {
+      "integrity": "7a0ac35e050431fb49d44e61c8b8aac1ebd55937e0dc9ec6409aa4bab39a7988"
     },
     "@std/http@0.224.5": {
       "integrity": "b03b5d1529f6c423badfb82f6640f9f2557b4034cd7c30655ba5bb447ff750a4",
@@ -172,16 +183,17 @@
         "jsr:@std/streams@^1.0.6"
       ]
     },
-    "@std/http@1.0.10": {
-      "integrity": "4e32d11493ab04e3ef09f104f0cb9beb4228b1d4b47c5469573c2c294c0d3692",
+    "@std/http@1.0.14": {
+      "integrity": "bfc4329d975dff2abd8170e83e37deb454fbc678fec3fdd2ef5b03d92768a4ef",
       "dependencies": [
-        "jsr:@std/cli@^1.0.6",
-        "jsr:@std/encoding@^1.0.5",
-        "jsr:@std/fmt@^1.0.3",
+        "jsr:@std/cli@^1.0.16",
+        "jsr:@std/encoding@^1.0.9",
+        "jsr:@std/fmt@^1.0.6",
+        "jsr:@std/html",
         "jsr:@std/media-types@^1.1.0",
         "jsr:@std/net@^1.0.4",
         "jsr:@std/path@^1.0.8",
-        "jsr:@std/streams@^1.0.8"
+        "jsr:@std/streams@^1.0.9"
       ]
     },
     "@std/internal@1.0.0": {
@@ -190,8 +202,8 @@
     "@std/internal@1.0.4": {
       "integrity": "62e8e4911527e5e4f307741a795c0b0a9e6958d0b3790716ae71ce085f755422"
     },
-    "@std/internal@1.0.5": {
-      "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
+    "@std/internal@1.0.6": {
+      "integrity": "9533b128f230f73bd209408bb07a4b12f8d4255ab2a4d22a1fd6d87304aca9a4"
     },
     "@std/media-types@1.0.0-rc.1": {
       "integrity": "ff3cc8d5b536be2730fc4d446865007faf69bf4d46e7bea426d5e1d9c6ba9053"
@@ -226,8 +238,8 @@
     "@std/streams@1.0.6": {
       "integrity": "022ed94e380d06b4d91c49eb70241b7289ab78b8c2b4c4bbb7eb265e4997c25c"
     },
-    "@std/streams@1.0.8": {
-      "integrity": "b41332d93d2cf6a82fe4ac2153b930adf1a859392931e2a19d9fabfb6f154fb3"
+    "@std/streams@1.0.9": {
+      "integrity": "a9d26b1988cdd7aa7b1f4b51e1c36c1557f3f252880fa6cc5b9f37078b1a5035"
     }
   },
   "npm": {
@@ -463,26 +475,11 @@
         "vue@3.4.27"
       ]
     },
-    "@primevue/core@4.2.3_vue@3.4.27": {
-      "integrity": "sha512-Qjxl6rPzkvLaUQQeM5wXlmFQK9Pox+rSC+r7sX9ZGXeacD0LJny9YAF0APDv/V5Z1RiXApDvfOQGeu7Xg50vyg==",
-      "dependencies": [
-        "@primeuix/styled@0.3.2",
-        "@primeuix/utils@0.3.2",
-        "vue@3.4.27"
-      ]
-    },
     "@primevue/icons@4.2.2_vue@3.4.27": {
       "integrity": "sha512-x0AwfjB94MoLsmNyQtSGgrEWhZ52SzRQ3X5hEUA30L7tdob66qYmiMKCnjfq2gvJIB477DwB7cxJZhaTxspsDw==",
       "dependencies": [
         "@primeuix/utils@0.3.1",
-        "@primevue/core@4.2.2_vue@3.4.27"
-      ]
-    },
-    "@primevue/icons@4.2.3_vue@3.4.27": {
-      "integrity": "sha512-2yitSASyLdKtKPy8Fw8A71wycfZ14/lIlJ70JP0yGRy1nYbEBzEteMDGFOnlkFokbK/wdx9oOdYTDEul37FDdg==",
-      "dependencies": [
-        "@primeuix/utils@0.3.2",
-        "@primevue/core@4.2.3_vue@3.4.27"
+        "@primevue/core"
       ]
     },
     "@primevue/themes@4.2.3": {
@@ -617,13 +614,6 @@
     },
     "@vitejs/plugin-vue@5.1.4_vite@5.2.10__@types+node@18.16.19_vue@3.4.27_@types+node@18.16.19": {
       "integrity": "sha512-N2XSI2n3sQqp5w7Y/AN/L2XDjBIRGqXko+eDp42sydYSBeJuSm5a1sLf8zakmo8u7tA8NmBgoDLA1HeOESjp9A==",
-      "dependencies": [
-        "vite@5.2.10_@types+node@18.16.19",
-        "vue@3.4.27"
-      ]
-    },
-    "@vitejs/plugin-vue@5.2.0_vite@5.2.10__@types+node@18.16.19_vue@3.4.27_@types+node@18.16.19": {
-      "integrity": "sha512-7n7KdUEtx/7Yl7I/WVAMZ1bEb0eVvXF3ummWTeLcs/9gvo9pJhuLdouSXGjdZ/MKD1acf1I272+X0RMua4/R3g==",
       "dependencies": [
         "vite@5.2.10_@types+node@18.16.19",
         "vue@3.4.27"
@@ -784,9 +774,6 @@
     },
     "@vue/devtools-api@6.6.1": {
       "integrity": "sha512-LgPscpE3Vs0x96PzSSB4IGVSZXZBZHpfxs+ZA1d+VEPwHdOXowy/Y2CsvCAIFrf+ssVU1pD1jidj505EpUnfbA=="
-    },
-    "@vue/devtools-api@6.6.4": {
-      "integrity": "sha512-sGhTPMuXqZ1rVOk32RylztWkfXTRhuS7vgAKv0zjqk8gbsHkJ7xfFf+jbySxt7tWObEJwyKaHMikV/WGDiQm8g=="
     },
     "@vue/reactivity@3.4.27": {
       "integrity": "sha512-kK0g4NknW6JX2yySLpsm2jlunZJl2/RJGZ0H9ddHdfBVHcNzxmQ0sS0b09ipmBoQpY8JM2KmUw+a6sO8Zo+zIA==",
@@ -1219,15 +1206,15 @@
       "integrity": "sha512-WdOOppmUNU+IbZ0PaDiTst80zjnrOkyJNHoKupIcVyU8Lvla3Ugx94VzkQ32Ijqd7UhHJy75gNWDMUekcrSJ6g==",
       "dependencies": [
         "@esbuild/aix-ppc64@0.20.2",
-        "@esbuild/android-arm@0.20.2",
         "@esbuild/android-arm64@0.20.2",
+        "@esbuild/android-arm@0.20.2",
         "@esbuild/android-x64@0.20.2",
         "@esbuild/darwin-arm64@0.20.2",
         "@esbuild/darwin-x64@0.20.2",
         "@esbuild/freebsd-arm64@0.20.2",
         "@esbuild/freebsd-x64@0.20.2",
-        "@esbuild/linux-arm@0.20.2",
         "@esbuild/linux-arm64@0.20.2",
+        "@esbuild/linux-arm@0.20.2",
         "@esbuild/linux-ia32@0.20.2",
         "@esbuild/linux-loong64@0.20.2",
         "@esbuild/linux-mips64el@0.20.2",
@@ -1247,15 +1234,15 @@
       "integrity": "sha512-mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==",
       "dependencies": [
         "@esbuild/aix-ppc64@0.21.5",
-        "@esbuild/android-arm@0.21.5",
         "@esbuild/android-arm64@0.21.5",
+        "@esbuild/android-arm@0.21.5",
         "@esbuild/android-x64@0.21.5",
         "@esbuild/darwin-arm64@0.21.5",
         "@esbuild/darwin-x64@0.21.5",
         "@esbuild/freebsd-arm64@0.21.5",
         "@esbuild/freebsd-x64@0.21.5",
-        "@esbuild/linux-arm@0.21.5",
         "@esbuild/linux-arm64@0.21.5",
+        "@esbuild/linux-arm@0.21.5",
         "@esbuild/linux-ia32@0.21.5",
         "@esbuild/linux-loong64@0.21.5",
         "@esbuild/linux-mips64el@0.21.5",
@@ -1769,17 +1756,8 @@
       "dependencies": [
         "@primeuix/styled@0.3.1",
         "@primeuix/utils@0.3.1",
-        "@primevue/core@4.2.2_vue@3.4.27",
-        "@primevue/icons@4.2.2_vue@3.4.27"
-      ]
-    },
-    "primevue@4.2.3_vue@3.4.27": {
-      "integrity": "sha512-kAkSOHmyBhe0NNzjfmZSAFNlxAWPTuTjWvYSxSv2OLVdy61F+IPQAENygaB7UdB4wY7NNxeBVbphEgjuipwTww==",
-      "dependencies": [
-        "@primeuix/styled@0.3.2",
-        "@primeuix/utils@0.3.2",
-        "@primevue/core@4.2.3_vue@3.4.27",
-        "@primevue/icons@4.2.3_vue@3.4.27"
+        "@primevue/core",
+        "@primevue/icons"
       ]
     },
     "process@0.11.10": {
@@ -2112,16 +2090,6 @@
         "rollup@4.17.1"
       ]
     },
-    "vite@5.4.11_@types+node@18.16.19": {
-      "integrity": "sha512-c7jFQRklXua0mTzneGW9QVyxFjUgwcihC4bXEtujIo2ouWCe1Ajt/amn2PCxYnhYfd5k09JX3SB7OYWFKYqj8Q==",
-      "dependencies": [
-        "@types/node",
-        "esbuild@0.21.5",
-        "fsevents",
-        "postcss@8.4.47",
-        "rollup@4.22.4"
-      ]
-    },
     "vite@5.4.7_@types+node@18.16.19": {
       "integrity": "sha512-5l2zxqMEPVENgvzTuBpHer2awaetimj2BGkhBPdnwKbPNOlHsODU+oiazEZzLK7KhAnOrO+XGYJYn4ZlUhDtDQ==",
       "dependencies": [
@@ -2153,22 +2121,15 @@
         "strip-literal",
         "tinybench",
         "tinypool",
-        "vite@5.2.10_@types+node@18.16.19",
         "vite-node",
+        "vite@5.2.10_@types+node@18.16.19",
         "why-is-node-running"
       ]
     },
     "vue-router@4.3.2_vue@3.4.27": {
       "integrity": "sha512-hKQJ1vDAZ5LVkKEnHhmm1f9pMiWIBNGF5AwU67PdH7TyXCj/a4hTccuUuYCAMgJK6rO/NVYtQIEN3yL8CECa7Q==",
       "dependencies": [
-        "@vue/devtools-api@6.6.1",
-        "vue@3.4.27"
-      ]
-    },
-    "vue-router@4.4.5_vue@3.4.27": {
-      "integrity": "sha512-4fKZygS8cH1yCyuabAXGUAsyi1b2/o/OKgu/RUb+znIYOxPRxdkytJEx+0wGcpBE1pX6vUgh5jwWOKRGvuA/7Q==",
-      "dependencies": [
-        "@vue/devtools-api@6.6.4",
+        "@vue/devtools-api",
         "vue@3.4.27"
       ]
     },
@@ -2251,16 +2212,16 @@
   "workspace": {
     "dependencies": [
       "jsr:@ploiu/arg-helper@^1.0.1",
-      "jsr:@std/assert@^1.0.8",
-      "jsr:@std/cli@^1.0.6",
-      "jsr:@std/fmt@^1.0.3",
-      "jsr:@std/fs@^1.0.5",
-      "jsr:@std/http@^1.0.10",
+      "jsr:@std/assert@^1.0.12",
+      "jsr:@std/cli@^1.0.16",
+      "jsr:@std/fmt@^1.0.6",
+      "jsr:@std/fs@^1.0.16",
+      "jsr:@std/http@^1.0.14",
       "npm:@primevue/themes@*",
-      "npm:@vitejs/plugin-vue@^5.2.0",
-      "npm:primevue@^4.2.3",
-      "npm:vite@^5.4.11",
-      "npm:vue-router@^4.4.5",
+      "npm:@vitejs/plugin-vue@^5.2.3",
+      "npm:primevue@^4.3.3",
+      "npm:vite@^6.2.6",
+      "npm:vue-router@^4.5.0",
       "npm:vue@^3.5.13"
     ]
   }

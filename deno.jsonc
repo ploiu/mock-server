@@ -6,8 +6,7 @@
     "exclude": [
       "README.md",
       "src/ui/components/AccordionElement.min.js",
-      "src/ui/.vite/**/*.js",
-      "src/ui/.vite/**/*.ts",
+      "src/ui/.vite/**/*",
       "src/ui/vite-env.d.ts",
       "src/ui/dist/**/*",
       "src/ui-old/**/*",

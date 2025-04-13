@@ -27,7 +27,7 @@ const toggleEnabled = (e: ChangeEvent) => {
 
 <template>
     <Card class="route-list-entry">
-        <template #title><span :class="['request-method', `request-method-${route.method.toLowerCase()}`]">{{
+        <template #title><span :class="['request-method', `request-method-${route.method === '*' ? 'all' : route.method.toLowerCase()}`]">{{
             route.method }}</span> <span class="route-title">{{ route.title }}</span></template>
         <template #footer>
             <div class="row">

@@ -28,11 +28,13 @@ function tokenizePaths(url: string): RouteToken[] {
 }
 
 function determinePathParameterType(param: string): RouteTokenType {
-  if (param.startsWith(':') && param.endsWith('?')) {
+  if (param.startsWith(':*')) {
+    return RouteTokenType.PATH_GLOB_PART;
+  } else if (param.startsWith(':') && param.endsWith('?')) {
     return RouteTokenType.OPTIONAL_PATH_PARAM_PART;
   } else if (param.startsWith(':')) {
     return RouteTokenType.REQUIRED_PATH_PARAM_PART;
-  } else if (!param.endsWith('?')) {
+  } else if (!param.endsWith('?') && !param.includes('*')) {
     /* still ending with ? could indicate bad parsing */
     return RouteTokenType.NORMAL_PATH_PART;
   } else {

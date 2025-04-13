@@ -109,9 +109,9 @@ function startServing(
       // don't use await because it will block the rest of the thread if any route takes a long time
       try {
         return await route.execute(request);
-      } catch (exception) {
+      } catch (exception: unknown) {
         const message = (typeof exception !== 'string')
-          ? exception.message
+          ? (exception as Error).message
           : exception;
         if (
           !message.toLowerCase().includes('forcibly closed') &&

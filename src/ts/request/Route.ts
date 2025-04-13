@@ -1,4 +1,3 @@
-//deno-lint-ignore-file no-explicit-any
 import { RequestMethod } from './RequestMethod.ts';
 import UrlVariable from './UrlVariable.ts';
 import { red } from '@std/fmt/colors';
@@ -14,18 +13,20 @@ import {
  * Object that matches against a request and generates a mock response
  */
 export default class Route {
-  private pathVariables: UrlVariable[] = [];
-  private queryVariables: UrlVariable[] = [];
-  public compiledUrlRegex: RegExp;
-  private hasImpliedQueryParams: boolean;
+  #pathVariables: UrlVariable[] = [];
+  #queryVariables: UrlVariable[] = [];
+  #compiledUrlRegex: RegExp;
+  #hasImpliedQueryParams: boolean;
+  /** represents how specific the route is. If a request matches multiple routes, the one with the highest specificity is picked to handle the request */
+  #specificity = 0;
 
   constructor(
     // a name to help the user distinguish which route is which
     public title: string,
     // the url that the route gets bound on, may include path and query variables
     public url: string,
-    // the request method the route gets bound on
-    public method: RequestMethod,
+    // the request method the route gets bound on. '*' means it accepts any method
+    public method: RequestMethod | '*',
     // the headers used in the response for this route
     public responseHeaders: Headers,
     // the response body
@@ -40,8 +41,9 @@ export default class Route {
     this.parseUrlVariables();
     // remove trailing `/` from the path
     this.url = this.url.replace(/\/$/, '').replace(/\/\?/, '?');
-    this.hasImpliedQueryParams = /[?&]:\*/g.test(this.url);
-    this.compiledUrlRegex = this.buildUrlRegex();
+    this.#hasImpliedQueryParams = /[?&]:\*/g.test(this.url);
+    this.#compiledUrlRegex = this.buildUrlRegex();
+    this.scoreSpecificity();
     // make sure all the required fields exist TODO
   }
 
@@ -110,14 +112,14 @@ export default class Route {
    * @param {string} url
    * @returns {boolean}
    */
-  public doesUrlMatch(url = ''): boolean {
+  public doesUrlMatch(url: string = ''): boolean {
     url = url.toLowerCase();
     // make sure it passes the general format of this url
     const basicPatternMatches = url === this.url ||
-      this.compiledUrlRegex.test(url);
+      this.#compiledUrlRegex.test(url);
     // make sure all mandatory query parameters are present
     let hasAllMandatoryQueryFlags = true;
-    for (const queryVariable of this.queryVariables) {
+    for (const queryVariable of this.#queryVariables) {
       if (!queryVariable.optional) {
         const queryRegex = new RegExp(
           `[?&]${queryVariable.name}=[^&]+`,
@@ -137,11 +139,11 @@ export default class Route {
    * @param {string} url must have been matched against this route before passing into this method
    * @returns {any}
    */
-  public parseVariablesFromUrl(url: string): any {
+  public parseVariablesFromUrl(url: string): Record<string, string | null> {
     if (
-      (this.pathVariables.length === 0 &&
-        this.queryVariables.length === 0) &&
-      !this.hasImpliedQueryParams
+      (this.#pathVariables.length === 0 &&
+        this.#queryVariables.length === 0) &&
+      !this.#hasImpliedQueryParams
     ) {
       return {};
     } else {
@@ -158,7 +160,7 @@ export default class Route {
    * @returns {boolean}
    */
   public hasPathVariable(name: string, optional: boolean): boolean {
-    return this.pathVariables.filter((it) =>
+    return this.#pathVariables.filter((it) =>
       it.name === name && it.optional === optional
     ).length > 0;
   }
@@ -170,7 +172,7 @@ export default class Route {
    * @returns {boolean}
    */
   public hasQueryVariable(name: string, optional: boolean): boolean {
-    return this.queryVariables.filter((it) =>
+    return this.#queryVariables.filter((it) =>
       it.name === name && it.optional === optional
     ).length > 0;
   }
@@ -236,16 +238,67 @@ export default class Route {
     const matchedPathVars = this.url.match(pathVarRegex);
     if (matchedPathVars) {
       for (const pathVar of matchedPathVars) {
-        this.pathVariables.push(UrlVariable.fromString(pathVar));
+        this.#pathVariables.push(UrlVariable.fromString(pathVar));
       }
     }
     // match and pull out our query variables
     const matchedQueryVars = this.url.match(queryVarRegex);
     if (matchedQueryVars) {
       for (const queryVar of matchedQueryVars) {
-        this.queryVariables.push(UrlVariable.fromString(queryVar));
+        this.#queryVariables.push(UrlVariable.fromString(queryVar));
       }
     }
+  }
+
+  /**
+   * in order to rank routes in the event multiple are matched, we need a way to break the tie.
+   * Determining route specificity is how I've chosen to do this, using a point-based system.
+   * - regular path segments get +3 points
+   * - required path variable segments get +2 points
+   * - optional path variable segments get +1 points
+   * - catch all path segment (/:*) get +0 points
+   * - regular query params get +3 points
+   * - required query params get +2 points
+   * - optional query params get +1 points
+   * - catch all query param (?:*) get +0 points
+   */
+  private scoreSpecificity() {
+    let specificity = 0;
+    let url = this.url;
+    // make sure a "bad" url is normalized
+    if (!url.startsWith('/')) {
+      url = '/' + url;
+    }
+    // it's way simpler to handle the path section and the query section separately
+    const [path, query] = url.split(/\?(?=[a-z0-9:])/i);
+    const splitPath = path.split('/');
+    // path will always be defined because we prefix it, but query could be undefined
+    const splitQuery = (query ?? '').split('&');
+    for (const pathPart of splitPath) {
+      // wild cards get nothing
+      if (pathPart.endsWith('*')) {
+        continue;
+      }
+      if (pathPart.startsWith(':')) {
+        specificity += pathPart.endsWith('?') ? 1 : 2;
+      } else if (pathPart.length > 0) {
+        specificity += 3;
+      }
+    }
+
+    for (const queryPart of splitQuery) {
+      // wild cards get nothing
+      if (queryPart.endsWith('*')) {
+        continue;
+      }
+      if (queryPart.startsWith(':')) {
+        specificity += queryPart.endsWith('?') ? 1 : 2;
+      } else if (queryPart.length > 0) {
+        specificity += 3;
+      }
+    }
+
+    this.#specificity = specificity;
   }
 
   /**
@@ -260,6 +313,7 @@ export default class Route {
     const nonOptionalPathRegex =
       /(?<=\/):(([a-zA-Z_\-0-9]+$)|([a-zA-Z_\-0-9]+(?=(\?:|\/|\\))))/g;
     const optionalPathRegex = /\/:[a-zA-Z_\-0-9]+\?(?!:)/g;
+    const anythingPathRegex = /(?<=\/):\*/g;
     const nonOptionalQueryRegex =
       /(\\?)?[?&]:(([a-zA-Z_\-0-9.]+$)|([a-zA-Z_\-0-9.]+(?=&)))/g;
     const optionalQueryRegex = /(\\?)?[?&]:[a-zA-Z_\-0-9.]+(?=\?)\?/g;
@@ -295,17 +349,23 @@ export default class Route {
       anythingQueryRegex,
       '([?&][^=/?&]+=[^&]+)*',
     );
+    // for anything path param
+    compiledUrlString = compiledUrlString.replaceAll(
+      anythingPathRegex,
+      '[^?]+?',
+    );
+    // final cleanup to make sure the regex is valid
+    compiledUrlString = compiledUrlString.replaceAll(/\?\?/g, '?\\?');
     return new RegExp(`^${compiledUrlString}\$`, 'i');
   }
 
   /**
    * parses path variables from the passed url that has been matched against this route
    * @param {string} request
-   * @returns {any}
    * @private
    */
-  private parsePathVars(request: string): any {
-    const result: any = {};
+  private parsePathVars(request: string): Record<string, string | null> {
+    const result: Record<string, string | null> = {};
     request = request.replace(/^https?:\/\//, '');
     // first build a list of where each of our path variables are
     const splitRequest = request.split('?')[0].split('/');
@@ -352,20 +412,18 @@ export default class Route {
 
   /**
    * pulls out the query vars of the passed url. The url at this point should have been matched against our pattern
-   * @param {string} request
-   * @returns {any}
    * @private
    */
-  private parseQueryVars(request: string): any {
+  private parseQueryVars(request: string): Record<string, string | null> {
     // if we don't have any query variables, return an empty object
-    if (this.queryVariables.length === 0 && !this.hasImpliedQueryParams) {
+    if (this.#queryVariables.length === 0 && !this.#hasImpliedQueryParams) {
       return {};
     } else {
-      const result: any = {};
+      const result: Record<string, string | null> = {};
       // for each mandatory query variable, get its value
-      const mandatoryVars = this.queryVariables.filter((it) => !it.optional)
+      const mandatoryVars = this.#queryVariables.filter((it) => !it.optional)
         .map((it) => it.name);
-      const optionalVars = this.queryVariables.filter((it) => it.optional)
+      const optionalVars = this.#queryVariables.filter((it) => it.optional)
         .map(
           (it) => it.name,
         );
@@ -401,21 +459,11 @@ export default class Route {
     }
   }
 
-  // noinspection JSUnusedGlobalSymbols this is used when formatting json with JSON.stringify
-  public toJSON(): string {
-    const result: any = {};
-    for (const key in this) {
-      if (
-        ![
-          'pathVariables',
-          'queryVariables',
-          'compiledUrlRegex',
-          'hasImpliedQueryParams',
-        ].includes(key)
-      ) {
-        result[key] = this[key];
-      }
-    }
-    return result;
+  get compiledUrlRegex() {
+    return this.#compiledUrlRegex;
+  }
+
+  get specificity() {
+    return this.#specificity;
   }
 }

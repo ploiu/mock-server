@@ -32,13 +32,22 @@ export class LogRoute extends Route {
   private init() {
     if (!('enqueLogEvent' in globalThis)) {
       globalThis.enqueueLogEvent = (log: Log): void => {
-        const event = `data: ${JSON.stringify(log)}\n\n`;
+        const event = `event: log\ndata: ${JSON.stringify(log)}\n\n`;
         globalThis.dispatchEvent(
           new CustomEvent('log', {
             detail: this.encoder.encode(event),
           }),
         );
       };
+      // start a heartbeat for the browser to listen for. If the connection gets interrupted, the browser can detect it via the heartbeat and re-establish the connection
+      setInterval(() => {
+        const event = 'event: heartbeat\ndata: {}\n\n';
+        globalThis.dispatchEvent(
+          new CustomEvent('heartbeat', {
+            detail: this.encoder.encode(event),
+          }),
+        );
+      }, 1000);
     }
   }
 
@@ -58,10 +67,12 @@ export class LogRoute extends Route {
           }
         };
         globalThis.addEventListener('log', handler);
+        globalThis.addEventListener('heartbeat', handler);
       },
       cancel() {
         if (handler) {
           globalThis.removeEventListener('log', handler);
+          globalThis.removeEventListener('heartbeat', handler);
         }
       },
     });

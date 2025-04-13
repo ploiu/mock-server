@@ -94,6 +94,10 @@ const change = () => {
     color: var(--p-blue-500);
 }
 
+.PATH_GLOB_PART {
+    color: var(--p-primary-500);
+}
+
 .REQUIRED_PATH_PARAM_PART {
     color: var(--p-yellow-500);
 }

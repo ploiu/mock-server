@@ -22,8 +22,8 @@ export function readConfigFile(
     Deno.readTextFileSync(location);
   } catch (e) {
     if (
-      e.message.includes('No such file or directory') ||
-      e.message.includes('system cannot find') /*windows*/
+      (e as Error).message.includes('No such file or directory') ||
+      (e as Error).message.includes('system cannot find') /*windows*/
     ) {
       setupConfigFile(location);
     } else {
