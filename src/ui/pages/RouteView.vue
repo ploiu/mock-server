@@ -44,6 +44,7 @@ const saveRoute = async (originalRoute: UIRoute | null, updatedRoute: UIRoute) =
     showError()
   }
   store.routes = await fetchRoutes()
+  filteredRoutes.value = store.routes
   // re-select the saved route based on what we get
   currentRoute.value = store.routes.filter(it => stringifyUIRoute(it) === stringifyUIRoute(updatedRoute))[0]
 }
@@ -59,6 +60,7 @@ const deleteRoute = async (route: UIRoute) => {
     showError()
   }
   store.routes = await fetchRoutes()
+  filteredRoutes.value = store.routes
 }
 
 const selectRoute = (route: UIRoute) => {
