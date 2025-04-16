@@ -115,6 +115,11 @@ const clearLogs = () => store.logs.splice(0, store.logs.length);
 </template>
 
 <style scoped>
+
+.ploiu-accordion-title > span.url {
+    overflow-wrap: anywhere;
+}
+
 #logSection {
     margin-left: 2em;
     margin-top: 1em;
