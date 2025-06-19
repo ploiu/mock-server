@@ -30,7 +30,10 @@ export default class RouteManager {
     specialRoutes: Route[],
     port: number,
   ): Route | null {
-    const url = request.url.replace(/(?<=http:\/\/)127\.0\.0\.1/, 'localhost')
+    const url = request.url.replace(
+      /(?<=http:\/\/)([0-9]{1,3}\.){3}[0-9]{1,3}/,
+      'localhost',
+    )
       .split(
         new RegExp(`localhost:${port}`),
       )[1];

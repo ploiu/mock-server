@@ -182,7 +182,10 @@ export default class Route {
    * @param url
    */
   public static getPath(url: string): string {
-    const split = url.replace(/(?<=http:\/\/)127\.0\.0\.1/, 'localhost')
+    const split = url.replace(
+      /(?<=http:\/\/)([0-9]{1,3}\.){3}[0-9]{1,3}/,
+      'localhost',
+    )
       .split(
         /localhost:[0-9]+/,
       );
