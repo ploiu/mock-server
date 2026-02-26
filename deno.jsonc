@@ -45,9 +45,9 @@
     // bundles the ui files into the main application
     "generate-ui": "deno fmt; deno run -A --node-modules-dir npm:vite build; deno run --allow-read --allow-write ./src/ts/GenerateUICode.ts",
     // installs this application onto your system path
-    "install": "deno task generate-ui; deno install --config deno.jsonc --global --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV --force ./src/ts/MockServer.ts",
+    "install": "deno task generate-ui; deno install --compile --config deno.jsonc --global --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV --force ./src/ts/MockServer.ts",
     // company intranet proxies can cause issues with TLS. use this option ONLY if you suffer these errors, they cannot be resolved otherwise, AND IF YOU KNOW WHAT YOU ARE DOING
-    "install-unsafe": "deno task generate-ui; deno install --config deno.jsonc --global --unsafely-ignore-certificate-errors --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV --force ./src/ts/MockServer.ts",
+    "install-unsafe": "deno task generate-ui; deno install --compile --config deno.jsonc --global --unsafely-ignore-certificate-errors --allow-read --allow-write --allow-net --allow-env=MOCK_SERVER_ENV --force ./src/ts/MockServer.ts",
     // formats and lints the code
     "check": "deno fmt; deno lint",
     // generates deno types for typescript
