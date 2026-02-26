@@ -4,9 +4,9 @@ import { createMemoryHistory, createRouter, RouteRecordRaw } from 'vue-router';
 import RouteView from './pages/RouteView.vue';
 import LogView from './pages/LogView/LogView.vue';
 import PrimeVue from 'primevue/config';
-import { definePreset } from '@primevue/themes';
 import ToastService from 'primevue/toastservice';
-import Lara from '@primevue/themes/lara';
+import Lara from '@primeuix/themes/lara';
+import { definePreset } from '@primeuix/themes';
 
 const routes = [
   { path: '/', component: RouteView },
