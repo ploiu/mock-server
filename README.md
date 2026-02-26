@@ -32,7 +32,8 @@ deno task dev
 ```
 
 ## Installation
-> [!NOTE] make sure you follow the steps under [Getting Started](#getting-started)
+> [!NOTE]
+> make sure you follow the steps under [Getting Started](#getting-started)
 
 ```sh
 deno task install
