@@ -10,16 +10,43 @@ interface is clunky and hard to set up. Postman has a nice and simple UI, but
 mock server support is limited on a free plan. Because of this, I decided to
 write my own simple mock server for my own use cases.
 
-## Objective
-
-This is a personal project for personal needs, so this most likely won't cover
-any advance functionality. For what I personally need, it should:
-
-- have unlimited uses
-- be simple to set up and use
-- have a simple UI
-- be portable; mocks should be easily transferable across machines
-- support path and query variables
-
 ## Getting Started
-Go to the [wiki](https://github.com/ploiu/mock-server/wiki) for the getting started guide
+### Requirements
+- [Deno](https://deno.land)
+
+### Steps
+1. make sure the deno bin folder is in your system path (this is where this app gets installed):
+
+linux/mac:
+```sh
+export PATH="$PATH:$HOME/.deno/bin"
+```
+windows (pwsh):
+```pwsh
+setx PATH "$($env:PATH);$HOME\.deno\bin"
+```
+2. install dependencies and run the development server
+```sh
+deno install
+deno task dev
+```
+
+## Installation
+> [!NOTE] make sure you follow the steps under [Getting Started](#getting-started)
+
+```sh
+deno task install
+```
+This will install the app at `$HOME/.deno/bin` with the name `MockServer`
+
+## Usage
+```sh
+# create a folder to store the config and ui files
+mkdir mockServer && cd mockServer
+MockServer
+```
+
+`MockServer -h` has more details and options
+
+## Misc
+updating mocks via the web ui will automatically update the server, but manually replacing the `config.json` file _requires_ you to restart the server manually to pick up the changes
