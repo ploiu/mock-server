@@ -14,6 +14,7 @@ export class LogRoute extends Route {
 
   constructor() {
     super(
+      'builtin_log',
       'New Log Route',
       '/mock-server-logs',
       RequestMethod.GET,

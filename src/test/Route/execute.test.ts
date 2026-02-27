@@ -8,6 +8,7 @@ import RouteFactory from '../../ts/request/RouteFactory.ts';
 
 Deno.test('execute should template out the response body from url parameters', async () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     url: '/test/:name/:age/:favoriteColor?:favoriteFood',
     responseHeaders: {},
@@ -32,6 +33,7 @@ Deno.test('execute should template out the response body from url parameters', a
 
 Deno.test('execute should use default variables if an optional variable is not included', async () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     url: '/test/:name/:age/:favoriteColor?:favoriteFood',
     responseHeaders: {},
@@ -58,6 +60,7 @@ Deno.test('execute should use default variables if an optional variable is not i
 
 Deno.test('execute should fill in default variable fields if the variable is included', async () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     url: '/test/:name/:age?:favoriteColor?&:favoriteFood',
     responseHeaders: {},
@@ -84,6 +87,7 @@ Deno.test('execute should fill in default variable fields if the variable is inc
 
 Deno.test('execute should set the proper response status code', async () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     url: '/test/:name/:age/:favoriteColor?:favoriteFood',
     responseHeaders: {},
@@ -105,6 +109,7 @@ Deno.test('execute should set the proper response status code', async () => {
 
 Deno.test('execute should set the proper response headers', async () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     url: '/test/:name/:age/:favoriteColor?:favoriteFood',
     responseHeaders: {
@@ -132,6 +137,7 @@ Deno.test('execute should set the proper response headers', async () => {
 
 Deno.test('execute should properly handle `null` for response body', async () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     url: '/test/',
     responseHeaders: {

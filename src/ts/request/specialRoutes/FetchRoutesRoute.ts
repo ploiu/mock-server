@@ -15,6 +15,7 @@ export default class FetchRoutesRoute extends Route {
 
   constructor(private routeManager: RouteManager) {
     super(
+      'builtin_fetchRoutes',
       'Fetch Routes',
       '/mock-server-routes',
       RequestMethod.GET,

@@ -1,5 +1,5 @@
+import { ConfigRouteV4 } from '../config/ConfigRoutes.ts';
 import Route from './Route.ts';
-import { ConfigRouteV3 } from '../config/ConfigRoutes.ts';
 import { RouteTypes } from './RouteTypes.ts';
 import { PassThroughRoute } from './specialRoutes/PassThroughRoute.ts';
 
@@ -7,7 +7,7 @@ import { PassThroughRoute } from './specialRoutes/PassThroughRoute.ts';
  * factory for creating routes from config entries based off of the entry's routeType
  */
 export default class RouteFactory {
-  static create(config: ConfigRouteV3): Route {
+  static create(config: ConfigRouteV4): Route {
     switch (config.routeType) {
       case RouteTypes.DEFAULT:
         return this.createDefaultRoute(config);
@@ -19,9 +19,10 @@ export default class RouteFactory {
   }
 
   private static createPassThroughRoute(
-    config: ConfigRouteV3,
+    config: ConfigRouteV4,
   ): PassThroughRoute {
     return new PassThroughRoute(
+      config.id,
       config.title,
       config.url,
       config.method,
@@ -30,7 +31,7 @@ export default class RouteFactory {
     );
   }
 
-  private static createDefaultRoute(config: ConfigRouteV3): Route {
+  private static createDefaultRoute(config: ConfigRouteV4): Route {
     let headers: Headers;
     if (!(config.responseHeaders instanceof Headers)) {
       headers = new Headers();
@@ -41,6 +42,7 @@ export default class RouteFactory {
       headers = config.responseHeaders;
     }
     return new Route(
+      config.id,
       config.title,
       config.url,
       config.method,

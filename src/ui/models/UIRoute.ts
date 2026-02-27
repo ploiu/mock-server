@@ -1,31 +1,18 @@
+import { type ConfigRouteV4 } from '../../ts/config/ConfigRoutes.ts';
 import { RequestMethod } from '../../ts/request/RequestMethod.ts';
 import { RouteTypes } from '../../ts/request/RouteTypes.ts';
 
-export interface UIRoute {
-  title: string;
-  url: string;
-  method: RequestMethod;
+export type UIRoute = Omit<ConfigRouteV4, 'responseHeaders'> & {
   responseHeaders?: string;
-  response: string | null;
-  responseStatus: number;
-  isEnabled: boolean;
-  routeType: RouteTypes;
-  redirectUrl?: string;
-}
+};
 
 export function stringifyUIRoute(route: UIRoute): string {
-  const orderedKeys: string[] = Object.keys(route).sort();
-  // typescript is silly
-  const casted = route as unknown as Record<string, string | null>;
-  let val = '';
-  for (const key of orderedKeys) {
-    val += casted[key]?.toString() ?? '';
-  }
-  return val;
+  return route.id;
 }
 
 export function newUIRoute(): UIRoute {
   return {
+    id: crypto.randomUUID(),
     title: '',
     url: '',
     method: RequestMethod.GET,

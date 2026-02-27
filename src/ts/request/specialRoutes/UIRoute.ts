@@ -6,6 +6,7 @@ import { RouteTypes } from '../RouteTypes.ts';
 export default class UIRoute extends Route {
   constructor() {
     super(
+      'builtin_ui',
       'UI',
       '/mock-server-ui',
       RequestMethod.GET,

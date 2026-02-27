@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from 'primevue/button';
 import { initSSE } from './service/LogService.ts';
-initSSE()
+initSSE();
 </script>
 
 <template>

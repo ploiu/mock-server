@@ -1,7 +1,7 @@
 import Route from './Route.ts';
 import Config from '../config/Config.ts';
 import RouteFactory from './RouteFactory.ts';
-import { ConfigRouteV3 } from '../config/ConfigRoutes.ts';
+import { ConfigRouteV4 } from '../config/ConfigRoutes.ts';
 
 /**
  * Central location for matching requests to routes and executing the responses for those routes
@@ -14,8 +14,8 @@ export default class RouteManager {
    * @param {Config} config
    */
   public setupRoutes(config: Config) {
-    this.routes = config.routes.map((it: object) =>
-      RouteFactory.create(it as ConfigRouteV3)
+    this.routes = config.routes.map((it: ConfigRouteV4) =>
+      RouteFactory.create(it)
     );
   }
 

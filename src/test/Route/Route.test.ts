@@ -5,6 +5,7 @@ import { RouteTypes } from '../../ts/request/RouteTypes.ts';
 
 Deno.test('fromObject differentiates between response as object and response as string', () => {
   const routeStringResponse = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     // adding a query variable after an optional variable to make sure that works
@@ -17,6 +18,7 @@ Deno.test('fromObject differentiates between response as object and response as 
   });
 
   const routeObjectResponse = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     // adding a query variable after an optional variable to make sure that works
@@ -34,6 +36,7 @@ Deno.test('fromObject differentiates between response as object and response as 
 
 Deno.test('properly parses path variables', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     // adding a query variable after an optional variable to make sure that works
@@ -56,6 +59,7 @@ Deno.test('properly parses path variables', () => {
 
 Deno.test('properly parses query variables', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     // adding a query variable after an optional variable to make sure that works
@@ -78,6 +82,7 @@ Deno.test('properly parses query variables', () => {
 
 Deno.test('specificity for regular path segment', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test',
@@ -92,6 +97,7 @@ Deno.test('specificity for regular path segment', () => {
 
 Deno.test('specificity for required path variable', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/:test',
@@ -106,6 +112,7 @@ Deno.test('specificity for required path variable', () => {
 
 Deno.test('specificity for optional path variable', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/:test?',
@@ -120,6 +127,7 @@ Deno.test('specificity for optional path variable', () => {
 
 Deno.test('specificity for catch-all path variable', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/:*',
@@ -134,6 +142,7 @@ Deno.test('specificity for catch-all path variable', () => {
 
 Deno.test('specificity for regular query param', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/:*?test',
@@ -148,6 +157,7 @@ Deno.test('specificity for regular query param', () => {
 
 Deno.test('specificity for mandatory query variable', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/:*?:test',
@@ -162,6 +172,7 @@ Deno.test('specificity for mandatory query variable', () => {
 
 Deno.test('specificity for optional query variable', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/:*?:test?',
@@ -176,6 +187,7 @@ Deno.test('specificity for optional query variable', () => {
 
 Deno.test('specificity for catch-all query variable', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/:*?:*',
@@ -190,6 +202,7 @@ Deno.test('specificity for catch-all query variable', () => {
 
 Deno.test('specificity for all path types', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/a/:b?/:c/:*',
@@ -204,6 +217,7 @@ Deno.test('specificity for all path types', () => {
 
 Deno.test('specificity for all query types', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/:*?a&:b?&:c&:*',
@@ -233,6 +247,7 @@ Deno.test('misc specificity routes', () => {
   };
   for (const [url, specificity] of Object.entries(routes)) {
     const route = RouteFactory.create({
+      id: '',
       title: 'test',
       method: RequestMethod.GET,
       url,

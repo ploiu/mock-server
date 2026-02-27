@@ -1,62 +1,67 @@
 <script setup lang="ts">
-import InputText from 'primevue/inputtext';
-import { ref } from 'vue';
-import { tokenize } from '../../ts/request/RouteTokenizer.ts'
+import InputText from "primevue/inputtext";
+import { ref } from "vue";
+import { tokenize } from "../../ts/request/RouteTokenizer.ts";
 
 type UrlEditorProps = {
-    initialText: string
-}
+    initialText: string;
+};
 
 const emit = defineEmits<{
-    (e: 'change', value: string),
-}>()
+    (e: "change", value: string);
+}>();
 
 const props = defineProps<UrlEditorProps>();
 
-const inputText = ref(props.initialText)
+const inputText = ref(props.initialText);
 
 const processInputText = (): string => {
-    if(inputText.value.length === 0) {
-        inputText.value = '/'
+    if (inputText.value.length === 0) {
+        inputText.value = "/";
     }
     const tokens = tokenize(inputText.value);
-    if(tokens.length === 0) {
+    if (tokens.length === 0) {
         return inputText.value;
     }
-    let builtText = '';
+    let builtText = "";
     // keep track of this is the first query param we've found; used to know if we need to prepend `?` or `&`
     let firstQueryParam = true;
     for (let i = 0; i < tokens.length; i++) {
-        const token = tokens[i]
+        const token = tokens[i];
         let prepend: string;
-        if (token.tokenType.includes('PATH')) {
-            prepend = '/';
+        if (token.tokenType.includes("PATH")) {
+            prepend = "/";
         } else if (firstQueryParam) {
             firstQueryParam = false;
-            prepend = '?';
+            prepend = "?";
         } else {
-            prepend = '&';
+            prepend = "&";
         }
-        builtText += `<span class="${token.tokenType}">${prepend}${token.text}</span>`
+        builtText += `<span class="${token.tokenType}">${prepend}${token.text}</span>`;
     }
     return builtText;
-}
+};
 
 const cleanValue = () => {
-    return inputText
-    .value
-    .replace(/^\/\//, '/');
-}
+    return inputText.value.replace(/^\/\//, "/");
+};
 
 const change = () => {
-    emit('change', cleanValue());
-}
-
+    emit("change", cleanValue());
+};
 </script>
 
 <template>
     <div id="renderedText" v-html="processInputText()"></div>
-    <InputText id="urlInput" type="text" :model-value="inputText" @update:model-value="value => inputText = ('/' + value).replace(/^\/\//, '/')" @change="change" />
+    <InputText
+        id="urlInput"
+        type="text"
+        :model-value="inputText"
+        @update:model-value="
+            (value) => (inputText = ('/' + value).replace(/^\/\//, '/'))
+        "
+        @change="change"
+    />
 </template>
 
 <style scoped>
@@ -82,11 +87,11 @@ const change = () => {
     background-color: var(--p-inputtext-background);
     height: 46px;
 }
-
 </style>
 // can't use scoped styles for generated html
 <style>
-.INVALID_PATH_PART, .INVALID_QUERY_PART {
+.INVALID_PATH_PART,
+.INVALID_QUERY_PART {
     color: var(--p-red-500);
 }
 
@@ -107,7 +112,7 @@ const change = () => {
 }
 
 .REQUIRED_QUERY_PARAM_PART {
-    color: var(--p-pink-500)
+    color: var(--p-pink-500);
 }
 
 .OPTIONAL_QUERY_PARAM_PART {

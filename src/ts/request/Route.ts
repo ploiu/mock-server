@@ -21,21 +21,23 @@ export default class Route {
   #specificity = 0;
 
   constructor(
-    // a name to help the user distinguish which route is which
+    /** the unique id of the route as saved on the disk */
+    public id: string,
+    /** a name to help the user distinguish which route is which */
     public title: string,
-    // the url that the route gets bound on, may include path and query variables
+    /** the url that the route gets bound on, may include path and query variables */
     public url: string,
-    // the request method the route gets bound on. '*' means it accepts any method
+    /** the request method the route gets bound on. '*' means it accepts any method */
     public method: RequestMethod | '*',
-    // the headers used in the response for this route
+    /** the headers used in the response for this route */
     public responseHeaders: Headers,
-    // the response body
+    /** the response body */
     public response: string | null,
-    // the http status code
+    /** the http status code */
     public responseStatus: number,
-    // whether the route is "turned on"
+    /** whether the route is "turned on" */
     public isEnabled: boolean,
-    // used on the UI side to determine which fields to display
+    /** used on the UI side to determine which fields to display */
     public routeType: RouteTypes,
   ) {
     this.parseUrlVariables();
@@ -121,10 +123,7 @@ export default class Route {
     let hasAllMandatoryQueryFlags = true;
     for (const queryVariable of this.#queryVariables) {
       if (!queryVariable.optional) {
-        const queryRegex = new RegExp(
-          `[?&]${queryVariable.name}=[^&]+`,
-          'i',
-        );
+        const queryRegex = new RegExp(`[?&]${queryVariable.name}=[^&]+`, 'i');
         hasAllMandatoryQueryFlags = hasAllMandatoryQueryFlags &&
           queryRegex.test(url);
       }
@@ -141,8 +140,8 @@ export default class Route {
    */
   public parseVariablesFromUrl(url: string): Record<string, string | null> {
     if (
-      (this.#pathVariables.length === 0 &&
-        this.#queryVariables.length === 0) &&
+      this.#pathVariables.length === 0 &&
+      this.#queryVariables.length === 0 &&
       !this.#hasImpliedQueryParams
     ) {
       return {};
@@ -160,9 +159,11 @@ export default class Route {
    * @returns {boolean}
    */
   public hasPathVariable(name: string, optional: boolean): boolean {
-    return this.#pathVariables.filter((it) =>
-      it.name === name && it.optional === optional
-    ).length > 0;
+    return (
+      this.#pathVariables.filter(
+        (it) => it.name === name && it.optional === optional,
+      ).length > 0
+    );
   }
 
   /**
@@ -172,9 +173,11 @@ export default class Route {
    * @returns {boolean}
    */
   public hasQueryVariable(name: string, optional: boolean): boolean {
-    return this.#queryVariables.filter((it) =>
-      it.name === name && it.optional === optional
-    ).length > 0;
+    return (
+      this.#queryVariables.filter(
+        (it) => it.name === name && it.optional === optional,
+      ).length > 0
+    );
   }
 
   /**
@@ -182,13 +185,9 @@ export default class Route {
    * @param url
    */
   public static getPath(url: string): string {
-    const split = url.replace(
-      /(?<=http:\/\/)([0-9]{1,3}\.){3}[0-9]{1,3}/,
-      'localhost',
-    )
-      .split(
-        /localhost:[0-9]+/,
-      );
+    const split = url
+      .replace(/(?<=http:\/\/)([0-9]{1,3}\.){3}[0-9]{1,3}/, 'localhost')
+      .split(/localhost:[0-9]+/);
     return split[1];
   }
 
@@ -204,15 +203,9 @@ export default class Route {
       const urlVars = this.parseVariablesFromUrl(url);
       // now replace each instance of our var placeholders
       for (const [varName, varValue] of Object.entries(urlVars)) {
-        const replaceRegex = new RegExp(
-          `{{${varName}(:[^}]+)?}}`,
-          'ig',
-        );
+        const replaceRegex = new RegExp(`{{${varName}(:[^}]+)?}}`, 'ig');
         if (varValue) {
-          bodyCopy = bodyCopy.replaceAll(
-            replaceRegex,
-            <string> varValue,
-          );
+          bodyCopy = bodyCopy.replaceAll(replaceRegex, <string> varValue);
         }
       }
       // now replace all of our remaining placeholders
@@ -220,7 +213,7 @@ export default class Route {
       if (remainingVars) {
         for (const remainingVar of remainingVars) {
           const defaultVal = remainingVar.match(/(?<=:)[^}]+(?=}})/) ??
-            [] as string[];
+            ([] as string[]);
           bodyCopy = bodyCopy.replace(remainingVar, defaultVal[0]);
         }
       }
@@ -424,12 +417,12 @@ export default class Route {
     } else {
       const result: Record<string, string | null> = {};
       // for each mandatory query variable, get its value
-      const mandatoryVars = this.#queryVariables.filter((it) => !it.optional)
+      const mandatoryVars = this.#queryVariables
+        .filter((it) => !it.optional)
         .map((it) => it.name);
-      const optionalVars = this.#queryVariables.filter((it) => it.optional)
-        .map(
-          (it) => it.name,
-        );
+      const optionalVars = this.#queryVariables
+        .filter((it) => it.optional)
+        .map((it) => it.name);
       for (const mandatoryVar of mandatoryVars) {
         // get the variable from the query string
         const varRegex = new RegExp(`(?<=[?&])${mandatoryVar}=[^&]+`);
@@ -452,12 +445,10 @@ export default class Route {
       // we don't want to re-include vars that we explicitly called out
       const explicitVarNames = [...mandatoryVars, ...optionalVars];
       const impliedQueryVars = (request.match(/(?<=[?&])[^&]*/g) ?? [])
-        .filter(
-          (it) => it && it.length > 0,
-        ).map((it) => it.split('=')).filter((it) =>
-          !explicitVarNames.includes(it[0])
-        );
-      impliedQueryVars.forEach(([key, value]) => result[key] = value);
+        .filter((it) => it && it.length > 0)
+        .map((it) => it.split('='))
+        .filter((it) => !explicitVarNames.includes(it[0]));
+      impliedQueryVars.forEach(([key, value]) => (result[key] = value));
       return result;
     }
   }

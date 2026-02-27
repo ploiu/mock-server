@@ -8,6 +8,7 @@ Deno.test('localhost ip is replaced with localhost name', () => {
   const config: Config = {
     configVersion: '',
     routes: [{
+      id: '',
       routeType: RouteTypes.DEFAULT,
       isEnabled: true,
       title: '',
@@ -28,6 +29,7 @@ Deno.test('match is not triggered if route does not match', () => {
   const config: Config = {
     configVersion: '',
     routes: [{
+      id: '',
       routeType: RouteTypes.DEFAULT,
       isEnabled: true,
       title: '',
@@ -48,6 +50,7 @@ Deno.test('non-matching method does not trigger a match', () => {
   const config: Config = {
     configVersion: '',
     routes: [{
+      id: '',
       routeType: RouteTypes.DEFAULT,
       isEnabled: true,
       title: '',
@@ -70,6 +73,7 @@ Deno.test('url and method need to match to trigger a match', () => {
   const config: Config = {
     configVersion: '',
     routes: [{
+      id: '',
       routeType: RouteTypes.DEFAULT,
       isEnabled: true,
       title: '',
@@ -90,6 +94,7 @@ Deno.test('HEAD method is allowed instead of correct method', () => {
   const config: Config = {
     configVersion: '',
     routes: [{
+      id: '',
       routeType: RouteTypes.DEFAULT,
       isEnabled: true,
       title: '',
@@ -112,6 +117,7 @@ Deno.test('disabled route should not trigger a match', () => {
   const config: Config = {
     configVersion: '',
     routes: [{
+      id: '',
       routeType: RouteTypes.DEFAULT,
       isEnabled: false,
       title: '',
@@ -129,10 +135,12 @@ Deno.test('disabled route should not trigger a match', () => {
 });
 
 Deno.test('routes are returned in specificity order', () => {
+  const id = '';
   const config: Config = {
     configVersion: '',
     routes: [
       {
+        id,
         routeType: RouteTypes.DEFAULT,
         isEnabled: true,
         title: 'good',
@@ -143,6 +151,7 @@ Deno.test('routes are returned in specificity order', () => {
         responseStatus: 0,
       },
       {
+        id,
         routeType: RouteTypes.DEFAULT,
         isEnabled: true,
         title: 'bad',
@@ -165,6 +174,7 @@ Deno.test('routes with ALL method type accept any request method', () => {
   const config: Config = {
     configVersion: '',
     routes: [{
+      id: '',
       routeType: RouteTypes.DEFAULT,
       isEnabled: true,
       title: '',

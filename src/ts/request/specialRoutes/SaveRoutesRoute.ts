@@ -14,6 +14,7 @@ export default class SaveRoutesRoute extends Route {
     private routeManager: RouteManager,
   ) {
     super(
+      'builtin_save',
       'Save Routes',
       '/mock-ui-save-routes',
       RequestMethod.POST,

@@ -10,18 +10,17 @@ import {
 
 export class PassThroughRoute extends Route {
   constructor(
-    // a name to help the user distinguish which route is which
-    public override title: string,
-    // the url that the route gets bound on, may include path and query variables
-    public override url: string,
-    // the request method the route gets bound on
-    public override method: RequestMethod | '*',
-    // whether the route is "turned on"
-    public override isEnabled: boolean,
-    // the url to redirect to, our `url` property will be appended to this as the path to hit
+    /** the id of the route (uuid) */
+    id: string,
+    title: string,
+    url: string,
+    method: RequestMethod | '*',
+    isEnabled: boolean,
+    /** the url to redirect to, our `url` property will be appended to this as the path to hit */
     public redirectUrl: string,
   ) {
     super(
+      id,
       title,
       url,
       method,

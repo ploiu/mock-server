@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "strict": true,
+    "strict": true
   },
   "fmt": {
     "exclude": [
@@ -12,13 +12,13 @@
       "src/ui-old/**/*",
       "generated/**/*",
       "**/*.css",
-      "**/*.html",
+      "**/*.html"
     ],
     "singleQuote": true,
     "useTabs": false,
     "indentWidth": 2,
     "proseWrap": "preserve",
-    "semiColons": true,
+    "semiColons": true
   },
   "lint": {
     "exclude": [
@@ -30,8 +30,8 @@
       "src/ui/.vite/**/*.ts",
       "src/ui/vite-env.d.ts",
       "src/ui/dist/**/*",
-      "src/ui-old/**/*",
-    ],
+      "src/ui-old/**/*"
+    ]
   },
   "tasks": {
     // starts up the dev server for development with hot reloading
@@ -51,7 +51,7 @@
     // formats and lints the code
     "check": "deno fmt; deno lint",
     // generates deno types for typescript
-    "types": "deno types > ./src/ts/Deno.d.ts",
+    "types": "deno types > ./src/ts/Deno.d.ts"
   },
   "minimumDependencyAge": "P2W",
   "imports": {
@@ -67,6 +67,6 @@
     "vite": "npm:vite@7.3.1",
     "vue": "npm:vue@3.5.13",
     "vue-router": "npm:vue-router@5.0.2",
-    "@primeuix/themes": "npm:@primeuix/themes@2.0.3",
-  },
+    "@primeuix/themes": "npm:@primeuix/themes@2.0.3"
+  }
 }

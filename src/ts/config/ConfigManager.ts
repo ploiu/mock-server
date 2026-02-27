@@ -4,11 +4,11 @@ import { ensureFileSync } from '@std/fs';
 import Config from './Config.ts';
 import { RouteTypes } from '../request/RouteTypes.ts';
 import { RequestMethod } from '../request/RequestMethod.ts';
-import { ConfigRouteV2 } from './ConfigRoutes.ts';
+import { ConfigRouteV2, ConfigRouteV3, ConfigRouteV4 } from './ConfigRoutes.ts';
 import RouteFactory from '../request/RouteFactory.ts';
 
 const CONFIG_FILE_LOCATION = './config.json';
-const configVersion = 3.0;
+const configVersion = 4.0;
 
 /**
  * reads and parses our config file, creating it if it does not exist
@@ -54,6 +54,7 @@ function convertConfigToLatest(
   let converted: Config;
   converted = convertV1ToV2(parsed);
   converted = convertV2ToV3(converted);
+  converted = convertV3ToV4(converted);
   // write back to the config file
   writeConfigFile(converted, location);
   return converted;
@@ -75,9 +76,20 @@ function convertV2ToV3(parsed: Config): Config {
   console.log('converting to v3...');
   if (parsed.configVersion === '2.0') {
     parsed.configVersion = '3.0';
-    parsed.routes.forEach((route) => {
+    parsed.routes.forEach((route: ConfigRouteV3) => {
       route.routeType = RouteTypes.DEFAULT;
     });
+  }
+  return parsed;
+}
+
+function convertV3ToV4(parsed: Config): Config {
+  console.log('converting to v4...');
+  if (parsed.configVersion === '3.0') {
+    parsed.configVersion = '4.0';
+    parsed.routes.forEach((route: ConfigRouteV4) =>
+      route.id = crypto.randomUUID()
+    );
   }
   return parsed;
 }
@@ -90,9 +102,10 @@ function setupConfigFile(location: string = CONFIG_FILE_LOCATION) {
   ensureFileSync(location);
   // create default config object
   const config = new Config();
-  config.configVersion = '3.0';
+  config.configVersion = configVersion.toFixed(1);
   // create an example route to show what can be done
   const route = RouteFactory.create({
+    id: crypto.randomUUID(),
     title: 'Example Route',
     url: '/HelloWorld/:name?:age',
     method: RequestMethod.GET,

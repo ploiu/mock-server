@@ -15,6 +15,7 @@ export default class UpdateConfigRoute extends Route {
     private routeManager: RouteManager,
   ) {
     super(
+      'builtin_updateConfig',
       'Custom Update Config Route',
       '/refreshConfig?:location?',
       RequestMethod.POST,

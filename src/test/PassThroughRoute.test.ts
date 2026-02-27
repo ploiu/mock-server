@@ -28,6 +28,7 @@ Deno.test('should make a call to the redirect url when invoked', async () => {
   };
   const server = Deno.serve({ port: 8001, handler });
   const route = RouteFactory.create({
+    id: '',
     title: 'test route',
     url: '/test',
     method: RequestMethod.POST,
@@ -67,6 +68,7 @@ Deno.test('should pass along any path and query variables', async () => {
   };
   const server = Deno.serve({ port: 8081, handler });
   const route = RouteFactory.create({
+    id: '',
     title: 'test route',
     // this isn't restful or realistic, but it fits the test so oh well
     url: '/:searchType?:name&:age',

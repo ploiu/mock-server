@@ -10,6 +10,7 @@ import RouteFactory from '../../ts/request/RouteFactory.ts';
 
 Deno.test('doesUrlMatch matches simple url', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test',
@@ -30,6 +31,7 @@ Deno.test('doesUrlMatch matches simple url', () => {
 
 Deno.test('doesUrlMatch matches query params with . in the name and value', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test?:first.last&:a.b',
@@ -53,6 +55,7 @@ Deno.test('doesUrlMatch matches query params with . in the name and value', () =
 
 Deno.test('doesUrlMatch matches urls with non-alphanumeric characters', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:email/:code',
@@ -70,6 +73,7 @@ Deno.test('doesUrlMatch matches urls with non-alphanumeric characters', () => {
 
 Deno.test('doesUrlMatch matches simple url with multiple path sections', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/a/b/c',
@@ -90,6 +94,7 @@ Deno.test('doesUrlMatch matches simple url with multiple path sections', () => {
 
 Deno.test('doesUrlMatch matches url with path variables', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:name/:age',
@@ -112,6 +117,7 @@ Deno.test('doesUrlMatch matches url with path variables', () => {
 
 Deno.test('doesUrlMatch matches url with optional path variables', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:name?/:age',
@@ -138,6 +144,7 @@ Deno.test('doesUrlMatch matches url with optional path variables', () => {
 
 Deno.test('doesUrlMatch matches url with query variables', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test?:name&:age',
@@ -160,6 +167,7 @@ Deno.test('doesUrlMatch matches url with query variables', () => {
 
 Deno.test('doesUrlMatch ensures query variable names are included', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test?:name&:age',
@@ -183,6 +191,7 @@ Deno.test('doesUrlMatch ensures query variable names are included', () => {
 
 Deno.test('doesUrlMatch matches url with optional query variables', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test?:name?&:age',
@@ -204,6 +213,7 @@ Deno.test('doesUrlMatch matches url with optional query variables', () => {
 
 Deno.test('doesUrlMatch matches url with mandatory and optional path and query parameters', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:name/:age??:favoriteColor&:favoriteFood?',
@@ -227,6 +237,7 @@ Deno.test('doesUrlMatch matches url with mandatory and optional path and query p
 
 Deno.test('doesUrlMatch matches url with mandatory and optional path and query parameters (mandatory path param followed by query param)', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:name/:age?:favoriteColor&:favoriteFood?',
@@ -250,6 +261,7 @@ Deno.test('doesUrlMatch matches url with mandatory and optional path and query p
 
 Deno.test('doesUrlMatch matches any query params if the url specifies ?:*', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test?:*',
@@ -268,6 +280,7 @@ Deno.test('doesUrlMatch matches any query params if the url specifies ?:*', () =
 
 Deno.test('doesUrlMatch still requires explicitly-named query params if ?:* or &:* is passed', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test?:name&:*',
@@ -296,6 +309,7 @@ Deno.test('doesUrlMatch matches trailing / in url path', () => {
   };
   for (const [pattern, url] of Object.entries(urls)) {
     const route = RouteFactory.create({
+      id: '',
       title: 'test',
       method: RequestMethod.GET,
       url: pattern,
@@ -315,6 +329,7 @@ Deno.test('doesUrlMatch matches trailing / in url path', () => {
 
 Deno.test('matches path wildcard with no query params', () => {
   const route = RouteFactory.create({
+    id: '',
     routeType: RouteTypes.DEFAULT,
     isEnabled: true,
     title: 'test',
@@ -331,6 +346,7 @@ Deno.test('matches path wildcard with no query params', () => {
 
 Deno.test('matches path wildcard with query params', () => {
   const route = RouteFactory.create({
+    id: '',
     routeType: RouteTypes.DEFAULT,
     isEnabled: true,
     title: 'test',
@@ -347,6 +363,7 @@ Deno.test('matches path wildcard with query params', () => {
 
 Deno.test('matches path and query wild cards', () => {
   const route = RouteFactory.create({
+    id: '',
     routeType: RouteTypes.DEFAULT,
     isEnabled: true,
     title: 'test',
@@ -367,6 +384,7 @@ Deno.test('matches path and query wild cards', () => {
 
 Deno.test('matches wild card for beginning of path', () => {
   const route = RouteFactory.create({
+    id: '',
     routeType: RouteTypes.DEFAULT,
     isEnabled: true,
     title: 'test',
@@ -384,6 +402,7 @@ Deno.test('matches wild card for beginning of path', () => {
 
 Deno.test('matches wild card for middle of path', () => {
   const route = RouteFactory.create({
+    id: '',
     routeType: RouteTypes.DEFAULT,
     isEnabled: true,
     title: 'test',
@@ -403,6 +422,7 @@ Deno.test('matches wild card for middle of path', () => {
 
 Deno.test('matches wild card for end of path', () => {
   const route = RouteFactory.create({
+    id: '',
     routeType: RouteTypes.DEFAULT,
     isEnabled: true,
     title: 'test',
@@ -419,6 +439,7 @@ Deno.test('matches wild card for end of path', () => {
 
 Deno.test('matches multiple path wildcards', () => {
   const route = RouteFactory.create({
+    id: '',
     routeType: RouteTypes.DEFAULT,
     isEnabled: true,
     title: 'test',

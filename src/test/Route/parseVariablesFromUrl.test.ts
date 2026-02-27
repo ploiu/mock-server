@@ -5,6 +5,7 @@ import { RequestMethod } from '../../ts/request/RequestMethod.ts';
 
 Deno.test('parseVariablesFromUrl should return an empty js object if there are no variables to parse', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/a/b/c',
@@ -19,6 +20,7 @@ Deno.test('parseVariablesFromUrl should return an empty js object if there are n
 
 Deno.test('parseVariablesFromUrl should return an object with path variables in it', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:name/:age',
@@ -37,6 +39,7 @@ Deno.test('parseVariablesFromUrl should return an object with path variables in 
 
 Deno.test('parseVariablesFromUrl should return an object with path variables in it for variables not directly sequential', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:name/hi/:age',
@@ -55,6 +58,7 @@ Deno.test('parseVariablesFromUrl should return an object with path variables in 
 
 Deno.test('parseVariablesFromUrl should set non-included path variables as null', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:name?/:age/:favoriteFood?',
@@ -74,6 +78,7 @@ Deno.test('parseVariablesFromUrl should set non-included path variables as null'
 
 Deno.test('parseVariablesFromUrl should set non-included path variables for variables not directly sequential as null', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:name?/hi/:age/:favoriteFood?',
@@ -93,6 +98,7 @@ Deno.test('parseVariablesFromUrl should set non-included path variables for vari
 
 Deno.test('parseVariablesFromUrl should include query parameters', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test?:name&:age',
@@ -111,6 +117,7 @@ Deno.test('parseVariablesFromUrl should include query parameters', () => {
 
 Deno.test('parseVariablesFromUrl should set non-included query variables as null', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test?:name?&:age&:favoriteFood?',
@@ -132,6 +139,7 @@ Deno.test('parseVariablesFromUrl should parse non-named query variables allowed 
   // deno-lint-ignore no-explicit-any
   (globalThis as any).enqueueLogEvent = () => {};
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test?:*',
@@ -153,6 +161,7 @@ Deno.test('parseVariablesFromUrl should parse non-named query variables allowed 
 
 Deno.test('parseVariablesFromUrl should not include http: or https: as a path var', () => {
   const route = RouteFactory.create({
+    id: '',
     title: 'test',
     method: RequestMethod.GET,
     url: '/test/:name/hi/:age',
