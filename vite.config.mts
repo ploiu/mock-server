@@ -19,4 +19,8 @@ export default defineConfig({
       allow: [searchForWorkspaceRoot(Deno.cwd())],
     },
   },
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+  },
 });

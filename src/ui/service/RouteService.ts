@@ -23,7 +23,7 @@ export async function fetchRoutes(): Promise<UIRoute[]> {
   }
 }
 
-export async function saveRoutes(routes: UIRoute[]): Promise<undefined> {
+export async function saveRoutes(routes: UIRoute[]): Promise<void> {
   const formatted = routes.map((route) => {
     // deno-lint-ignore no-explicit-any
     const detyped: Record<string, any> = { ...route };

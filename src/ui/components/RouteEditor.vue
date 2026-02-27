@@ -14,9 +14,8 @@ import { validateHeaderInput } from "../models/UIHeader.ts";
 type RouteEditorProps = {
     route: UIRoute;
 };
-const props = defineProps<RouteEditorProps>();
+const { route: item } = defineProps<RouteEditorProps>();
 
-const item = reactive({ ...props.route } as UIRoute);
 item.isEnabled = item.isEnabled ?? true;
 const headersInvalid = ref(false);
 const hasChanges = ref(false);
