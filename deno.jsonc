@@ -38,7 +38,7 @@
     // starts up the dev server for development with hot reloading
     "dev": "deno task generate-ui; export MOCK_SERVER_ENV=dev; deno run --watch -A --unsafely-ignore-certificate-errors ./src/ts/MockServer.ts & deno run -A --node-modules-dir npm:vite dev",
     // runs unit tests
-    "test": "deno fmt; deno test --allow-net",
+    "test": "deno fmt; deno test --allow-net src/test",
     // starts up the server with a test config file and a frontend with the testing script baked in. You will need to open the browser to the server page for the tests to run
     "ui-test": "deno run -A --node-modules-dir npm:vitest",
     // builds the ui and runs the backend server, to test the fully-built application
