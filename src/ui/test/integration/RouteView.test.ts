@@ -1,14 +1,13 @@
+import Lara from '@primeuix/themes/lara';
+import { fireEvent, render, within } from '@testing-library/vue';
+import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
 import { type Mock, vi } from 'vitest';
-import { fireEvent, render } from '@testing-library/vue';
 import { RequestMethod } from '../../../ts/request/RequestMethod.ts';
 import { RouteTypes } from '../../../ts/request/RouteTypes.ts';
 import { UIRoute } from '../../models/index.ts';
-import { fetchRoutes, saveRoutes } from '../../service/RouteService.ts';
-import { within } from '@testing-library/vue';
 import RouteView from '../../pages/RouteView.vue';
-import PrimeVue from 'primevue/config';
-import ToastService from 'primevue/toastservice';
-import Lara from '@primeuix/themes/lara';
+import { fetchRoutes, saveRoutes } from '../../service/RouteService.ts';
 
 type FetchRoutesMock = Mock<() => Promise<UIRoute[]>>;
 type SaveRoutesMock = Mock<() => Promise<void>>;
@@ -53,10 +52,21 @@ const global = {
   // deno-lint-ignore no-explicit-any
 } as any;
 
+const verifyLabeledInput = (
+  // deno-lint-ignore no-explicit-any
+  dom: any,
+  label: string,
+  value: string,
+) => {
+  expect(dom.getByLabelText(label)).to.exist;
+  expect(dom.getByLabelText(label).value).toContain(value);
+};
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
 describe('Route List', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
   test('should show the routes', async () => {
     (fetchRoutes as FetchRoutesMock).mockResolvedValue(baseRoutes);
     const dom = render(RouteView, { global });
@@ -70,7 +80,6 @@ describe('Route List', () => {
   test('should attempt to delete the route when the delete button is clicked', async () => {
     (fetchRoutes as FetchRoutesMock).mockResolvedValue(baseRoutes);
     const dom = render(RouteView, { global });
-    await flushPromises();
     const firstCard = within(dom.getByText('first route').closest('.p-card'));
     await fireEvent.click(firstCard.getByRole('button', { name: /delete/i }));
     expect(saveRoutes as SaveRoutesMock).toBeCalledWith(baseRoutes.slice(1));
@@ -79,7 +88,6 @@ describe('Route List', () => {
   test('should attemmpt to enable a disabled route when the toggle is clicked', async () => {
     (fetchRoutes as FetchRoutesMock).mockResolvedValue(baseRoutes);
     const dom = render(RouteView, { global });
-    await flushPromises();
     const firstCard = within(dom.getByText('first route').closest('.p-card'));
     await fireEvent.click(firstCard.getByRole('switch', { checked: true }));
     const expected = [
@@ -96,7 +104,6 @@ describe('Route List', () => {
   test('should attempt to disable an enabled route when the toggle is clicked', async () => {
     (fetchRoutes as FetchRoutesMock).mockResolvedValue(baseRoutes);
     const dom = render(RouteView, { global });
-    await flushPromises();
     const firstCard = within(dom.getByText('second route').closest('.p-card'));
     await fireEvent.click(firstCard.getByRole('switch', { checked: false }));
     const expected = [
@@ -112,7 +119,35 @@ describe('Route List', () => {
 });
 
 describe('Route Editor', () => {
-  test('should show the route edit view when a route is clicked', () => {
+  test('should show the route edit view when a route is clicked', async () => {
+    (fetchRoutes as FetchRoutesMock).mockResolvedValue(baseRoutes);
+    const dom = render(RouteView, { global });
+    fireEvent.click(dom.getByText('first route').closest('.p-card'));
+    await flushPromises();
+    verifyLabeledInput(dom, 'Title', 'first route');
+    verifyLabeledInput(dom, 'Status Code', '200');
+    verifyLabeledInput(dom, 'Response Headers', 'content-type: text/plain');
+    verifyLabeledInput(dom, 'Response Body', 'whatever');
+    verifyLabeledInput(dom, 'Path', '/test');
+
+    // label for dropdown doesn't work the same
+    expect(dom.getByText('Route Type')).to.exist;
+    expect(dom.getByText('Request Method')).to.exist;
+
+    const routeTypeWrapper = within(
+      dom.getByText('Route Type').closest('div'),
+    );
+    expect(routeTypeWrapper.getByRole('combobox').innerText).toEqual('default');
+
+    const requestMethodWrapper = within(
+      dom.getByText('Request Method').closest('div'),
+    );
+    expect(requestMethodWrapper.getByRole('combobox').innerText).toEqual(
+      'POST',
+    );
+  });
+
+  test('should show the route edit view when create new button is clicked', () => {
     throw 'unimplemented';
   });
 });

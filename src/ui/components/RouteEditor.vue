@@ -14,7 +14,8 @@ import { validateHeaderInput } from "../models/UIHeader.ts";
 type RouteEditorProps = {
     route: UIRoute;
 };
-const { route: item } = defineProps<RouteEditorProps>();
+const props = defineProps<RouteEditorProps>();
+const item = reactive({ ...props.route });
 
 item.isEnabled = item.isEnabled ?? true;
 const headersInvalid = ref(false);
@@ -28,7 +29,9 @@ const setHeaders = (input: string) => {
     headersInvalid.value = !validateHeaderInput(input);
 };
 
-const valueChange = () => (hasChanges.value = true);
+const valueChange = () => {
+    hasChanges.value = true;
+};
 
 const saveRoute = () => {
     emit("save", item);
@@ -53,13 +56,16 @@ const saveRoute = () => {
             </div>
             <!-- type  -->
             <div class="col-4">
-                <Select
-                    id="routeTypes"
-                    v-model="item.routeType"
-                    :options="Object.values(RouteTypes)"
-                    placeholder="type"
-                    @update:model-value="valueChange"
-                />
+                <FloatLabel id="routeTypesWrapper">
+                    <Select
+                        id="routeTypes"
+                        v-model="item.routeType"
+                        :options="Object.values(RouteTypes)"
+                        placeholder="type"
+                        @update:model-value="valueChange"
+                    />
+                    <label for="routeTypes">Route Type</label>
+                </FloatLabel>
             </div>
             <!-- status code  -->
             <div class="col-4" v-if="item.routeType === RouteTypes.DEFAULT">
@@ -82,13 +88,16 @@ const saveRoute = () => {
         <!-- method, url -->
         <div class="row">
             <div class="col-2">
-                <Select
-                    id="requestMethod"
-                    v-model="item.method"
-                    :options="['*', ...Object.keys(RequestMethod)]"
-                    placeholder="Method"
-                    @update:model-value="valueChange"
-                />
+                <FloatLabel>
+                    <Select
+                        id="requestMethod"
+                        v-model="item.method"
+                        :options="['*', ...Object.keys(RequestMethod)]"
+                        placeholder="Method"
+                        @update:model-value="valueChange"
+                    />
+                    <label for="requestMethod">Request Method</label>
+                </FloatLabel>
             </div>
             <div class="col-10">
                 <!-- key is set here to force re-render when props.route changes -->

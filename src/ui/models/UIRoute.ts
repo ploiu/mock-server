@@ -6,10 +6,6 @@ export type UIRoute = Omit<ConfigRouteV4, 'responseHeaders'> & {
   responseHeaders?: string;
 };
 
-export function stringifyUIRoute(route: UIRoute): string {
-  return route.id;
-}
-
 export function newUIRoute(): UIRoute {
   return {
     id: crypto.randomUUID(),

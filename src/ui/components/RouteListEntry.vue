@@ -108,6 +108,7 @@ const toggleEnabled = (e: ChangeEvent) => {
 span.request-method {
     padding: 4px;
     border-radius: var(--border-radius);
+    margin-right: 0.5em;
 }
 
 .route-title {

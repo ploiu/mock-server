@@ -52,16 +52,19 @@ const change = () => {
 </script>
 
 <template>
-    <div id="renderedText" v-html="processInputText()"></div>
-    <InputText
-        id="urlInput"
-        type="text"
-        :model-value="inputText"
-        @update:model-value="
-            (value) => (inputText = ('/' + value).replace(/^\/\//, '/'))
-        "
-        @change="change"
-    />
+    <div class="p-floatlabel p-floatlabel-over">
+        <div id="renderedText" v-html="processInputText()"></div>
+        <label for="urlInput">Path</label>
+        <InputText
+            id="urlInput"
+            type="text"
+            :model-value="inputText"
+            @update:model-value="
+                (value) => (inputText = ('/' + value).replace(/^\/\//, '/'))
+            "
+            @change="change"
+        />
+    </div>
 </template>
 
 <style scoped>
@@ -74,8 +77,7 @@ const change = () => {
 #urlInput,
 #renderedText {
     position: absolute;
-    left: 18%;
-    width: 80%;
+    width: 100%;
     font-family: var(--font-family);
     font-feature-settings: var(--font-feature-settings);
     font-variant-ligatures: none;
@@ -83,9 +85,10 @@ const change = () => {
 }
 
 #renderedText {
-    padding: calc(46px - 2em);
+    /* this is hacky has hell but it works on my machine */
+    padding: calc(41px - 1.78em);
     background-color: var(--p-inputtext-background);
-    height: 46px;
+    height: 41px;
 }
 </style>
 // can't use scoped styles for generated html

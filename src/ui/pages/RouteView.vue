@@ -7,7 +7,7 @@ import Button from "primevue/button";
 import Toast from "primevue/toast";
 import { onBeforeMount, type Ref, ref } from "vue";
 import RouteEditor from "../components/RouteEditor.vue";
-import { newUIRoute, stringifyUIRoute } from "../models/UIRoute";
+import { newUIRoute } from "../models/UIRoute";
 import { useToast } from "primevue/usetoast";
 import type { ToastMessageOptions } from "primevue/toast";
 import InputText from "primevue/inputtext";
@@ -69,21 +69,16 @@ const saveRoute = async (
     // re-select the saved route based on what we get
     if (updatedRoute.id === currentRoute.value?.id) {
         currentRoute.value = store.routes.filter(
-            (it) => stringifyUIRoute(it) === stringifyUIRoute(updatedRoute),
+            (it) => it.id === updatedRoute.id,
         )[0];
     }
 };
 
 const deleteRoute = async (route: UIRoute) => {
-    if (
-        currentRoute.value &&
-        stringifyUIRoute(route) === stringifyUIRoute(currentRoute.value)
-    ) {
+    if (currentRoute.value && route.id === currentRoute.value.id) {
         currentRoute.value = null;
     }
-    const without = store.routes.filter(
-        (it) => stringifyUIRoute(it) !== stringifyUIRoute(route),
-    );
+    const without = store.routes.filter((it) => it.id !== route.id);
     try {
         await saveRoutes(without);
     } catch {
@@ -111,7 +106,7 @@ const selectRoute = (route: UIRoute) => {
             <div id="routeList">
                 <RouteListEntry
                     v-for="route in filteredRoutes"
-                    :key="stringifyUIRoute(route)"
+                    :key="route.id"
                     :route="route"
                     @change="(updated) => saveRoute(route, updated)"
                     @select="() => selectRoute(route)"
@@ -129,7 +124,7 @@ const selectRoute = (route: UIRoute) => {
                 v-if="currentRoute !== null && currentRoute !== undefined"
                 :route="currentRoute"
                 @save="(route) => saveRoute(currentRoute, route)"
-                :key="currentRoute.title"
+                :key="currentRoute.id"
             />
         </div>
     </div>
