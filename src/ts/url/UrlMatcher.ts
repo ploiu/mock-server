@@ -17,6 +17,7 @@ type PathPart =
     | {
       isVariable: true;
       isOptional: boolean;
+      isGlob: false;
     }
     | {
       isVariable: true;
@@ -48,12 +49,17 @@ type QueryPart =
     }
   );
 
+type IndexedPathPart = {
+  parts: PathPart[];
+  index: Map<number, PathPart>;
+};
+
 export class UrlMatcher {
   #tokens: Token[];
   /** represents how specific the route is. If a request matches multiple routes, the one with the highest specificity is picked to handle the request */
   #specificity: number;
   /** ordered path parts, with order based on internal `order` value in `BasePathPart` */
-  #pathParts: PathPart[];
+  #pathParts: IndexedPathPart;
   #queryParts: QueryPart[];
 
   constructor(tokens: Token[]) {
@@ -64,6 +70,51 @@ export class UrlMatcher {
   }
 
   public matches(url: string): boolean {
+    // if we normalize the url, we can use the URL and URLSearchParams apis
+    const normalized = 'http://localhost:0000/' + url.replace(/^\//, '');
+    const builtUrl = URL.parse(normalized);
+    if (builtUrl === null) {
+      console.error(
+        `Failed to build url from normalized string: ${normalized}`,
+      );
+      return false;
+    }
+    const { pathname, search } = builtUrl;
+    const searchParams = new URLSearchParams(search);
+    const splitPath = pathname.split('/').filter((it) => it.trim() !== '');
+    const { index, parts } = this.#pathParts;
+    // an issue with checking against globs (and multiple ones, and ones in the middle of the path)
+    //  is that we don't know how big their range is. Therefore, they should NOT be greedy
+    if (splitPath.length === parts.length) {
+      // TODO we can do straightforward path checking
+    } else if (parts.some((it) => it.isVariable && it.isGlob)) {
+      /*
+        This is a bit tough, since we can have weird patterns like `/:*`, `/something`, `/:*`, `/somethingElse`.
+        how do we know how much each `/:*` consumes?
+
+        Order of operations (EVOG):
+        - Exact matches, left to right
+        - required Variables, left to right,
+        - Optional variables, left to right,
+        - Globs, left to right
+
+        INFO EXAMPLES:
+        - `/:*\/whatever/:*\/:required/:optional?/whatever2/:*`, `/asdfasdfasdf/09893298932/whatever/literallyAnything/stupid/whatever2/madeYouLook`
+          - E: `whatever` and `whatever2` are matched literally
+          - V: `:required` is after `whatever` _and_ a glob, but globs aren't greedy until everything else is taken, so `/:required` => `literallyAnything`
+          - O: `:optional?` is immediately after `:required`, so `:optional?` => `stupid`. if `/stupid` wasn't in the path, `:optional?` => nothing
+          - G: There are 3 globs.
+            - Glob 1 => `/asdfasdfasdf/09893298932`
+            - Glob 2 => nothing (taken by `:required`)
+            - Glob 3 => after `whatever2`, so => `madeYouLook`
+      */
+    }
+    // TODO be sure to use getAll with urlSearchParams in case multiple of the same query param are specified in the template
+    console.debug(
+      `index: `,
+      index,
+      `; path: ${splitPath}; searchParams: ${searchParams}`,
+    );
     throw new Error('unimplemented');
   }
 
@@ -79,17 +130,23 @@ export class UrlMatcher {
     return this.#specificity;
   }
 
-  #getPathParts(tokens: Token[]): PathPart[] {
+  #getPathParts(tokens: Token[]): IndexedPathPart {
+    // this is just used to see if there _is_ a path part
     const lastPathSepIndex = tokens.findLastIndex(({ type }) =>
       type === TokenTypes.PATH_SEPARATOR
     );
     if (lastPathSepIndex === -1 || lastPathSepIndex === 0) {
       // no path, only queries
-      return [];
+      return { parts: [], index: new Map() };
     } else {
-      const rawTypes = tokens.slice(0, lastPathSepIndex).filter(({ type }) =>
-        type !== TokenTypes.PATH_SEPARATOR
-      );
+      // need to rely on first query sep in dex so that we get the last path variable
+      const firstQuerySepIndex = tokens.findIndex(({ type }) =>
+        type === TokenTypes.QUERY_SEPARATOR
+      ) ??
+        tokens.length + 1;
+      const rawTypes = tokens.slice(0, firstQuerySepIndex).filter((
+        { type },
+      ) => type !== TokenTypes.PATH_SEPARATOR);
       const pathParts: PathPart[] = [];
       for (let i = 0; i < rawTypes.length; i++) {
         const { type, value } = rawTypes[i];
@@ -103,6 +160,7 @@ export class UrlMatcher {
               order: i,
               isVariable: true,
               isOptional: false,
+              isGlob: false,
             });
             break;
           case TokenTypes.OPTIONAL_PATH_VARIABLE:
@@ -111,6 +169,7 @@ export class UrlMatcher {
               order: i,
               isVariable: true,
               isOptional: true,
+              isGlob: false,
             });
             break;
           case TokenTypes.PATH_GLOB:
@@ -127,7 +186,11 @@ export class UrlMatcher {
             );
         }
       }
-      return pathParts;
+      const index = new Map();
+      for (const part of pathParts) {
+        index.set(part.order, part);
+      }
+      return { parts: pathParts, index };
     }
   }
 
