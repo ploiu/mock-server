@@ -1,4 +1,4 @@
-import { lex, type Lexeme, LexemeTypes } from './UrlLexer.ts';
+import { type Lexeme, LexemeTypes } from './UrlLexer.ts';
 
 export enum TokenTypes {
   // path stuff
@@ -64,8 +64,7 @@ export type Token = {
   value: string;
 };
 
-export function tokenize(url: string): Token[] {
-  const lexemes = lex(url);
+export function tokenize(lexemes: Lexeme[], url: string): Token[] {
   const isInvalid = lexemes.some((it) => it.type === LexemeTypes.UNKNOWN);
   if (isInvalid) {
     // TODO this might be too course. Thinking of scenarios where frontend syntax highlighting relies on this
