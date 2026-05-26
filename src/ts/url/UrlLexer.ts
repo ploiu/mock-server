@@ -32,6 +32,9 @@ type Context = [Lexeme | null, string, string | null];
 
 /** turns the url into a list of lexemes */
 export function lex(url: string): Lexeme[] {
+  if (!url.startsWith('/')) {
+    url = '/' + url;
+  }
   if (url.length === 0 || url === '/') {
     return [{ type: LexemeTypes.PATH_SEPARATOR, value: '/' }];
   }
@@ -128,7 +131,7 @@ function handleQuestionMarkOrAmpersand(
     // 6. a? -> optional arg since nothing after it          (x)
     //
     // there are way more cases where what comes after matters more, so check those first
-    if (next === null || next.match(/[?&=]/)) {
+    if (next === null || next.match(/[?&/]/)) {
       // previous is not null so we know it's real
       return {
         type: LexemeTypes.VARIABLE_OPTIONALITY_INDICATOR,

@@ -67,7 +67,7 @@ export type Token = {
 export function tokenize(lexemes: Lexeme[], url: string): Token[] {
   const isInvalid = lexemes.some((it) => it.type === LexemeTypes.UNKNOWN);
   if (isInvalid) {
-    // TODO this might be too course. Thinking of scenarios where frontend syntax highlighting relies on this
+    // TODO this might be too coarse. Thinking of scenarios where frontend syntax highlighting relies on this
     // ? maybe use lexemes for highlighting instead? That will allow both rejecting malformed url template _and_ provide syntax highlighting
     return [{
       type: TokenTypes.UNKNOWN,
@@ -203,6 +203,10 @@ function determineSingleLexemeType({ type }: Lexeme): TokenTypes {
     tokenType = TokenTypes.PATH_SEPARATOR;
   } else if (type === LexemeTypes.QUERY_SEPARATOR) {
     tokenType = TokenTypes.QUERY_SEPARATOR;
+  } else if (type === LexemeTypes.PATH_CHARACTER) {
+    tokenType = TokenTypes.PATH_TEXT;
+  } else if (type === LexemeTypes.QUERY_CHARACTER) {
+    tokenType = TokenTypes.QUERY_TEXT;
   }
   return tokenType;
 }

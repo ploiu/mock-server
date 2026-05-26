@@ -6,25 +6,29 @@ type BasePathPart = {
   value: string;
   /** the position in the path this part takes */
   order: number;
+  /**
+   * used during matching process to keep track of which parts have been matched against already.
+   * a part can't be "claimed" multiple times in this way
+   */
+  matchClaimed: boolean;
 };
 
+type ExactPathPart = BasePathPart & { isVariable: false };
+type RequiredVariablePathPart = BasePathPart & {
+  isVariable: true;
+  isOptional: false;
+};
+type OptionalVariablePathPart = BasePathPart & {
+  isVariable: true;
+  isOptional: true;
+};
+type GlobPathPart = BasePathPart & { isVariable: true; isGlob: true };
+
 type PathPart =
-  & BasePathPart
-  & (
-    | {
-      isVariable: false;
-    }
-    | {
-      isVariable: true;
-      isOptional: boolean;
-      isGlob: false;
-    }
-    | {
-      isVariable: true;
-      /** means this is a `:*` path part and needs special handling */
-      isGlob: true;
-    }
-  );
+  | ExactPathPart
+  | RequiredVariablePathPart
+  | OptionalVariablePathPart
+  | GlobPathPart;
 
 type BaseQueryPart = {
   /** the name of the query param */
@@ -49,9 +53,21 @@ type QueryPart =
     }
   );
 
+/** an indexed object grouping the path into different parts for eash of use.
+ *
+ * each array is sorted according to the internal `order` value of the path part
+ */
 type IndexedPathPart = {
   parts: PathPart[];
-  index: Map<number, PathPart>;
+  exactParts: ExactPathPart[];
+  requiredVariables: RequiredVariablePathPart[];
+  optionalVariables: OptionalVariablePathPart[];
+  globs: GlobPathPart[];
+  length: number;
+  hasExactParts: boolean;
+  hasRequiredVars: boolean;
+  hasOptionalVars: boolean;
+  hasGlobs: boolean;
 };
 
 export class UrlMatcher {
@@ -60,6 +76,7 @@ export class UrlMatcher {
   #specificity: number;
   /** ordered path parts, with order based on internal `order` value in `BasePathPart` */
   #pathParts: IndexedPathPart;
+  /** query params from the template passed to this object's constructor */
   #queryParts: QueryPart[];
 
   constructor(tokens: Token[]) {
@@ -80,15 +97,19 @@ export class UrlMatcher {
       return false;
     }
     const { pathname, search } = builtUrl;
-    const searchParams = new URLSearchParams(search);
-    const splitPath = pathname.split('/').filter((it) => it.trim() !== '');
-    const { index, parts } = this.#pathParts;
-    // an issue with checking against globs (and multiple ones, and ones in the middle of the path)
-    //  is that we don't know how big their range is. Therefore, they should NOT be greedy
-    if (splitPath.length === parts.length) {
-      // TODO we can do straightforward path checking
-    } else if (parts.some((it) => it.isVariable && it.isGlob)) {
-      /*
+    // TODO be sure to use getAll with urlSearchParams in case multiple of the same query param are specified in the template
+    return this.checkPathMatches(pathname) && this.checkQueryMatches(search);
+  }
+
+  private checkPathMatches(path: string): boolean {
+    const splitPath = path.split('/').filter((it) => it.trim() !== '');
+    // if the path lengths don't match and the template doesn't have any optional vars or globs, it won't match
+    const { length, hasOptionalVars, hasGlobs } = this.#pathParts;
+    if (splitPath.length !== length && !hasOptionalVars && !hasGlobs) {
+      return false;
+    }
+
+    /*
         This is a bit tough, since we can have weird patterns like `/:*`, `/something`, `/:*`, `/somethingElse`.
         how do we know how much each `/:*` consumes?
 
@@ -108,14 +129,47 @@ export class UrlMatcher {
             - Glob 2 => nothing (taken by `:required`)
             - Glob 3 => after `whatever2`, so => `madeYouLook`
       */
+
+    return true && this.checkExactSegments(splitPath) &&
+      this.checkRequiredVariableSegments(splitPath);
+  }
+
+  private checkQueryMatches(search: string): boolean {
+    const searchParams = new URLSearchParams(search);
+    return true;
+  }
+
+  /** returns true if all exact path segments are matched */
+  private checkExactSegments(splitPath: string[]): boolean {
+    const { exactParts } = this.#pathParts;
+    for (const part of exactParts) {
+      const { order, value, matchClaimed } = part;
+      const passedEquivalent = splitPath[order];
+      if (
+        value !== passedEquivalent || value === passedEquivalent && matchClaimed
+      ) {
+        return false;
+      } else if (value === passedEquivalent && !matchClaimed) {
+        part.matchClaimed = true;
+      }
     }
-    // TODO be sure to use getAll with urlSearchParams in case multiple of the same query param are specified in the template
-    console.debug(
-      `index: `,
-      index,
-      `; path: ${splitPath}; searchParams: ${searchParams}`,
-    );
-    throw new Error('unimplemented');
+    return true;
+  }
+
+  /** returns true if all exact path variables are matched */
+  private checkRequiredVariableSegments(splitPath: string[]): boolean {
+    const { requiredVariables } = this.#pathParts;
+    for (const part of requiredVariables) {
+      const { order, matchClaimed } = part;
+      const passedEquivalent = splitPath[order];
+      console.debug('template: ', part, '; split: ', passedEquivalent);
+      if (passedEquivalent === undefined || matchClaimed) {
+        return false;
+      } else if (!matchClaimed) {
+        part.matchClaimed = true;
+      }
+    }
+    return true;
   }
 
   get pathParts() {
@@ -130,54 +184,93 @@ export class UrlMatcher {
     return this.#specificity;
   }
 
+  /**
+   * creates an indexed lookup object for all the path parts of the token array
+   */
   #getPathParts(tokens: Token[]): IndexedPathPart {
+    const PATH_TOKEN_TYPES = [
+      TokenTypes.PATH_TEXT,
+      TokenTypes.PATH_VARIABLE,
+      TokenTypes.OPTIONAL_PATH_VARIABLE,
+      TokenTypes.PATH_GLOB,
+    ];
     // this is just used to see if there _is_ a path part
-    const lastPathSepIndex = tokens.findLastIndex(({ type }) =>
-      type === TokenTypes.PATH_SEPARATOR
+    const hasPathTokens = tokens.findIndex(({ type }) =>
+      PATH_TOKEN_TYPES.includes(type)
     );
-    if (lastPathSepIndex === -1 || lastPathSepIndex === 0) {
+    if (hasPathTokens === -1 || hasPathTokens === 0) {
       // no path, only queries
-      return { parts: [], index: new Map() };
+      return {
+        parts: [],
+        exactParts: [],
+        requiredVariables: [],
+        optionalVariables: [],
+        globs: [],
+        length: 0,
+        hasExactParts: false,
+        hasRequiredVars: false,
+        hasOptionalVars: false,
+        hasGlobs: false,
+      };
     } else {
       // need to rely on first query sep in dex so that we get the last path variable
-      const firstQuerySepIndex = tokens.findIndex(({ type }) =>
+      let firstQuerySepIndex = tokens.findIndex(({ type }) =>
         type === TokenTypes.QUERY_SEPARATOR
-      ) ??
-        tokens.length + 1;
+      );
+      if (firstQuerySepIndex === -1) {
+        firstQuerySepIndex = tokens.length + 1;
+      }
       const rawTypes = tokens.slice(0, firstQuerySepIndex).filter((
         { type },
       ) => type !== TokenTypes.PATH_SEPARATOR);
-      const pathParts: PathPart[] = [];
+      const exactParts: ExactPathPart[] = [];
+      const requiredVariables: RequiredVariablePathPart[] = [];
+      const optionalVariables: OptionalVariablePathPart[] = [];
+      const globs: GlobPathPart[] = [];
+      let hasExactParts = false;
+      let hasRequiredVars = false;
+      let hasOptionalVars = false;
+      let hasGlobs = false;
       for (let i = 0; i < rawTypes.length; i++) {
         const { type, value } = rawTypes[i];
         switch (type) {
           case TokenTypes.PATH_TEXT:
-            pathParts.push({ value, order: i, isVariable: false });
+            hasExactParts = true;
+            exactParts.push({
+              value,
+              order: i,
+              isVariable: false,
+              matchClaimed: false,
+            });
             break;
           case TokenTypes.PATH_VARIABLE:
-            pathParts.push({
+            hasRequiredVars = true;
+            requiredVariables.push({
               value: value.substring(1),
               order: i,
               isVariable: true,
               isOptional: false,
-              isGlob: false,
+              matchClaimed: false,
             });
             break;
           case TokenTypes.OPTIONAL_PATH_VARIABLE:
-            pathParts.push({
+            hasOptionalVars = true;
+            optionalVariables.push({
               value: value.substring(1, value.length - 1),
               order: i,
               isVariable: true,
               isOptional: true,
-              isGlob: false,
+              matchClaimed: false,
             });
             break;
           case TokenTypes.PATH_GLOB:
-            pathParts.push({
+            hasGlobs = true;
+            globs.push({
               value,
               order: i,
               isGlob: true,
               isVariable: true,
+              matchClaimed: false,
             });
             break;
           default:
@@ -186,11 +279,24 @@ export class UrlMatcher {
             );
         }
       }
-      const index = new Map();
-      for (const part of pathParts) {
-        index.set(part.order, part);
-      }
-      return { parts: pathParts, index };
+      const parts = [
+        ...exactParts,
+        ...requiredVariables,
+        ...optionalVariables,
+        ...globs,
+      ].filter((it) => it !== undefined).sort((a, b) => a.order - b.order);
+      return {
+        parts,
+        exactParts,
+        requiredVariables,
+        optionalVariables,
+        globs,
+        length: parts.length,
+        hasExactParts,
+        hasRequiredVars,
+        hasOptionalVars,
+        hasGlobs,
+      };
     }
   }
 

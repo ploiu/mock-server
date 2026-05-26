@@ -8,6 +8,7 @@ import {
   RequestLogEntry,
   ResponseLogEntry,
 } from '../model/LogModels.ts';
+import { parseUrlTemplate, UrlMatcher } from '../url/index.ts';
 
 /**
  * Object that matches against a request and generates a mock response
@@ -19,6 +20,7 @@ export default class Route {
   #hasImpliedQueryParams: boolean;
   /** represents how specific the route is. If a request matches multiple routes, the one with the highest specificity is picked to handle the request */
   #specificity = 0;
+  #urlMatcher: UrlMatcher;
 
   constructor(
     /** the unique id of the route as saved on the disk */
@@ -43,6 +45,7 @@ export default class Route {
     this.parseUrlVariables();
     // remove trailing `/` from the path
     this.url = this.url.replace(/\/$/, '').replace(/\/\?/, '?');
+    this.#urlMatcher = parseUrlTemplate(this.url);
     this.#hasImpliedQueryParams = /[?&]:\*/g.test(this.url);
     this.#compiledUrlRegex = this.buildUrlRegex();
     this.scoreSpecificity();
@@ -115,20 +118,21 @@ export default class Route {
    * @returns {boolean}
    */
   public doesUrlMatch(url: string = ''): boolean {
-    url = url.toLowerCase();
-    // make sure it passes the general format of this url
-    const basicPatternMatches = url === this.url ||
-      this.#compiledUrlRegex.test(url);
-    // make sure all mandatory query parameters are present
-    let hasAllMandatoryQueryFlags = true;
-    for (const queryVariable of this.#queryVariables) {
-      if (!queryVariable.optional) {
-        const queryRegex = new RegExp(`[?&]${queryVariable.name}=[^&]+`, 'i');
-        hasAllMandatoryQueryFlags = hasAllMandatoryQueryFlags &&
-          queryRegex.test(url);
-      }
-    }
-    return basicPatternMatches && hasAllMandatoryQueryFlags;
+    // url = url.toLowerCase();
+    // // make sure it passes the general format of this url
+    // const basicPatternMatches = url === this.url ||
+    //   this.#compiledUrlRegex.test(url);
+    // // make sure all mandatory query parameters are present
+    // let hasAllMandatoryQueryFlags = true;
+    // for (const queryVariable of this.#queryVariables) {
+    //   if (!queryVariable.optional) {
+    //     const queryRegex = new RegExp(`[?&]${queryVariable.name}=[^&]+`, 'i');
+    //     hasAllMandatoryQueryFlags = hasAllMandatoryQueryFlags &&
+    //       queryRegex.test(url);
+    //   }
+    // }
+    // return basicPatternMatches && hasAllMandatoryQueryFlags;
+    return this.#urlMatcher.matches(url);
   }
 
   /**
@@ -259,42 +263,43 @@ export default class Route {
    * - catch all query param (?:*) get +0 points
    */
   private scoreSpecificity() {
-    let specificity = 0;
-    let url = this.url;
-    // make sure a "bad" url is normalized
-    if (!url.startsWith('/')) {
-      url = '/' + url;
-    }
-    // it's way simpler to handle the path section and the query section separately
-    const [path, query] = url.split(/\?(?=[a-z0-9:])/i);
-    const splitPath = path.split('/');
-    // path will always be defined because we prefix it, but query could be undefined
-    const splitQuery = (query ?? '').split('&');
-    for (const pathPart of splitPath) {
-      // wild cards get nothing
-      if (pathPart.endsWith('*')) {
-        continue;
-      }
-      if (pathPart.startsWith(':')) {
-        specificity += pathPart.endsWith('?') ? 1 : 2;
-      } else if (pathPart.length > 0) {
-        specificity += 3;
-      }
-    }
+    this.#specificity = this.#urlMatcher.specificity;
+    // let specificity = 0;
+    // let url = this.url;
+    // // make sure a "bad" url is normalized
+    // if (!url.startsWith('/')) {
+    //   url = '/' + url;
+    // }
+    // // it's way simpler to handle the path section and the query section separately
+    // const [path, query] = url.split(/\?(?=[a-z0-9:])/i);
+    // const splitPath = path.split('/');
+    // // path will always be defined because we prefix it, but query could be undefined
+    // const splitQuery = (query ?? '').split('&');
+    // for (const pathPart of splitPath) {
+    //   // wild cards get nothing
+    //   if (pathPart.endsWith('*')) {
+    //     continue;
+    //   }
+    //   if (pathPart.startsWith(':')) {
+    //     specificity += pathPart.endsWith('?') ? 1 : 2;
+    //   } else if (pathPart.length > 0) {
+    //     specificity += 3;
+    //   }
+    // }
 
-    for (const queryPart of splitQuery) {
-      // wild cards get nothing
-      if (queryPart.endsWith('*')) {
-        continue;
-      }
-      if (queryPart.startsWith(':')) {
-        specificity += queryPart.endsWith('?') ? 1 : 2;
-      } else if (queryPart.length > 0) {
-        specificity += 3;
-      }
-    }
+    // for (const queryPart of splitQuery) {
+    //   // wild cards get nothing
+    //   if (queryPart.endsWith('*')) {
+    //     continue;
+    //   }
+    //   if (queryPart.startsWith(':')) {
+    //     specificity += queryPart.endsWith('?') ? 1 : 2;
+    //   } else if (queryPart.length > 0) {
+    //     specificity += 3;
+    //   }
+    // }
 
-    this.#specificity = specificity;
+    // this.#specificity = specificity;
   }
 
   /**

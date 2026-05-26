@@ -22,9 +22,8 @@ Deno.test('doesUrlMatch matches simple url', () => {
   });
   assert(route.doesUrlMatch('/test'), 'url should match /test');
   // make sure other routes starting with /test don't match
-  assertNotEquals(
+  assertFalse(
     route.doesUrlMatch('/test/a/b/c'),
-    true,
     'url should not match /test/a/b/c',
   );
 });
