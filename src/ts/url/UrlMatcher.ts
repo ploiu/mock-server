@@ -1,89 +1,34 @@
 import { Token, TokenTypes } from './UrlTokenizer.ts';
-
-/** represents a part of the path portion of our url */
-type BasePathPart = {
-  /** the value of the path. If `isVariable`, then this is _not_ what literally needs to be matched. Otherwise, it is a literal */
-  value: string;
-  /** the position in the path this part takes */
-  order: number;
-  /**
-   * used during matching process to keep track of which parts have been matched against already.
-   * a part can't be "claimed" multiple times in this way
-   */
-  matchClaimed: boolean;
-};
-
-type ExactPathPart = BasePathPart & { isVariable: false };
-type RequiredVariablePathPart = BasePathPart & {
-  isVariable: true;
-  isOptional: false;
-};
-type OptionalVariablePathPart = BasePathPart & {
-  isVariable: true;
-  isOptional: true;
-};
-type GlobPathPart = BasePathPart & { isVariable: true; isGlob: true };
-
-type PathPart =
-  | ExactPathPart
-  | RequiredVariablePathPart
-  | OptionalVariablePathPart
-  | GlobPathPart;
-
-type BaseQueryPart = {
-  /** the name of the query param */
-  name: string;
-};
-
-type QueryPart =
-  & BaseQueryPart
-  & (
-    | {
-      /** what value is required to be passed in order for
-       * it to be considered a positive match. if `null`, any value is allowed */
-      requiredValue: string | null;
-    }
-    | {
-      isVariable: true;
-      isOptional: boolean;
-    }
-    | {
-      isVariable: true;
-      isGlob: true;
-    }
-  );
-
-/** an indexed object grouping the path into different parts for eash of use.
- *
- * each array is sorted according to the internal `order` value of the path part
- */
-type IndexedPathPart = {
-  parts: PathPart[];
-  exactParts: ExactPathPart[];
-  requiredVariables: RequiredVariablePathPart[];
-  optionalVariables: OptionalVariablePathPart[];
-  globs: GlobPathPart[];
-  length: number;
-  hasExactParts: boolean;
-  hasRequiredVars: boolean;
-  hasOptionalVars: boolean;
-  hasGlobs: boolean;
-};
+import type {
+  ExactPathPart,
+  GlobPathPart,
+  IndexedPathPart,
+  OptionalVariablePathPart,
+  QueryPart,
+  RequiredVariablePathPart,
+} from './PathPart.ts';
+import { toGex } from './PathPart.ts';
 
 export class UrlMatcher {
   #tokens: Token[];
-  /** represents how specific the route is. If a request matches multiple routes, the one with the highest specificity is picked to handle the request */
+  /** represents how specific the route is. If a request matches multiple routes, the one with
+   *  the highest specificity is picked to handle the request */
   #specificity: number;
   /** ordered path parts, with order based on internal `order` value in `BasePathPart` */
   #pathParts: IndexedPathPart;
   /** query params from the template passed to this object's constructor */
   #queryParts: QueryPart[];
+  /** a regex used to match the path when testing / extracting path parts for variables.
+   *  Using a regex for the path is much easier than manually checking, especially when multiple
+   *  `\/*` can be involved */
+  #pathGex: RegExp;
 
   constructor(tokens: Token[]) {
     this.#tokens = tokens;
     this.#pathParts = this.#getPathParts(tokens);
     this.#queryParts = this.#getQueryParts(tokens);
     this.#specificity = this.#scoreSpecificity(tokens);
+    this.#pathGex = this.buildPathGex(this.#pathParts);
   }
 
   public matches(url: string): boolean {
@@ -108,67 +53,30 @@ export class UrlMatcher {
     if (splitPath.length !== length && !hasOptionalVars && !hasGlobs) {
       return false;
     }
+    return this.#pathGex.test(path);
+  }
 
-    /*
-        This is a bit tough, since we can have weird patterns like `/:*`, `/something`, `/:*`, `/somethingElse`.
-        how do we know how much each `/:*` consumes?
-
-        Order of operations (EVOG):
-        - Exact matches, left to right
-        - required Variables, left to right,
-        - Optional variables, left to right,
-        - Globs, left to right
-
-        INFO EXAMPLES:
-        - `/:*\/whatever/:*\/:required/:optional?/whatever2/:*`, `/asdfasdfasdf/09893298932/whatever/literallyAnything/stupid/whatever2/madeYouLook`
-          - E: `whatever` and `whatever2` are matched literally
-          - V: `:required` is after `whatever` _and_ a glob, but globs aren't greedy until everything else is taken, so `/:required` => `literallyAnything`
-          - O: `:optional?` is immediately after `:required`, so `:optional?` => `stupid`. if `/stupid` wasn't in the path, `:optional?` => nothing
-          - G: There are 3 globs.
-            - Glob 1 => `/asdfasdfasdf/09893298932`
-            - Glob 2 => nothing (taken by `:required`)
-            - Glob 3 => after `whatever2`, so => `madeYouLook`
-      */
-
-    return true && this.checkExactSegments(splitPath) &&
-      this.checkRequiredVariableSegments(splitPath);
+  /**
+   * builds the regex used to match our path and retrieve path variables
+   */
+  private buildPathGex({ pathParts }: IndexedPathPart) {
+    // used to clean up optional vars since they handle the path separator themselves
+    // `/)?/`
+    const optVarPath = /\/\)\?\//g;
+    // optional starting `/`
+    const gexStart = '(^/?)';
+    const gexParts = pathParts.map(toGex).join('/').replaceAll(
+      optVarPath,
+      '/)?',
+    );
+    // optional ending `/`
+    const gexEnd = '/?$';
+    const gexString = gexStart + gexParts + gexEnd;
+    return new RegExp(gexString, 'i');
   }
 
   private checkQueryMatches(search: string): boolean {
     const searchParams = new URLSearchParams(search);
-    return true;
-  }
-
-  /** returns true if all exact path segments are matched */
-  private checkExactSegments(splitPath: string[]): boolean {
-    const { exactParts } = this.#pathParts;
-    for (const part of exactParts) {
-      const { order, value, matchClaimed } = part;
-      const passedEquivalent = splitPath[order];
-      if (
-        value !== passedEquivalent || value === passedEquivalent && matchClaimed
-      ) {
-        return false;
-      } else if (value === passedEquivalent && !matchClaimed) {
-        part.matchClaimed = true;
-      }
-    }
-    return true;
-  }
-
-  /** returns true if all exact path variables are matched */
-  private checkRequiredVariableSegments(splitPath: string[]): boolean {
-    const { requiredVariables } = this.#pathParts;
-    for (const part of requiredVariables) {
-      const { order, matchClaimed } = part;
-      const passedEquivalent = splitPath[order];
-      console.debug('template: ', part, '; split: ', passedEquivalent);
-      if (passedEquivalent === undefined || matchClaimed) {
-        return false;
-      } else if (!matchClaimed) {
-        part.matchClaimed = true;
-      }
-    }
     return true;
   }
 
@@ -182,6 +90,10 @@ export class UrlMatcher {
 
   get specificity() {
     return this.#specificity;
+  }
+
+  get pathGex() {
+    return this.#pathGex;
   }
 
   /**
@@ -201,7 +113,7 @@ export class UrlMatcher {
     if (hasPathTokens === -1 || hasPathTokens === 0) {
       // no path, only queries
       return {
-        parts: [],
+        pathParts: [],
         exactParts: [],
         requiredVariables: [],
         optionalVariables: [],
@@ -240,7 +152,6 @@ export class UrlMatcher {
               value,
               order: i,
               isVariable: false,
-              matchClaimed: false,
             });
             break;
           case TokenTypes.PATH_VARIABLE:
@@ -250,7 +161,6 @@ export class UrlMatcher {
               order: i,
               isVariable: true,
               isOptional: false,
-              matchClaimed: false,
             });
             break;
           case TokenTypes.OPTIONAL_PATH_VARIABLE:
@@ -260,7 +170,6 @@ export class UrlMatcher {
               order: i,
               isVariable: true,
               isOptional: true,
-              matchClaimed: false,
             });
             break;
           case TokenTypes.PATH_GLOB:
@@ -270,7 +179,6 @@ export class UrlMatcher {
               order: i,
               isGlob: true,
               isVariable: true,
-              matchClaimed: false,
             });
             break;
           default:
@@ -286,7 +194,7 @@ export class UrlMatcher {
         ...globs,
       ].filter((it) => it !== undefined).sort((a, b) => a.order - b.order);
       return {
-        parts,
+        pathParts: parts,
         exactParts,
         requiredVariables,
         optionalVariables,
@@ -389,6 +297,7 @@ export class UrlMatcher {
       specificity: this.#specificity,
       pathParts: this.#pathParts,
       queryParts: this.#queryParts,
+      pathGex: this.#pathGex.toString(),
     };
   }
 }
