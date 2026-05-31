@@ -61,13 +61,13 @@ export class UrlMatcher {
    */
   private buildPathGex({ pathParts }: IndexedPathPart) {
     // used to clean up optional vars since they handle the path separator themselves
-    // `/)?/`
-    const optVarPath = /\/\)\?\//g;
+    // `/)?)/`
+    const optVarPath = /\/\)\?\)\//g;
     // optional starting `/`
     const gexStart = '(^/?)';
     const gexParts = pathParts.map(toGex).join('/').replaceAll(
       optVarPath,
-      '/)?',
+      '/)?)',
     );
     // optional ending `/`
     const gexEnd = '/?$';

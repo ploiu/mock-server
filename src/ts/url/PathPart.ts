@@ -94,15 +94,15 @@ export function toGex(part: PathPart): string {
   } else if (isRequiredVar(part)) {
     // match everything until the first path separator. With how testing is done, we don't need to worry
     // about query param bounds, since we can guarantee only testing on the url path
-    return '[^/]+?';
+    return `(?<${part.value.replace(':', '')}${part.order}>[^/]+?)`;
   } else if (isOptionalVar(part)) {
     // this one is interesting, since something or _nothing_ can be matched. We have to include the `/`
     // in this part so that it can be optionally matched on, which means the caller of this function will
     // need to remove cases of `//`
-    return '([^/]+?/)?';
+    return `(?<${part.value.replace(':', '')}${part.order}>([^/]+?/)?)`;
   } else if (isGlob(part)) {
     // this one is a bit interesting too, since it can match as many path segments as it wants
-    return '.+?';
+    return `(?<glob${part.order}>.+?)`;
   } else {
     throw new Error(
       `Invalid path part type: typescript compiler said this will never happen!: ${
