@@ -26,8 +26,8 @@ Deno.test('execute should template out the response body from url parameters', a
     },
   );
   assertEquals(
-    await res.text(),
     'Hello, ploiu! You are 23 years old and you probably like green pasta',
+    await res.text(),
   );
 });
 
@@ -35,7 +35,7 @@ Deno.test('execute should use default variables if an optional variable is not i
   const route = RouteFactory.create({
     id: '',
     title: 'test',
-    url: '/test/:name/:age/:favoriteColor?:favoriteFood',
+    url: '/test/:name/:age/:favoriteColor??:favoriteFood',
     responseHeaders: {},
     response:
       `Hello, {{name}}! You are {{age}} years old and you probably like {{favoriteColor:green}} {{favoriteFood}}. My favorite color is {{favoriteColor:blue}}`,

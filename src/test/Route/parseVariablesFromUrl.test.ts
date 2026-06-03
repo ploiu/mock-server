@@ -109,10 +109,14 @@ Deno.test('parseVariablesFromUrl should include query parameters', () => {
     routeType: RouteTypes.DEFAULT,
   });
 
-  assertEquals(route.parseVariablesFromUrl('/test?name=ploiu&age=23'), {
-    name: 'ploiu',
-    age: '23',
-  }, 'query parameters should be included');
+  assertEquals(
+    {
+      name: 'ploiu',
+      age: '23',
+    },
+    route.parseVariablesFromUrl('/test?name=ploiu&age=23'),
+    'query parameters should be included',
+  );
 });
 
 Deno.test('parseVariablesFromUrl should set non-included query variables as null', () => {
@@ -153,8 +157,8 @@ Deno.test('parseVariablesFromUrl should parse non-named query variables allowed 
     <Request> { url: '/test?a=1&b=2&c=3', method: RequestMethod.GET },
   )).text();
   assertEquals(
-    '1, 2, 3, test',
     result,
+    '1, 2, 3, test',
     'should parse non-explicitly named variables',
   );
 });

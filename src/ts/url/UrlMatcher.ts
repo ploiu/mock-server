@@ -19,9 +19,9 @@ export class UrlMatcher {
 
   constructor(tokens: Token[]) {
     this.#tokens = tokens;
-    this.#pathParts = this.#getPathParts(tokens);
-    this.#queryParts = this.#getQueryParts(tokens);
-    this.#specificity = this.#scoreSpecificity(tokens);
+    this.#pathParts = this.getPathParts(tokens);
+    this.#queryParts = this.getQueryParts(tokens);
+    this.#specificity = this.scoreSpecificity(tokens);
     this.#pathGex = this.buildPathGex(this.#pathParts);
   }
 
@@ -37,6 +37,34 @@ export class UrlMatcher {
     }
     const { pathname, search } = builtUrl;
     return this.checkPathMatches(pathname) && this.checkQueryMatches(search);
+  }
+
+  /**
+   * for any variables in the Token array, parse them out and return them as a mapping
+   */
+  public getVariables(url: string): Record<string, string> {
+    const normalized = 'http://localhost:0000/' + url.replace(/^\//, '');
+    const parsed = URL.parse(normalized)!;
+    return {
+      ...this.getPathParamVariables(parsed),
+      ...this.getQueryVariables(parsed),
+    };
+  }
+
+  get pathParts() {
+    return this.#pathParts;
+  }
+
+  get queryparts() {
+    return this.#queryParts;
+  }
+
+  get specificity() {
+    return this.#specificity;
+  }
+
+  get pathGex() {
+    return this.#pathGex;
   }
 
   private checkPathMatches(path: string): boolean {
@@ -107,30 +135,14 @@ export class UrlMatcher {
     return new RegExp(gexString, 'i');
   }
 
-  get pathParts() {
-    return this.#pathParts;
-  }
-
-  get queryparts() {
-    return this.#queryParts;
-  }
-
-  get specificity() {
-    return this.#specificity;
-  }
-
-  get pathGex() {
-    return this.#pathGex;
-  }
-
   /**
    * creates an indexed lookup object for all the path parts of the token array
    */
-  #getPathParts(tokens: Token[]): IndexedPathPart {
+  private getPathParts(tokens: Token[]): IndexedPathPart {
     return indexPath(tokens);
   }
 
-  #getQueryParts(tokens: Token[]): IndexedQueryPart {
+  private getQueryParts(tokens: Token[]): IndexedQueryPart {
     return indexQueryPart(tokens);
   }
 
@@ -146,7 +158,7 @@ export class UrlMatcher {
    * - optional query params get +1 points
    * - catch all query param (?:*) get +0 points
    */
-  #scoreSpecificity(tokens: Token[]): number {
+  private scoreSpecificity(tokens: Token[]): number {
     const scoreMapping: Record<string, number> = {
       [TokenTypes.PATH_TEXT]: 3,
       [TokenTypes.QUERY_TEXT]: 3,
@@ -163,6 +175,39 @@ export class UrlMatcher {
       score += scoreMapping[type] ?? 0;
     }
     return score;
+  }
+
+  private getPathParamVariables({ pathname }: URL): Record<string, string> {
+    console.debug(pathname);
+    const execRes = this.#pathGex.exec(pathname);
+    console.debug(this.#pathGex);
+    if (execRes !== null && execRes.groups) {
+      const { groups } = execRes;
+      const varMap: Record<string, string> = {};
+      for (const part of this.#pathParts.pathParts) {
+        const partName = part.value.replace(/^:/, '');
+        const groupName = partName + part.order;
+        if (groupName in groups) {
+          varMap[partName] = groups[groupName].replace(/^\//, '');
+        }
+      }
+      return varMap;
+    } else {
+      return {};
+    }
+  }
+
+  private getQueryVariables({ search }: URL): Record<string, string> {
+    const params = new URLSearchParams(search);
+    const vars: Record<string, string> = {};
+    const { allParams } = this.#queryParts;
+    for (const { name } of allParams) {
+      if (params.has(name)) {
+        vars[name] = params.get(name)!;
+      }
+    }
+
+    return vars;
   }
 
   toJSON() {

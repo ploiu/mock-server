@@ -118,20 +118,6 @@ export default class Route {
    * @returns {boolean}
    */
   public doesUrlMatch(url: string = ''): boolean {
-    // url = url.toLowerCase();
-    // // make sure it passes the general format of this url
-    // const basicPatternMatches = url === this.url ||
-    //   this.#compiledUrlRegex.test(url);
-    // // make sure all mandatory query parameters are present
-    // let hasAllMandatoryQueryFlags = true;
-    // for (const queryVariable of this.#queryVariables) {
-    //   if (!queryVariable.optional) {
-    //     const queryRegex = new RegExp(`[?&]${queryVariable.name}=[^&]+`, 'i');
-    //     hasAllMandatoryQueryFlags = hasAllMandatoryQueryFlags &&
-    //       queryRegex.test(url);
-    //   }
-    // }
-    // return basicPatternMatches && hasAllMandatoryQueryFlags;
     return this.#urlMatcher.matches(url);
   }
 
@@ -150,9 +136,7 @@ export default class Route {
     ) {
       return {};
     } else {
-      const pathVars = this.parsePathVars(url);
-      const queryVars = this.parseQueryVars(url);
-      return { ...pathVars, ...queryVars };
+      return this.#urlMatcher.getVariables(url);
     }
   }
 
