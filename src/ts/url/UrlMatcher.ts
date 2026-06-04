@@ -1,7 +1,11 @@
 import { Token, TokenTypes } from './UrlTokenizer.ts';
 import type { IndexedPathPart } from './PathPart.ts';
-import { indexPath, toGex } from './PathPart.ts';
-import { IndexedQueryPart, indexQueryPart } from './QueryPart.ts';
+import { indexPath, isOptionalVar, toGex } from './PathPart.ts';
+import {
+  IndexedQueryPart,
+  indexQueryPart,
+  isOptionalParameter,
+} from './QueryPart.ts';
 
 export class UrlMatcher {
   #tokens: Token[];
@@ -42,9 +46,15 @@ export class UrlMatcher {
   /**
    * for any variables in the Token array, parse them out and return them as a mapping
    */
-  public getVariables(url: string): Record<string, string> {
-    const normalized = 'http://localhost:0000/' + url.replace(/^\//, '');
-    const parsed = URL.parse(normalized)!;
+  public getVariables(url: string): Record<string, string | null> {
+    let parsed: URL;
+    if (URL.canParse(url)) {
+      parsed = URL.parse(url)!;
+    } else {
+      // if we get here, url isn't correct so we need to normalize it
+      const normalized = 'http://localhost:0000/' + url.replace(/^\//, '');
+      parsed = URL.parse(normalized)!;
+    }
     return {
       ...this.getPathParamVariables(parsed),
       ...this.getQueryVariables(parsed),
@@ -177,33 +187,54 @@ export class UrlMatcher {
     return score;
   }
 
-  private getPathParamVariables({ pathname }: URL): Record<string, string> {
-    console.debug(pathname);
+  private getPathParamVariables(
+    { pathname }: URL,
+  ): Record<string, string | null> {
     const execRes = this.#pathGex.exec(pathname);
-    console.debug(this.#pathGex);
     if (execRes !== null && execRes.groups) {
-      const { groups } = execRes;
-      const varMap: Record<string, string> = {};
+      const { groups: foundVars } = execRes;
+      const varMap: Record<string, string | null> = {};
       for (const part of this.#pathParts.pathParts) {
         const partName = part.value.replace(/^:/, '');
         const groupName = partName + part.order;
-        if (groupName in groups) {
-          varMap[partName] = groups[groupName].replace(/^\//, '');
+        if (groupName in foundVars) {
+          // values will be empty if they're optional and not specified
+          const normalizedValue = foundVars[groupName].trim() === ''
+            ? null
+            : foundVars[groupName].replace(/^\//, '');
+          varMap[partName] = normalizedValue;
+        } else if (isOptionalVar(part)) {
+          // optional vars might not be matched and won't be in foundVars
+          varMap[partName] = null;
         }
       }
+      // optional vars might not be in here so we need to set as null
       return varMap;
     } else {
       return {};
     }
   }
 
-  private getQueryVariables({ search }: URL): Record<string, string> {
+  private getQueryVariables({ search }: URL): Record<string, string | null> {
     const params = new URLSearchParams(search);
-    const vars: Record<string, string> = {};
+    const { hasGlob } = this.#queryParts;
+
+    const vars: Record<string, string | null> = {};
     const { allParams } = this.#queryParts;
-    for (const { name } of allParams) {
-      if (params.has(name)) {
-        vars[name] = params.get(name)!;
+    for (const param of allParams) {
+      const { name } = param;
+      if (params.has(param.name)) {
+        vars[name] = params.get(name);
+      } else if (isOptionalParameter(param)) {
+        vars[name] = null;
+      }
+    }
+    // if we have a glob, add everything else too
+    if (hasGlob) {
+      for (const param of params.keys()) {
+        if (param.trim() !== '') {
+          vars[param] ??= params.get(param);
+        }
       }
     }
 

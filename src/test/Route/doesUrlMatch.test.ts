@@ -320,8 +320,6 @@ Deno.test('doesUrlMatch matches trailing / in url path', () => {
     });
     assert(
       route.doesUrlMatch(url),
-      'url should allow trailing path slash, regex is ' +
-        route.compiledUrlRegex,
     );
   }
 });
@@ -413,7 +411,6 @@ Deno.test('matches wild card for middle of path', () => {
   });
   assert(
     route.doesUrlMatch('/a/asdfasdfasdf/b/c'),
-    String(route.compiledUrlRegex),
   );
   assert(route.doesUrlMatch('/a/asdfasdfasdf/lkjhlkjh/b/hi'));
   assertFalse(route.doesUrlMatch('/asdfasdf/b/asdfasdf'));
@@ -450,16 +447,13 @@ Deno.test('matches multiple path wildcards', () => {
   });
   assert(
     route.doesUrlMatch('/asdfasdfasdf/b/c'),
-    String(route.compiledUrlRegex),
   );
   assert(
     route.doesUrlMatch(
       '/asdfasdfasdf/lkjhlkjh/b/asdfasdfasdfasdf/asdfasdfasdf',
     ),
-    String(route.compiledUrlRegex),
   );
   assertFalse(
     route.doesUrlMatch('/asdfasdf/huh/asdfasdf'),
-    String(route.compiledUrlRegex),
   );
 });

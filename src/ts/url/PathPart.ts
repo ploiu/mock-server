@@ -35,7 +35,9 @@ function isExact(part: PathPart): part is ExactPathPart {
   return !part.isVariable;
 }
 
-function isOptionalVar(part: PathPart): part is OptionalVariablePathPart {
+export function isOptionalVar(
+  part: PathPart,
+): part is OptionalVariablePathPart {
   return part.isVariable && 'isOptional' in part && part.isOptional;
 }
 

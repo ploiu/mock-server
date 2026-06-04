@@ -49,26 +49,10 @@ export type IndexedQueryPart = {
   hasGlob: boolean;
 };
 
-function isValue(part: QueryPart): part is QueryValuePart {
-  return !part.isVariable;
-}
-
-function isRequiredParameter(
-  part: QueryPart,
-): part is RequiredQueryVariablePart {
-  return part.isVariable && 'isOptional' in part && !part.isOptional;
-}
-
-function isOptionalParameter(
+export function isOptionalParameter(
   part: QueryPart,
 ): part is OptionalQueryVariablePart {
   return part.isVariable && 'isOptional' in part && part.isOptional;
-}
-
-function isGlobParameter(
-  part: QueryPart,
-): part is GlobQueryVariablePart {
-  return part.isVariable && 'isGlob' in part;
 }
 
 export function indexQueryPart(tokens: Token[]): IndexedQueryPart {
