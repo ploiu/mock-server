@@ -18,7 +18,6 @@ const props = defineProps<RouteEditorProps>();
 // isEnabled is the only field that can change outside the editor, so we need extra tracking
 const isEnabled = computed(() => props.route.isEnabled);
 const item = reactive({ ...props.route });
-console.debug("item: ", item);
 item.isEnabled ??= true;
 const headersInvalid = ref(false);
 const hasChanges = ref(false);
